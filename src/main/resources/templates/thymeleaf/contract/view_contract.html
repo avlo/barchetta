@@ -33,23 +33,23 @@
       </table>
       <h4>Vote Form</h4>
       <div th:switch="${role}">
-        <div th:case="${T(com.prosilion.scdecisionmatrix.model.entity.CreatorRoleEnum).PAYER}">
+        <div th:case="${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).PAYER}">
         <h5 id="payee_state">Payee State: <code class="language-plaintext highlighter-rouge"><span
             th:text="${contract.payeeState} ?: 'awaiting'"/></code></h5>
         <select name="payerState" th:field="${contract.payerState}">
           <option
-              th:each="payer_state : ${T(com.prosilion.scdecisionmatrix.model.entity.ContractStateEnum).values()}"
+              th:each="payer_state : ${T(com.prosilion.barchetta.model.entity.ContractStateEnum).values()}"
               th:value="${payer_state}" th:text="${payer_state.ContractStateType}">
           </option>
         </select>
         <input type="hidden" th:field="${contract.payeeState}" id="payeeState"/>
         </div>
-        <div th:case="${T(com.prosilion.scdecisionmatrix.model.entity.CreatorRoleEnum).PAYEE}">
+        <div th:case="${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).PAYEE}">
         <h5 id="payer_state">Payer State: <code class="language-plaintext highlighter-rouge"><span
             th:text="${contract.payerState} ?: 'awaiting'"/></code></h5>
         <select name="payeeState" th:field="${contract.payeeState}">
           <option
-              th:each="payee_state : ${T(com.prosilion.scdecisionmatrix.model.entity.ContractStateEnum).values()}"
+              th:each="payee_state : ${T(com.prosilion.barchetta.model.entity.ContractStateEnum).values()}"
               th:value="${payee_state}" th:text="${payee_state.ContractStateType}">
           </option>
         </select>

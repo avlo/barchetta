@@ -3,9 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.prosilion</groupId>
-  <artifactId>scdecisionmatrix</artifactId>
+  <artifactId>barchetta</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>scdecisionmatrix</name>
+  <name>barchetta</name>
+  <description>Smart-Contract Negotation Framework</description>
   <packaging>war</packaging>
 
   <parent>
@@ -16,8 +17,9 @@
 
   <properties>
     <spring-boot.version>3.2.2</spring-boot.version>
-    <starter.version>0.0.1-SNAPSHOT</starter.version>
-    <nostr-java.version>0.4-SNAPSHOT</nostr-java.version>
+    <nostr-java.version>0.6-SNAPSHOT</nostr-java.version>
+    <lombok.version>1.18.30</lombok.version>
+    <prestio.jpa.version>0.0.1-SNAPSHOT</prestio.jpa.version>
   </properties>
 
   <dependencies>
@@ -83,9 +85,9 @@
       <version>${spring-boot.version}</version>
     </dependency>
     <dependency>
-      <groupId>edu.mayo.lpea.cad.cadence3.starter</groupId>
+      <groupId>com.prosilion.presto.starter</groupId>
       <artifactId>jpa</artifactId>
-      <version>${starter.version}</version>
+      <version>${prestio.jpa.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -111,6 +113,11 @@
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
       <version>1.9.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

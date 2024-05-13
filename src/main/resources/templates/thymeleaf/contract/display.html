@@ -144,7 +144,7 @@
 
       <label>Role:</label>
       <select name="creatorRole" th:field="${contract.creatorRole}">
-        <option th:each="role : ${T(com.prosilion.scdecisionmatrix.model.entity.CreatorRoleEnum).values()}"
+        <option th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>
       <br>
