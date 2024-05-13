@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <title>Contract Vote</title>
+  <link rel="stylesheet" th:href="@{/css/simple.css}"/>
+  <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
+</head>
+<main>
+  <h4 id="sec_user">
+    User: <code class="language-plaintext highlighter-rouge"><span sec:authentication="principal.username"/></code>&emsp;
+    Contract Role: <code class="language-plaintext highlighter-rouge">[[${role}]]</code>&emsp;
+    Auth Role(s): <code class="language-plaintext highlighter-rouge"><span sec:authentication="principal.authorities"/></code>
+  </h4>
+  <section>
+    <h4>Contract state</h4>
+    <form action="#" th:action="@{/contract/vote}" th:object="${contract}" method="post">
+      <table style="width:90%">
+        <thead>
+        <tr>
+          <th>AppUserID</th>
+          <th>Creator Role</th>
+          <th>Contract Text</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td th:text="${contract.getAppUserId()}"/>
+          <td th:text="${contract.creatorRole}"/>
+          <td th:text="${contract.getText()}"/>
+        </tr>
+        </tbody>
+      </table>
+      <h4>Vote Form</h4>
+      <div th:switch="${role}">
+        <div th:case="${T(com.prosilion.scdecisionmatrix.model.entity.CreatorRoleEnum).PAYER}">
+        <h5 id="payee_state">Payee State: <code class="language-plaintext highlighter-rouge"><span
+            th:text="${contract.payeeState} ?: 'awaiting'"/></code></h5>
+        <select name="payerState" th:field="${contract.payerState}">
+          <option
+              th:each="payer_state : ${T(com.prosilion.scdecisionmatrix.model.entity.ContractStateEnum).values()}"
+              th:value="${payer_state}" th:text="${payer_state.ContractStateType}">
+          </option>
+        </select>
+        <input type="hidden" th:field="${contract.payeeState}" id="payeeState"/>
+        </div>
+        <div th:case="${T(com.prosilion.scdecisionmatrix.model.entity.CreatorRoleEnum).PAYEE}">
+        <h5 id="payer_state">Payer State: <code class="language-plaintext highlighter-rouge"><span
+            th:text="${contract.payerState} ?: 'awaiting'"/></code></h5>
+        <select name="payeeState" th:field="${contract.payeeState}">
+          <option
+              th:each="payee_state : ${T(com.prosilion.scdecisionmatrix.model.entity.ContractStateEnum).values()}"
+              th:value="${payee_state}" th:text="${payee_state.ContractStateType}">
+          </option>
+        </select>
+        <input type="hidden" th:field="${contract.payerState}" id="payerState"/>
+        </div>
+      </div>
+
+      <input type="hidden" th:field="${contract.id}" id="id"/>
+      <input type="hidden" th:field="${contract.text}" id="text"/>
+      <input type="hidden" th:field="${contract.payerStake}" id="payerStake"/>
+      <input type="hidden" th:field="${contract.payeeStake}" id="payeeStake"/>
+      <input type="hidden" th:field="${contract.payoutAmount}" id="payoutAmount"/>
+      <input type="hidden" th:field="${contract.completed}" id="completed"/>
+      <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
+      <input type="hidden" th:field="${contract.creatorRole}" id="creatorRole"/>
+      <input type="hidden" th:field="${contract.appUserId}" id="appUserId"/>
+      <input type="hidden" th:value="${contract.counterPartyId}" name="counterPartyId"/>
+
+      <input type="submit" value="Accept Contract (View page)">
+    </form>
+  </section>
+</main>
+</html>

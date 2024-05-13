@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <title>Contract Preview</title>
+  <link rel="stylesheet" th:href="@{/css/simple.css}"/>
+  <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
+</head>
+<main>
+  <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.username"/></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.authorities"/></code></h4>
+  <section>
+    <h4>Apply for Contract</h4>
+    <form action="#" th:action="@{/contract/apply}" th:object="${contract}" method="post">
+      <table style="width:90%">
+        <thead>
+        <tr>
+          <th>AppUserID</th>
+          <th>Creator Role</th>
+          <th>Contract Text</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td th:text="${contract.getAppUserId()}"/>
+          <td th:text="${contract.creatorRole}"/>
+          <td th:text="${contract.getText()}"/>
+        </tr>
+        <input type="hidden" th:field="${contract.id}" id="id"/>
+        <input type="hidden" th:field="${contract.text}" id="text"/>
+
+        <input type="hidden" th:field="${contract.payerStake}" id="payerStake"/>
+        <input type="hidden" th:field="${contract.payeeStake}" id="payeeStake"/>
+        <input type="hidden" th:field="${contract.payoutAmount}" id="payoutAmount"/>
+
+        <input type="hidden" th:field="${contract.payerState}" id="payerState"/>
+        <input type="hidden" th:field="${contract.payeeState}" id="payeeState"/>
+        <input type="hidden" th:field="${contract.completed}" id="completed"/>
+
+        <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
+
+        <input type="hidden" th:field="${contract.creatorRole}" id="creatorRole"/>
+
+        <input type="hidden" th:field="${contract.appUserId}" id="appUserId"/>
+        <input type="hidden" th:value="${counterPartyId}" name="counterPartyId"/>
+
+        <input type="submit" value="Accept Contract (Preview page)">
+        </tbody>
+      </table>
+    </form>
+  </section>
+</main>
+<footer>
+  <p>Powered by Cadence 3 Security - LPEA/CAD Custom Applications - Mayo Clinic</p>
+</footer>
+</html>

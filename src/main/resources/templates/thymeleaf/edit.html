@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <title>Edit User</title>
+  <link rel="stylesheet" th:href="@{/css/simple.css}"/>
+</head>
+<body>
+<header>Edit User</header>
+<main>
+  <b>User:</b> <span sec:authentication="principal.username"/>
+  <b>Role(s):</b> <span sec:authentication="principal.authorities"/>
+
+  <form action="#" th:action="@{/edit}" th:object="${user}" method="post">
+    <p>
+      <label>Unqiue ContractAppUser Field</label>
+      <input type="text" id="unqiueContractAppUserField" placeholder="Unqiue ContractAppUser Field" name="unqiueContractAppUserField" th:value="${user.unqiueContractAppUserField}">
+    </p>
+    <input type="hidden" id="id" name="id" th:value="${user.id}"/>
+    <input type="submit" value="Save">
+  </form>
+</main>
+<footer>
+  <p>Powered by Cadence 3 Security - LPEA/CAD Custom Applications - Mayo Clinic</p>
+</footer>
+</body>
+</html>
