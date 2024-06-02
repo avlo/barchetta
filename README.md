@@ -1,3 +1,12 @@
+```java
+`7MM"""Yp,      db      `7MM"""Mq.   .g8"""bgd `7MMF'  `7MMF'`7MM"""YMM MMP""MM""YMM MMP""MM""YMM   db      
+  MM    Yb     ;MM:       MM   `MM..dP'     `M   MM      MM    MM    `7 P'   MM   `7 P'   MM   `7  ;MM:     
+  MM    dP    ,V^MM.      MM   ,M9 dM'       `   MM      MM    MM   d        MM           MM      ,V^MM.    
+  MM"""bg.   ,M  `MM      MMmmdM9  MM            MMmmmmmmMM    MMmmMM        MM           MM     ,M  `MM    
+  MM    `Y   AbmmmqMA     MM  YM.  MM.           MM      MM    MM   Y  ,     MM           MM     AbmmmqMA   
+  MM    ,9  A'     VML    MM   `Mb.`Mb.     ,'   MM      MM    MM     ,M     MM           MM    A'     VML  
+.JMMmmmd9 .AMA.   .AMMA..JMML. .JMM. `"bmmmd'  .JMML.  .JMML..JMMmmmmMMM   .JMML.       .JMML..AMA.   .AMMA.
+```
 # Barchetta Smart-Contract Negotation Framework
   - Build atop Bitcoin/Lightning-Network [RGB protocol](https://rgb.tech/) and [Single-Use Seal UTXO's](https://docs.rgb.info/distributed-computing-concepts/single-use-seals) for contract-binding
   - Contract attributes provided per [Nostr](https://nostr.com/) NIPS:
