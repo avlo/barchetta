@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.dto.ContractAppUserDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.ContractAppUser;
@@ -8,6 +9,7 @@ import com.prosilion.barchetta.repository.ContractUserRepository;
 import com.prosilion.presto.security.entity.AppUser;
 import com.prosilion.presto.security.service.AuthUserService;
 import lombok.NonNull;
+import nostr.base.PublicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +43,12 @@ public class ContractAppUserService {
   }
 
   @Transactional
-  public Contract save(@NonNull Contract contract, @NonNull Long id) {
-    LOGGER.info("Creating contract [{}], for user id [{}]", contract.getText(), id);
+  public Contract create(@NonNull Contract contract, @NonNull Long id) throws JsonProcessingException {
+    LOGGER.info("Creating contract [{}], for user id [{}]", contract.getSummary(), id);
     // TODO: check below contract doesn't already have existing different appuser ID
     contract.setAppUserId(contractUserRepository.findById(id).get().getId());
     LOGGER.info("Set appUser id [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
-    return save(contract);
+    return create(contract);
   }
 
   public ContractAppUserDto update(@NonNull ContractAppUserDto contractAppUserDto) throws InvocationTargetException, IllegalAccessException {
@@ -81,10 +83,10 @@ public class ContractAppUserService {
     return Objects.isNull(contractAppUser.getId()) ? contractAppUser : findById(contractAppUser.getId());
   }
 
-  private Contract save(@NonNull Contract contract) {
-    LOGGER.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
+  private Contract create(@NonNull Contract contract) throws JsonProcessingException {
+    LOGGER.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getSummary(), contract.getAppUserId(), contract.getCreatorRole());;
     Contract savedContract = contractService.save(contract);
-    LOGGER.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
+    LOGGER.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getSummary(), savedContract.getAppUserId(), savedContract.getCreatorRole());
     return savedContract;
   }
 

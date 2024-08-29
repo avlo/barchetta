@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.ContractAppUser;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
@@ -7,8 +8,7 @@ import com.prosilion.barchetta.service.ContractAppUserService;
 import com.prosilion.barchetta.service.ContractService;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/contract")
 public class ContractController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ContractController.class);
   private final ContractAppUserService contractAppUserService;
   private final ContractService contractService;
 
@@ -34,8 +34,8 @@ public class ContractController {
   }
 
   @PostMapping("/create")
-  public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) {
-    contractAppUserService.save(contract, contractAppUserService.findByUsername(user.getUsername()).getId());
+  public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws JsonProcessingException {
+    contractAppUserService.create(contract, contractAppUserService.findByUsername(user.getUsername()).getId());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }
@@ -47,20 +47,20 @@ public class ContractController {
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long id, Model model) {
-    LOGGER.info("Fetching selected contract: [{}]", id);
+  public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long id, Model model) throws JsonProcessingException {
+    log.info("Fetching selected contract: [{}]", id);
     Contract contract = contractService.getContractById(id);
     model.addAttribute("contract", contract);
     model.addAttribute("username", user.getUsername());
     model.addAttribute("counterPartyId", contractAppUserService.findByUsername(user.getUsername()).getId());
-    LOGGER.info("CounterPartyId: [{}]", contractAppUserService.findByUsername(user.getUsername()).getId());
-    LOGGER.info("User for potential contract: {}", user.getUsername());
+    log.info("CounterPartyId: [{}]", contractAppUserService.findByUsername(user.getUsername()).getId());
+    log.info("User for potential contract: {}", user.getUsername());
     return "thymeleaf/contract/preview_contract";
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long id, Model model) {
-    LOGGER.info("Fetching my contract: [{}]", id);
+  public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long id, Model model) throws JsonProcessingException {
+    log.info("Fetching my contract: [{}]", id);
     Contract contract = contractService.getContractById(id);
     model.addAttribute("contract", contract);
     model.addAttribute("username", user.getUsername());
@@ -69,7 +69,7 @@ public class ContractController {
   }
 
   @PostMapping("/apply")
-  public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) {
+  public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
     contractService.save(contract);
     List<Contract> contractList = contractService.getAll();
     model.addAttribute("contracts", contractList);
@@ -77,11 +77,11 @@ public class ContractController {
   }
 
   @PostMapping("/vote")
-  public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) {
-    LOGGER.info("User [{}] voting on contract [{}]", user.getUsername(), contract);
-    LOGGER.info("Contract id: [{}] ", contract.getId());
-    LOGGER.info("Contract text: [{}] ", contract.getText());
-    LOGGER.info("Contract appUserId: [{}] ", contract.getAppUserId());
+  public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
+    log.info("User [{}] voting on contract [{}]", user.getUsername(), contract);
+    log.info("Contract id: [{}] ", contract.getId());
+    log.info("Contract text: [{}] ", contract.getSummary());
+    log.info("Contract appUserId: [{}] ", contract.getAppUserId());
     contractService.save(contract);
     List<Contract> contractList = contractService.getAll();
     model.addAttribute("contracts", contractList);

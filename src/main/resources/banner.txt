@@ -6,4 +6,4 @@
  #+#    #+#  #+#     #+#  #+#    #+#  #+#   #+#  #+#    #+#  #+#            #+#         #+#  #+#     #+#
 #########   ###     ###  ###    ###  ########   ###    ###  ##########     ###         ###  ###     ###
 
-ScdMatrix ${application.formatted-version} - SpringBoot${spring-boot.formatted-version}
+Barchetta${application.formatted-version} - SpringBoot${spring-boot.formatted-version}
