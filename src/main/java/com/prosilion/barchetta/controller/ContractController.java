@@ -80,7 +80,7 @@ public class ContractController {
   public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
     log.info("User [{}] voting on contract [{}]", user.getUsername(), contract);
     log.info("Contract id: [{}] ", contract.getId());
-    log.info("Contract text: [{}] ", contract.getSummary());
+    log.info("Contract text: [{}] ", contract.getText());
     log.info("Contract appUserId: [{}] ", contract.getAppUserId());
     contractService.save(contract);
     List<Contract> contractList = contractService.getAll();

@@ -44,7 +44,7 @@ public class ContractAppUserService {
 
   @Transactional
   public Contract create(@NonNull Contract contract, @NonNull Long id) throws JsonProcessingException {
-    LOGGER.info("Creating contract [{}], for user id [{}]", contract.getSummary(), id);
+    LOGGER.info("Creating contract [{}], for user id [{}]", contract.getText(), id);
     // TODO: check below contract doesn't already have existing different appuser ID
     contract.setAppUserId(contractUserRepository.findById(id).get().getId());
     LOGGER.info("Set appUser id [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
@@ -84,9 +84,9 @@ public class ContractAppUserService {
   }
 
   private Contract create(@NonNull Contract contract) throws JsonProcessingException {
-    LOGGER.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getSummary(), contract.getAppUserId(), contract.getCreatorRole());;
+    LOGGER.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());;
     Contract savedContract = contractService.save(contract);
-    LOGGER.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getSummary(), savedContract.getAppUserId(), savedContract.getCreatorRole());
+    LOGGER.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
     return savedContract;
   }
 

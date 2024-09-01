@@ -2,7 +2,6 @@ package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.repository.ContractRepository;
-import com.prosilion.barchetta.service.nostr.NostrClientServiceImpl;
 import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -15,44 +14,20 @@ import java.util.List;
 @Service
 public class ContractService<T extends String, U extends ClassifiedListingEvent> {
   private final ContractRepository contractRepository;
-  private final NostrClientServiceImpl<T> nostrClientServiceString;
-  private final NostrClientServiceImpl<U> nostrClientService;
-
-
-  //  @Value("${nostr.file.nostr-request-string.json}")
-  //  private String nostrRequestString;
 
   @Autowired
-  public ContractService(ContractRepository contractRepository, NostrClientServiceImpl<T> nostrClientServiceString, NostrClientServiceImpl<U> nostrClientService) {
+  public ContractService(ContractRepository contractRepository) {
     this.contractRepository = contractRepository;
-    this.nostrClientServiceString = nostrClientServiceString;
-    this.nostrClientService = nostrClientService;
 
   }
 
   @Transactional
   public Contract save(@NonNull Contract contract) {
-//    nostrClientServiceString.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-//    Message<T> classifiedListingEventString = nostrClientServiceString.getReturnVal();
-//    nostrClientService.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-//    Message<U> classifiedListingEvent = nostrClientService.getReturnVal();
-//
-//    contract.setText(classifiedListingEvent.getPayload().getContent());
-//    PublicKey publicKey = classifiedListingEvent.getPayload().getPubKey();
-//    contract.setNostrAppUserId(publicKey.toHexString());
     return contractRepository.save(contract);
   }
 
   public Contract getContractById(@NonNull Long id) {
-    Contract contract = contractRepository.getContractById(id).get();
-//    nostrClientServiceString.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-//    Message<T> classifiedListingEventString = nostrClientServiceString.getReturnVal();
-//    nostrClientService.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-//    Message<U> classifiedListingEvent = nostrClientService.getReturnVal();
-//    contract.setText(classifiedListingEvent.getPayload().getContent());
-//    PublicKey publicKey = classifiedListingEvent.getPayload().getPubKey();
-//    contract.setNostrAppUserId(publicKey.toHexString());
-    return contract;
+    return contractRepository.getContractById(id).get();
   }
 
   public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
