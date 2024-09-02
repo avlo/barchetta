@@ -3,21 +3,23 @@ package com.prosilion.barchetta.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
 import nostr.event.BaseMessage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
-@Component
+//@Component
 public class NostrWebSocketClient {
   private final WebSocketClient webSocketClient;
 
-  @Autowired
+  //  @Autowired
   public NostrWebSocketClient(@NonNull WebSocketClient webSocketClient) {
     this.webSocketClient = webSocketClient;
   }
 
-  public void send(@NonNull BaseMessage baseMessage) throws JsonProcessingException {
-//  TODO: investigate refactoring using new TextMessage & WebSocketSession
-    webSocketClient.send(baseMessage.encode());
+  public Flux<String> send(@NonNull BaseMessage baseMessage) throws JsonProcessingException {
+    return webSocketClient.sendMessageMono(baseMessage.encode());
+  }
+
+  public Flux<String> send(@NonNull String json) {
+    return webSocketClient.sendMessageMono(json);
   }
 }
 

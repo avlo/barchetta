@@ -24,9 +24,9 @@ public class EditContractAppUserController {
     this.contractAppUserService = contractAppUserService;
   }
 
-  @GetMapping("/edit/{id}")
-  public String showEditForm(Model model, @PathVariable("id") Long id) throws InvocationTargetException, IllegalAccessException {
-    model.addAttribute("user", contractAppUserService.findById(id).convertToDto());
+  @GetMapping("/edit/{user_id}")
+  public String editUser(Model model, @PathVariable("user_id") Long userId) throws InvocationTargetException, IllegalAccessException {
+    model.addAttribute("user", contractAppUserService.findUserByUserId(userId).convertToDto());
     return "thymeleaf/edit";
   }
 

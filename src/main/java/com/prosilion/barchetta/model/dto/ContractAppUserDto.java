@@ -15,10 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class ContractAppUserDto extends AppUserDto {
-	private String unqiueContractAppUserField;
-	public ContractAppUser convertToContractAppUser() throws InvocationTargetException, IllegalAccessException {
-		ContractAppUser contractAppUser = new ContractAppUser();
-		BeanUtils.copyProperties(contractAppUser, this);
-		return contractAppUser;
-	}
+  private String nostrPubKey;
+  public ContractAppUser convertToContractAppUser() throws InvocationTargetException, IllegalAccessException {
+    ContractAppUser contractAppUser = new ContractAppUser();
+    BeanUtils.copyProperties(contractAppUser, this);
+    return contractAppUser;
+  }
 }

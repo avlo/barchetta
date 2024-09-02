@@ -1,91 +1,141 @@
-//package com.prosilion.barchetta.service;
-//
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.prosilion.barchetta.client.NostrWebSocketClient;
-//import com.prosilion.barchetta.model.entity.Contract;
-//import com.prosilion.barchetta.repository.ContractRepository;
-//import com.prosilion.presto.security.entity.AppUser;
-//import jakarta.transaction.Transactional;
-//import lombok.NonNull;
-//import lombok.extern.slf4j.Slf4j;
-//import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
-//import nostr.event.impl.ClassifiedListingEvent;
-//import nostr.event.impl.Filters;
-//import nostr.event.message.EventMessage;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.List;
-//
-//@Slf4j
+package com.prosilion.barchetta.service;
+
+import com.prosilion.barchetta.client.NostrWebSocketClient;
+import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.presto.security.entity.AppUser;
+import jakarta.transaction.Transactional;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
+import nostr.event.Kind;
+import nostr.event.impl.ClassifiedListing;
+import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.message.EventMessage;
+import nostr.event.tag.PriceTag;
+import nostr.id.Identity;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 //@Service
-//public class ContractNostrService {
-//  private final ContractRepository contractRepository;
-//  private final NostrWebSocketClient nostrWebSocketClient;
-//
+public class ContractNostrService implements ContractServiceIF, Subscriber<String> {
+  private final NostrWebSocketClient nostrWebSocketClient;
+
+  private static final String SUBSCRIBER = "ReqClientComponent-ID-001";
+  //  private static final String REQ_CLIENT_EVENT_ID_001 = "8f66a36101d3d152c6270e18f5622d1f8bce4ac5da9ab62d7c3cc0006e5914cc";
+//  private static final String idReqJson = "[\"REQ\",\"" + REQ_CLIENT_SUBSCRIBER_001 + "\",{\"ids\":[\"" + REQ_CLIENT_EVENT_ID_001 + "\"]}]";
+
 //  @Autowired
-//  public ContractNostrService(ContractRepository contractRepository, NostrWebSocketClient nostrWebSocketClient) {
-//    this.contractRepository = contractRepository;
-//    this.nostrWebSocketClient = nostrWebSocketClient;
-//  }
-//
-//  @Transactional
-//  public Contract save(@NonNull Contract contractEntity) throws JsonProcessingException {
-//    log.info("saving contract {}", contractEntity);
-//
-//    postContract(contractEntity);
-//    return contractEntity;
-//  }
-//
-//  private void postContract(Contract contractEntity) throws JsonProcessingException {
-////    EventMessage eventMessage = new EventMessageFactory(contract.getClassifiedListingEvent(), contract.getNostrAppUserId()).create();
-////    nostrWebSocketClient.send(eventMessage);
-//  }
-//
-//  public ContractEntity getContractById(@NonNull Long id) throws JsonProcessingException {
-////    ContractEntity contractEntity = contractRepository.getContractById(id).get();
-////    ClassifiedListingEvent contractByEventId = getContractByEventId(contractEntity);
-////    nostrClientServiceString.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-////    Message<T> classifiedListingEventString = nostrClientServiceString.getReturnVal();
-////    nostrClientService.getClassifiedListingEvent(NostrClientService.nostrRequestString);
-////    Message<U> classifiedListingEvent = nostrClientService.getReturnVal();
-////    contract.setText(classifiedListingEvent.getPayload().getContent());
-////    PublicKey publicKey = classifiedListingEvent.getPayload().getPubKey();
-////    contract.setNostrAppUserId(publicKey.toHexString());
-////    return contractEntity;
-//  }
-//
-//  private ClassifiedListingEvent getContractByEventId(ContractEntity contractEntity) throws JsonProcessingException {
-////    Contract contract = contractRepository.getContractById(eventId).get();
-//    Filters filters = new Filters();
-////    filters.setEvents(List.of(contract.getClassifiedListingEvent()));
-////    TODO: hook in callback below...
-////    nostrWebSocketClient.send(new ReqMessage(contract.getNostrAppUserId(), filters));
-////    TODO: then replace null
-//    return null;
-//  }
-//
-//  public List<ContractEntity> getContractsByAppUser(@NonNull AppUser appUser) {
-//    return getContractsByAppUserId(appUser.getId());
-//  }
-//
-//  public List<ContractEntity> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
-//    return getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
-//  }
-//
-//  public List<ContractEntity> getContractsByCoPartyId(@NonNull Long id) {
-////    return contractRepository.getContractsByCoPartyId(id);
-//  }
-//
-//  public List<ContractEntity> getAvailableOppositeRoleContractsByAppUserId(@NonNull Long id) {
-////    return contractRepository.getOpenContractsFor(id);
-//  }
-//
-//  public List<ContractEntity> getContractsByAppUserId(@NonNull Long id) {
-////    return contractRepository.getContractsByAppUserId(id);
-//  }
-//
-//  public List<ContractEntity> getAll() {
-//    return contractRepository.findAll();
-//  }
-//}
+  public ContractNostrService(NostrWebSocketClient nostrWebSocketClient) {
+    this.nostrWebSocketClient = nostrWebSocketClient;
+  }
+
+  @Transactional
+  @Override
+  @SneakyThrows
+  public Contract save(@NonNull Contract contract) {
+    log.info("saving contract {}", contract);
+    EventMessage eventMessage = new EventMessageFactory(convertToClassifiedListingEvent(contract), contract.getNostrAppUserId()).create();
+    nostrWebSocketClient.send(eventMessage).subscribeWith(this);
+    return contract;
+  }
+
+  private ClassifiedListingEvent convertToClassifiedListingEvent(Contract contract) {
+    return new ClassifiedListingEvent(
+        Identity.create("myprivatekey").getPublicKey(),
+        Kind.CLASSIFIED_LISTING,
+        new ArrayList<>(),
+        "CONTENT",
+        new ClassifiedListing(
+            contract.getText(),
+            "SUMMARY",
+            new PriceTag(BigDecimal.TEN, "btc", "once")));
+  }
+
+
+  @Override
+  public Contract getContractById(@NonNull Long id) {
+    return convertToContract(getContractById(id.toString()));
+  }
+
+  private ClassifiedListingEvent getContractById(String id) {
+    nostrWebSocketClient.send(createReqJson(id)).subscribeWith(this);
+    return null;
+  }
+
+  private Contract convertToContract(ClassifiedListingEvent classifiedListingEvent) {
+    return new Contract();
+  }
+
+  public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
+    return getContractsByAppUserId(appUser.getId());
+  }
+
+  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
+    return getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
+  }
+
+  public List<Contract> getContractsByCoPartyId(@NonNull Long id) {
+    return getContractsByAppUserId(id);
+  }
+
+  public List<Contract> getAvailableOppositeRoleContractsByAppUserId(@NonNull Long id) {
+    return getContractsByAppUserId(id);
+  }
+
+  public List<Contract> getContractsByAppUserId(@NonNull Long id) {
+    return List.of(getContractById(id));
+  }
+
+  public List<Contract> getAll() {
+    String allContracts = "[\"REQ\",\"" + SUBSCRIBER + "\",{\"kind\":[\"" + Kind.CLASSIFIED_LISTING + "\"]}]";
+    return List.of(convertToContract(getContractById(allContracts)));
+  }
+
+  private String createReqJson(String id) {
+    return "[\"REQ\",\"" + SUBSCRIBER + "\",{\"ids\":[\"" + id + "\"]}]";
+  }
+
+  @Override
+  public void onSubscribe(Subscription subscription) {
+    System.out.println("000000000000000000");
+    System.out.println("000000000000000000");
+    System.out.println("subscribed");
+    System.out.println("000000000000000000");
+    System.out.println("000000000000000000");
+  }
+
+  @Override
+  public void onNext(String s) {
+    System.out.println("11111111111111111111111111");
+    System.out.println("11111111111111111111111111");
+    System.out.println(s);
+    System.out.println("11111111111111111111111111");
+    System.out.println("11111111111111111111111111");
+  }
+
+  @Override
+  public void onError(Throwable throwable) {
+    System.out.println("222222222222222222");
+    System.out.println("222222222222222222");
+    System.out.println("error");
+    System.out.println("222222222222222222");
+    System.out.println("222222222222222222");
+  }
+
+  @Override
+  public void onComplete() {
+    System.out.println("333333333333333333");
+    System.out.println("333333333333333333");
+    System.out.println("completed");
+    System.out.println("333333333333333333");
+    System.out.println("333333333333333333");
+  }
+}

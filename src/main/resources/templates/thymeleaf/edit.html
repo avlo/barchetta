@@ -8,15 +8,16 @@
 <body>
 <header>Edit User</header>
 <main>
+  <a href="http://localhost:8080/contract/display_all">display all</a>
   <b>User:</b> <span sec:authentication="principal.username"/>
   <b>Role(s):</b> <span sec:authentication="principal.authorities"/>
 
   <form action="#" th:action="@{/edit}" th:object="${user}" method="post">
     <p>
-      <label>Unqiue ContractAppUser Field</label>
-      <input type="text" id="unqiueContractAppUserField" placeholder="Unqiue ContractAppUser Field" name="unqiueContractAppUserField" th:value="${user.unqiueContractAppUserField}">
+      <label>User Nostr Public Key</label>
+      <input type="text" id="nostrPubKey" placeholder="User Pubkey" name="nostrPubKey" th:value="${user.nostrPubKey}">
     </p>
-    <input type="hidden" id="id" name="id" th:value="${user.id}"/>
+    <input type="hidden" id="user_id" name="user_id" th:value="${user.id}"/>
     <input type="submit" value="Save">
   </form>
 </main>

@@ -19,7 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 @Embeddable
 @Entity
 public class ContractAppUser extends AppUser {
-  private String unqiueContractAppUserField;
+  private String nostrPubKey;
+
   @Override
   public ContractAppUser getInstantiatedCustomAppUserType() {
     return this;

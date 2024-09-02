@@ -7,6 +7,7 @@
   <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
 </head>
 <main>
+  <a href="http://localhost:8080/contract/display_all">display all</a>
   <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
       sec:authentication="principal.username"/></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
       sec:authentication="principal.authorities"/></code></h4>
@@ -43,7 +44,7 @@
         <input type="hidden" th:field="${contract.creatorRole}" id="creatorRole"/>
 
         <input type="hidden" th:field="${contract.appUserId}" id="appUserId"/>
-        <input type="hidden" th:value="${counterPartyId}" name="counterPartyId"/>
+        <input type="hidden" th:value="${counter_party_id}" name="counterPartyId"/>
 
         <input type="submit" value="Accept Contract (Preview page)">
         </tbody>
