@@ -11,8 +11,7 @@ import com.prosilion.presto.security.entity.AppUser;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import com.prosilion.presto.security.service.AuthUserService;
 import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,22 +20,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class ContractAppUserService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ContractAppUserService.class);
-  private final ContractServiceIF contractServiceIf;
+  private final ContractServiceIF contractServiceIF;
   private final ContractUserRepository contractUserRepository;
   private final AuthUserService authUserService;
 
   @Autowired
-  public ContractAppUserService(ContractServiceIF contractServiceIf, ContractUserRepository contractUserRepository, AuthUserService authUserService) {
-    this.contractServiceIf = contractServiceIf;
+  public ContractAppUserService(ContractServiceIF contractServiceIF, ContractUserRepository contractUserRepository, AuthUserService authUserService) {
+    this.contractServiceIF = contractServiceIF;
     this.contractUserRepository = contractUserRepository;
     this.authUserService = authUserService;
   }
 
   public Contract getContractByContractId(@NonNull Long id) {
-    return contractServiceIf.getContractById(id);
+    return contractServiceIF.getContractById(id);
   }
 
   public ContractAppUser findUserByUserId(Long id) {
@@ -48,40 +47,40 @@ public class ContractAppUserService {
   }
 
   public Contract save(@NonNull Contract contract) {
-    return contractServiceIf.save(contract);
+    return contractServiceIF.save(contract);
   }
 
   public List<Contract> getAll() {
-    return contractServiceIf.getAll();
+    return contractServiceIF.getAll();
   }
 
   @Transactional
   public Contract create(@NonNull Contract contract, @NonNull Long userId) throws JsonProcessingException {
-    LOGGER.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
+    log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
     // TODO: check below contract doesn't already have existing different appuser ID
     contract.setAppUserId(contractUserRepository.findById(userId).get().getId());
-    LOGGER.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
+    log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
     return create(contract);
   }
 
   public ContractAppUserDto update(@NonNull ContractAppUserDto contractAppUserDto) throws InvocationTargetException, IllegalAccessException {
-    LOGGER.info("CONTRACT USER - updating");
+    log.info("CONTRACT USER - updating");
     ContractAppUser contractAppUser = contractAppUserDto.convertToContractAppUser();
     ContractAppUser retrievedUser = find(contractAppUser);
-    LOGGER.info("Confirm retrieved existing contractAppUser [{}]", retrievedUser);
+    log.info("Confirm retrieved existing contractAppUser [{}]", retrievedUser);
     ContractAppUser returnUser = contractUserRepository.save(contractAppUser);
-    LOGGER.info("Updating contractAppUser [{}]", returnUser);
+    log.info("Updating contractAppUser [{}]", returnUser);
     return contractUserRepository.findById(contractAppUser.getId()).get().convertToDto();
   }
 
   public List<Contract> getAllContractsFor(@NonNull AppUser appUser) {
-    List<Contract> contracts = contractServiceIf.getContractsByAppUserId(appUser.getId());
-    contracts.addAll(contractServiceIf.getContractsByCoPartyId(appUser.getId()));
+    List<Contract> contracts = contractServiceIF.getContractsByAppUserId(appUser.getId());
+    contracts.addAll(contractServiceIF.getContractsByCoPartyId(appUser.getId()));
     return contracts;
   }
 
   public List<Contract> getOpenContractsFor(@NonNull AppUser appUser) {
-    return contractServiceIf.getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
+    return contractServiceIF.getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
   }
 
   public Contract constructContract(AppUser appUser) {
@@ -100,9 +99,9 @@ public class ContractAppUserService {
   }
 
   private Contract create(@NonNull Contract contract) throws JsonProcessingException {
-    LOGGER.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
-    Contract savedContract = contractServiceIf.save(contract);
-    LOGGER.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
+    log.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
+    Contract savedContract = contractServiceIF.save(contract);
+    log.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
     return savedContract;
   }
 

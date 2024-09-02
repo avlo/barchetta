@@ -4,9 +4,11 @@ import com.prosilion.presto.JpaSecurityConfig;
 import com.prosilion.presto.jpa.controller.JpaAuthController;
 import com.prosilion.presto.web.controller.AuthController;
 import com.prosilion.presto.web.controller.UsersController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,11 +21,10 @@ import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 // TODO: below should not be necessary, revisit
 @Import({JpaSecurityConfig.class, UsersController.class, JpaAuthController.class, AuthController.class})
 public class WebSecurityConfig {
-  private static final Logger LOGGER = LoggerFactory.getLogger(WebSecurityConfig.class);
 
   @Bean
   @Primary
-  public AuthenticationSuccessHandler customAuthenticationSuccessHandler(){
+  public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
     return new ContractDefaultLoginHandler();
   }
 
