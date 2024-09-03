@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractAppUserDto;
-import com.prosilion.barchetta.service.ContractAppUserService;
+import com.prosilion.barchetta.service.ContractAppUserServiceIF;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,16 +17,16 @@ import java.lang.reflect.InvocationTargetException;
 @Slf4j
 @Controller
 public class EditContractAppUserController {
-  private final ContractAppUserService contractAppUserService;
+  private final ContractAppUserServiceIF contractAppUserServiceIF;
 
   @Autowired
-  public EditContractAppUserController(ContractAppUserService contractAppUserService) {
-    this.contractAppUserService = contractAppUserService;
+  public EditContractAppUserController(ContractAppUserServiceIF contractAppUserServiceIF) {
+    this.contractAppUserServiceIF = contractAppUserServiceIF;
   }
 
   @GetMapping("/edit/{user_id}")
   public String editUser(Model model, @PathVariable("user_id") Long userId) throws InvocationTargetException, IllegalAccessException {
-    model.addAttribute("user", contractAppUserService.findUserByUserId(userId).convertToDto());
+    model.addAttribute("user", contractAppUserServiceIF.findUserByUserId(userId).convertToDto());
     return "thymeleaf/edit";
   }
 
@@ -40,7 +40,7 @@ public class EditContractAppUserController {
     }
 
     try {
-      ContractAppUserDto updatedContractAppUserDto = contractAppUserService.update(contractAppUserDto);
+      ContractAppUserDto updatedContractAppUserDto = contractAppUserServiceIF.update(contractAppUserDto);
       model.addAttribute("user", updatedContractAppUserDto);
       return "redirect:/users";
     } catch (InvocationTargetException | IllegalAccessException e) {

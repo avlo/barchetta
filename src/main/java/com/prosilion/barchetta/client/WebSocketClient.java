@@ -1,11 +1,6 @@
 package com.prosilion.barchetta.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,14 +11,11 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 
 @Slf4j
-@Lazy
-@Component
 public class WebSocketClient {
   private final String relayUrl;
   private final WebSocketHandler webSocketHandler;
 
-  @Autowired
-  WebSocketClient(WebSocketHandler webSocketHandler, @Value("${nostr.relay.uri}") String relayUrl) {
+  public WebSocketClient(WebSocketHandler webSocketHandler, String relayUrl) {
     this.relayUrl = relayUrl;
     this.webSocketHandler = webSocketHandler;
     this.webSocketHandler.connect(new ReactorNettyWebSocketClient(), getURI());

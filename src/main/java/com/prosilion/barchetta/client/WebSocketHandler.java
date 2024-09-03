@@ -2,7 +2,6 @@ package com.prosilion.barchetta.client;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -15,14 +14,13 @@ import java.net.URI;
 import java.util.Optional;
 
 @Slf4j
-@Component
-class WebSocketHandler {
+public class WebSocketHandler {
   private final Sinks.Many<String> sendBuffer;
   private final Sinks.Many<String> receiveBuffer;
   private Disposable subscription;
   private WebSocketSession session;
 
-  protected WebSocketHandler() {
+  public WebSocketHandler() {
 //    TODO: revisit, possibly other options/approaches
     this.sendBuffer = Sinks.many().unicast().onBackpressureBuffer();
     this.receiveBuffer = Sinks.many().unicast().onBackpressureBuffer();

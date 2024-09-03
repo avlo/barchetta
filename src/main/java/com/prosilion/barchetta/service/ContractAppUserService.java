@@ -22,7 +22,7 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class ContractAppUserService {
+public class ContractAppUserService implements ContractAppUserServiceIF {
   private final ContractServiceIF contractServiceIF;
   private final ContractUserRepository contractUserRepository;
   private final AuthUserService authUserService;
@@ -34,27 +34,33 @@ public class ContractAppUserService {
     this.authUserService = authUserService;
   }
 
+  @Override
   public Contract getContractByContractId(@NonNull Long id) {
     return contractServiceIF.getContractById(id);
   }
 
+  @Override
   public ContractAppUser findUserByUserId(Long id) {
     return contractUserRepository.findById(id).get();
   }
 
+  @Override
   public ContractAppUser findByUsername(@NonNull String username) {
     return findUserByUserId(authUserService.getAppuserAuthuser(username).getId());
   }
 
+  @Override
   public Contract save(@NonNull Contract contract) {
     return contractServiceIF.save(contract);
   }
 
+  @Override
   public List<Contract> getAll() {
     return contractServiceIF.getAll();
   }
 
   @Transactional
+  @Override
   public Contract create(@NonNull Contract contract, @NonNull Long userId) throws JsonProcessingException {
     log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
     // TODO: check below contract doesn't already have existing different appuser ID
@@ -63,6 +69,7 @@ public class ContractAppUserService {
     return create(contract);
   }
 
+  @Override
   public ContractAppUserDto update(@NonNull ContractAppUserDto contractAppUserDto) throws InvocationTargetException, IllegalAccessException {
     log.info("CONTRACT USER - updating");
     ContractAppUser contractAppUser = contractAppUserDto.convertToContractAppUser();
@@ -73,20 +80,24 @@ public class ContractAppUserService {
     return contractUserRepository.findById(contractAppUser.getId()).get().convertToDto();
   }
 
+  @Override
   public List<Contract> getAllContractsFor(@NonNull AppUser appUser) {
     List<Contract> contracts = contractServiceIF.getContractsByAppUserId(appUser.getId());
     contracts.addAll(contractServiceIF.getContractsByCoPartyId(appUser.getId()));
     return contracts;
   }
 
+  @Override
   public List<Contract> getOpenContractsFor(@NonNull AppUser appUser) {
     return contractServiceIF.getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
   }
 
+  @Override
   public Contract constructContract(AppUser appUser) {
     return constructContract(appUser.getId());
   }
 
+  @Override
   public CreatorRoleEnum getRole(Contract contract, AuthUserDetails user) {
     return getRoleEnum(
         contract.getCreatorRole(),

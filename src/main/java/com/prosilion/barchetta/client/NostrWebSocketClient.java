@@ -5,11 +5,9 @@ import lombok.NonNull;
 import nostr.event.BaseMessage;
 import reactor.core.publisher.Flux;
 
-//@Component
 public class NostrWebSocketClient {
   private final WebSocketClient webSocketClient;
 
-  //  @Autowired
   public NostrWebSocketClient(@NonNull WebSocketClient webSocketClient) {
     this.webSocketClient = webSocketClient;
   }
