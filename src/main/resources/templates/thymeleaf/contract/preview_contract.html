@@ -28,6 +28,14 @@
           <td th:text="${contract.creatorRole}"/>
           <td th:text="${contract.getText()}"/>
         </tr>
+        <tr>
+          <label>Nostr PubKey:</label>
+          <select name="nostrAppUserPubKey" th:field="${contract.nostrAppUserPubKey}" id="nostrAppUserPubKey">
+            <option th:value="'ReqClientComponent-ID-001'" th:text="'ReqClientComponent-ID-001'"></option>
+            <option th:value="'ReqClientComponent-ID-002'" th:text="'ReqClientComponent-ID-002'"></option>
+          </select>
+        </tr>
+
         <input type="hidden" th:field="${contract.id}" id="id"/>
         <input type="hidden" th:field="${contract.text}" id="text"/>
 
@@ -53,6 +61,6 @@
   </section>
 </main>
 <footer>
-  <p>Powered by Cadence 3 Security - LPEA/CAD Custom Applications - Mayo Clinic</p>
+  <p>Powered by Presto Security</p>
 </footer>
 </html>

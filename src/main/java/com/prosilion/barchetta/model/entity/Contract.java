@@ -18,9 +18,10 @@ public class Contract {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  private String nostrEventId;
 
-  private String nostrAppUserId;
-  private String nostrCounterPartyId;
+  private String nostrAppUserPubKey;
+  private String nostrCounterPartyPubKey;
 
   private String text;
   private Long payerStake, payeeStake, payoutAmount;

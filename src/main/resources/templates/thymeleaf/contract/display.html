@@ -10,22 +10,26 @@
 <header>Contracts</header>
 <main>
   <a href="http://localhost:8080/contract/display_all">display all</a>
-  <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span sec:authentication="principal.username"/></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span sec:authentication="principal.authorities"/></code></h4>
+  <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.username"/></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.authorities"/></code></h4>
   <section>
     <h4>My Contracts</h4>
     <table style="width:50%">
       <thead>
       <tr>
-      <th>AppUserID</th>
-      <th>CoPartyID</th>
-      <th>Role</th>
-      <th>Text</th>
-      <th>PayerStake</th>
-      <th>PayeeStake</th>
-      <th>Payout$$$</th>
-      <th>PayerState</th>
-      <th>PayeeState</th>
-      <th>Completed</th>
+        <th>AppUserID</th>
+        <th>AppUserPubKey</th>
+        <th>CoPartyID</th>
+        <th>CoPartyPubKey</th>
+        <th>Role</th>
+        <th>Text</th>
+        <th>PayerStake</th>
+        <th>PayeeStake</th>
+        <th>Payout$$$</th>
+        <th>PayerState</th>
+        <th>PayeeState</th>
+        <th>Completed</th>
       </tr>
       </thead>
       <tbody>
@@ -37,7 +41,17 @@
         </td>
         <td>
           <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
+            [[${user_contract?.nostrAppUserPubKey}]]
+          </a>
+        </td>
+        <td>
+          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
             [[${user_contract?.counterPartyId}]]
+          </a>
+        </td>
+        <td>
+          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
+            [[${user_contract?.nostrCounterPartyPubKey}]]
           </a>
         </td>
         <td>
@@ -78,16 +92,18 @@
     <table style="width:50%">
       <thead>
       <tr>
-      <th>AppUserID</th>
-      <th>CoPartyID</th>
-      <th>Role</th>
-      <th>Text</th>
-      <th>PayerStake</th>
-      <th>PayeeStake</th>
-      <th>Payout$$$</th>
-      <th>PayerState</th>
-      <th>PayeeState</th>
-      <th>Completed</th>
+        <th>AppUserID</th>
+        <th>AppUserPubKey</th>
+        <th>CoPartyID</th>
+        <th>CoPartyPubKey</th>
+        <th>Role</th>
+        <th>Text</th>
+        <th>PayerStake</th>
+        <th>PayeeStake</th>
+        <th>Payout$$$</th>
+        <th>PayerState</th>
+        <th>PayeeState</th>
+        <th>Completed</th>
       </tr>
       </thead>
       <tbody>
@@ -98,8 +114,18 @@
           </a>
         </td>
         <td>
+          <a th:href="@{/contract/my_contract/{id}(id=${open_contract.getId()})}">
+            [[${open_contract?.nostrAppUserPubKey}]]
+          </a>
+        </td>
+        <td>
           <a th:href="@{/contract/display_contract/{id}(id=${open_contract.getId()})}">
             [[${open_contract?.counterPartyId}]]
+          </a>
+        </td>
+        <td>
+          <a th:href="@{/contract/my_contract/{id}(id=${open_contract.getId()})}">
+            [[${open_contract?.nostrCounterPartyPubKey}]]
           </a>
         </td>
         <td>
@@ -155,7 +181,7 @@
   </section>
 </main>
 <footer>
-  <p>Powered by Cadence 3 Security - LPEA/CAD Custom Applications - Mayo Clinic</p>
+  <p>Powered by Presto Security</p>
 </footer>
 </body>
 </html>
