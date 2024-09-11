@@ -1,9 +1,9 @@
 package com.prosilion.barchetta.config;
 
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.model.entity.ContractAppUser;
+import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.repository.ContractRepository;
-import com.prosilion.barchetta.repository.ContractUserRepository;
+import com.prosilion.barchetta.repository.UserRepository;
 import com.prosilion.presto.security.service.CustomizableAppUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -15,11 +15,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Slf4j
 @Configuration
 @EnableJpaRepositories(basePackageClasses = {
-    ContractUserRepository.class
+    UserRepository.class
     , ContractRepository.class
 })
 @EntityScan(basePackageClasses = {
-    ContractAppUser.class
+    User.class
     , Contract.class
 })
 @ComponentScan(basePackages = "com.prosilion.presto.*")
@@ -28,7 +28,7 @@ public class ContractUserConfig {
   @Bean
   CustomizableAppUserService customizableAppUserService() {
     log.info("CONTRACT USER CONFIG - Creating ContractAppUser");
-    return new CustomizableAppUserService(new ContractAppUser());
+    return new CustomizableAppUserService(new User());
   }
 
 //  @Bean

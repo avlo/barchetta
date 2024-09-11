@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.model.dto;
 
-import com.prosilion.barchetta.model.entity.ContractAppUser;
+import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.presto.web.model.AppUserDto;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,11 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
-public class ContractAppUserDto extends AppUserDto {
+public class UserDto extends AppUserDto {
   private String nostrPubKey;
-  public ContractAppUser convertToContractAppUser() throws InvocationTargetException, IllegalAccessException {
-    ContractAppUser contractAppUser = new ContractAppUser();
-    BeanUtils.copyProperties(contractAppUser, this);
-    return contractAppUser;
+  public User convertToContractAppUser() throws InvocationTargetException, IllegalAccessException {
+    User user = new User();
+    BeanUtils.copyProperties(user, this);
+    return user;
   }
 }

@@ -3,12 +3,12 @@ package com.prosilion.barchetta.config;
 import com.prosilion.barchetta.client.NostrWebSocketClient;
 import com.prosilion.barchetta.client.WebSocketClient;
 import com.prosilion.barchetta.client.WebSocketHandler;
-import com.prosilion.barchetta.service.ContractAppUserService;
-import com.prosilion.barchetta.service.ContractAppUserServiceIF;
-import com.prosilion.barchetta.service.ContractAppUserServiceNostrDecorator;
-import com.prosilion.barchetta.service.ContractService;
-import com.prosilion.barchetta.service.ContractServiceIF;
-import com.prosilion.barchetta.service.ContractServiceNostrDecorator;
+import com.prosilion.barchetta.service.db.ContractEntityService;
+import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
+import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecorator;
+import com.prosilion.barchetta.service.user.UserService;
+import com.prosilion.barchetta.service.user.UserServiceNostrDecorator;
+import com.prosilion.barchetta.service.user.UserServiceNostrDecoratorIF;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -39,13 +39,19 @@ public class NostrConfig {
 
   @Bean
   @Primary
-  ContractServiceIF contractServiceIF(ContractService contractService, NostrWebSocketClient nostrWebSocketClient) {
-    return new ContractServiceNostrDecorator(contractService, nostrWebSocketClient);
+  UserServiceNostrDecoratorIF userServiceIF(UserService userService) {
+    return new UserServiceNostrDecorator(userService);
   }
 
   @Bean
   @Primary
-  ContractAppUserServiceIF contractAppUserServiceIF(ContractAppUserService contractAppUserService) {
-    return new ContractAppUserServiceNostrDecorator(contractAppUserService);
+  ContractEntityServiceIF contractServiceIF(
+      ContractEntityService contractEntityService,
+      NostrWebSocketClient nostrWebSocketClient,
+      UserServiceNostrDecoratorIF userServiceNostrDecoratorIF) {
+    return new ContractEntityServiceNostrDecorator(
+        contractEntityService,
+        nostrWebSocketClient,
+        userServiceNostrDecoratorIF);
   }
 }

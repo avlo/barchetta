@@ -1,77 +1,41 @@
 package com.prosilion.barchetta.client;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.NonNull;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 
-@Slf4j
 public class WebSocketClient {
-  private final String relayUrl;
   private final WebSocketHandler webSocketHandler;
 
-  public WebSocketClient(WebSocketHandler webSocketHandler, String relayUrl) {
-    this.relayUrl = relayUrl;
+  public WebSocketClient(@NonNull WebSocketHandler webSocketHandler, @NonNull String relayUrl) {
     this.webSocketHandler = webSocketHandler;
-    this.webSocketHandler.connect(new ReactorNettyWebSocketClient(), getURI());
+    this.webSocketHandler.connect(new ReactorNettyWebSocketClient(), getURI(relayUrl));
   }
 
-  void send(String json) {
-    log.info("++++++++++++");
-    log.info("++++++++++++");
-    log.info(json);
-    log.info("++++++++++++");
-    log.info("++++++++++++");
-    sendMessage(json);
-    countdownClose();
-  }
-
-  Flux<String> sendMessageMono(String message) {
+  Flux<String> sendMessageMono(@NonNull String message) {
     return Mono
         .fromRunnable(
             () -> webSocketHandler.send(message)
         )
         .thenMany(
             webSocketHandler.receive().map(String::trim));
-
   }
 
-  private void sendMessage(String message) {
-    Mono
-        .fromRunnable(
-            () -> webSocketHandler.send(message)
-        )
-        .thenMany(webSocketHandler.receive())
-        .doOnNext(
-            System.out::println
-        )
-        .subscribe();
-  }
-
-  private void countdownClose() {
-    Mono
-        .delay(Duration.ofSeconds(1))
-        .publishOn(Schedulers.boundedElastic())
-        .subscribe(value -> {
-//          closeMethodNostr(subscriptionId);
-          closeMethodForce();
-        });
-  }
-
-  private void closeMethodForce() {
+  public void closeSocket() {
     webSocketHandler.disconnect();
   }
 
-  private void closeMethodNostr(String subscriptionId) {
-    sendMessage("[\"CLOSE\",\"" + subscriptionId + "\"]");
+  public Flux<String> disconnect(@NonNull String subscriptionId) {
+    Flux<String> stringFlux = sendMessageMono("[\"CLOSE\",\"" + subscriptionId + "\"]");
+    closeSocket();
+    return stringFlux;
   }
 
-  private URI getURI() {
+  private URI getURI(@NonNull String relayUrl) {
     try {
       return new URI(relayUrl);
     } catch (URISyntaxException e) {

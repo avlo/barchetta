@@ -1,4 +1,4 @@
-package com.prosilion.barchetta.service;
+package com.prosilion.barchetta.service.db;
 
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.presto.security.entity.AppUser;
@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 import java.util.List;
 
-public interface ContractServiceIF {
+public interface ContractEntityServiceIF {
   @Transactional
   Contract save(@NonNull Contract contract);
   Contract getContractById(@NonNull Long id);

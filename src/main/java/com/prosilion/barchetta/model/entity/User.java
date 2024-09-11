@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.model.entity;
 
-import com.prosilion.barchetta.model.dto.ContractAppUserDto;
+import com.prosilion.barchetta.model.dto.UserDto;
 import com.prosilion.presto.security.entity.AppUser;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -18,22 +18,22 @@ import java.lang.reflect.InvocationTargetException;
 @NoArgsConstructor
 @Embeddable
 @Entity
-public class ContractAppUser extends AppUser {
+public class User extends AppUser {
   private String nostrPubKey;
 
   @Override
-  public ContractAppUser getInstantiatedCustomAppUserType() {
+  public User getInstantiatedCustomAppUserType() {
     return this;
   }
 
   @Override
-  public ContractAppUser createNewCustomAppUserInstance() {
-    return new ContractAppUser();
+  public User createNewCustomAppUserInstance() {
+    return new User();
   }
 
-  public ContractAppUserDto convertToDto() throws InvocationTargetException, IllegalAccessException {
-    ContractAppUserDto contractAppUserDto = new ContractAppUserDto();
-    BeanUtils.copyProperties(contractAppUserDto, this);
-    return contractAppUserDto;
+  public UserDto convertToDto() throws InvocationTargetException, IllegalAccessException {
+    UserDto userDto = new UserDto();
+    BeanUtils.copyProperties(userDto, this);
+    return userDto;
   }
 }

@@ -1,0 +1,159 @@
+package com.prosilion.barchetta.service.db;
+
+import com.prosilion.barchetta.client.NostrWebSocketClient;
+import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.barchetta.model.entity.User;
+import com.prosilion.barchetta.service.user.UserServiceNostrDecoratorIF;
+import com.prosilion.presto.security.entity.AppUser;
+import jakarta.transaction.Transactional;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
+import nostr.base.IEvent;
+import nostr.base.PublicKey;
+import nostr.event.Kind;
+import nostr.event.impl.ClassifiedListing;
+import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.json.codec.BaseMessageDecoder;
+import nostr.event.message.EventMessage;
+import nostr.event.message.OkMessage;
+import nostr.event.tag.PriceTag;
+import nostr.id.Identity;
+import nostr.util.NostrException;
+import org.springframework.util.ObjectUtils;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.awaitility.Awaitility.await;
+
+@Slf4j
+public class ContractEntityServiceNostrDecorator implements ContractEntityServiceIF {
+  private final ContractEntityServiceIF contractService;
+  private final NostrWebSocketClient nostrWebSocketClient;
+  private final UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator;
+
+  public ContractEntityServiceNostrDecorator(
+      ContractEntityServiceIF contractService,
+      NostrWebSocketClient nostrWebSocketClient,
+      UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator) {
+    this.contractService = contractService;
+    this.nostrWebSocketClient = nostrWebSocketClient;
+    this.contractAppUserServiceNostrDecorator = contractAppUserServiceNostrDecorator;
+  }
+
+  @Transactional
+  @Override
+  @SneakyThrows
+  public Contract save(@NonNull Contract contract) {
+    log.info("saving contract {}", contract);
+    ClassifiedListingEvent event = convertToClassifiedListingEvent(contract);
+    String userPubKeyAsSubscriptionId = contract.getNostrAppUserPubKey();
+
+//    TODO: below temp placeholder
+    event.setSignature(Identity.generateRandomIdentity().sign(event));
+
+    EventMessage eventMessage = new EventMessageFactory(event, userPubKeyAsSubscriptionId).create();
+    nostrWebSocketClient.send(eventMessage);
+
+    await().until(() -> !ObjectUtils.isEmpty(nostrWebSocketClient.getRelayResponse()));
+
+//    TODO: hacky call to nostrWebSocketClient.getRelayResponse() below, revisit
+//    TODO: might/likely need multiple clients, 1 per user session
+    OkMessage decode = new BaseMessageDecoder<OkMessage>().decode(nostrWebSocketClient.getRelayResponse());
+
+    if (!decode.getFlag())
+      throw new NostrException("failed OK from relay");
+
+    contract.setNostrEventId(eventMessage.getEvent().getId());
+    return contractService.save(contract);
+  }
+
+  @Override
+  public Contract getContractById(@NonNull Long id) {
+    Contract contractByDbId = contractService.getContractById(id);
+    String contractEventId = contractByDbId.getNostrEventId();
+    String nostrAppUserPubKey = contractByDbId.getNostrAppUserPubKey();
+    User userByPubKey = contractAppUserServiceNostrDecorator.findByPubKey(nostrAppUserPubKey);
+    ClassifiedListingEvent classifiedListingEvent = reqClassifiedEventForPubKeyByEventId(userByPubKey.getNostrPubKey(), contractEventId);
+    Contract contract = convertToContract(classifiedListingEvent);
+    return contract;
+  }
+
+  @Override
+  public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
+//    getContractsByAppUserId(appUser.getId());
+    return contractService.getContractsByAppUser(appUser);
+  }
+
+  @Override
+  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
+//    getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
+    return contractService.getAvailableOppositeRoleContractsByAppUser(appUser);
+  }
+
+  @Override
+  public List<Contract> getContractsByCoPartyId(@NonNull Long id) {
+//    getContractsByAppUserId(id);
+    return contractService.getContractsByCoPartyId(id);
+  }
+
+  @Override
+  public List<Contract> getAvailableOppositeRoleContractsByAppUserId(@NonNull Long id) {
+//    getContractsByAppUserId(id);
+    return contractService.getAvailableOppositeRoleContractsByAppUserId(id);
+  }
+
+  @Override
+  public List<Contract> getContractsByAppUserId(@NonNull Long id) {
+    return contractService.getContractsByAppUserId(id).stream()
+        .map(contract ->
+            getContractById(contract.getId()))
+        .toList();
+  }
+
+  @Override
+  public List<Contract> getAll() {
+//    String allContracts = "[\"REQ\",\"" + SUBSCRIBER + "\",{\"kind\":[\"" + Kind.CLASSIFIED_LISTING + "\"]}]";
+//    List.of(convertToContract(getContractByNostrAppUserId(allContracts)));
+    return contractService.getAll();
+  }
+
+  private ClassifiedListingEvent convertToClassifiedListingEvent(Contract contract) {
+    return new ClassifiedListingEvent(
+        new PublicKey(
+            contract.getNostrAppUserPubKey()),
+        Kind.CLASSIFIED_LISTING,
+        new ArrayList<>(),
+        "CONTENT",
+        new ClassifiedListing(
+            contract.getText(),
+            "SUMMARY",
+            new PriceTag(BigDecimal.TEN, "btc", "once")));
+  }
+
+  private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) {
+    String reqJson = createReqJson(subscriberId, eventId);
+    nostrWebSocketClient.send(reqJson);
+
+    await().until(() -> !ObjectUtils.isEmpty(nostrWebSocketClient.getRelayResponse()));
+
+//    TODO: hacky call to nostrWebSocketClient.getRelayResponse() below, revisit
+//    TODO: might/likely need multiple clients, 1 per user session
+    IEvent event = new BaseMessageDecoder<EventMessage>().decode(nostrWebSocketClient.getRelayResponse()).getEvent();
+
+//    ClassifiedListingEvent classifiedListingEvent = new ObjectMapper().readValue(decode., ClassifiedListingEvent.class);
+
+    return (ClassifiedListingEvent) event;
+  }
+
+  private String createReqJson(String subscriberId, String id) {
+    return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
+  }
+
+  private Contract convertToContract(ClassifiedListingEvent classifiedListingEvent) {
+    return new Contract();
+  }
+}
