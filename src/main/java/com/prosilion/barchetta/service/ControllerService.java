@@ -39,11 +39,12 @@ public class ControllerService implements ControllerServiceIF {
     // TODO: check below contract doesn't already have existing different appuser ID
     User user = userService.findByUserId(userId);
     contract.setAppUserId(user.getId());
-    setAliceBobPubKey(user, contract);
+    setAliceBobPubKey(user, contract); // TODO: remove this call when pubKey work is underway
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
     return create(contract);
   }
 
+  // TODO: below method when pubKey work is underway
   private void setAliceBobPubKey(User user, Contract contract) {
     if (user.getId().equals(1L)) {
       contract.setNostrAppUserPubKey(ALICE_PUB_KEY);
@@ -57,6 +58,7 @@ public class ControllerService implements ControllerServiceIF {
 //    userService.update(user.convertToDto());
   }
 
+  // TODO: remove this method when pubKey work is underway
   @Override
   public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user) {
     User byUserId = userService.findByUserId(user.getId());
