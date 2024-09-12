@@ -17,8 +17,6 @@
 
   <properties>
     <spring-boot.version>3.3.1</spring-boot.version>
-    <annotations.version>24.0.1</annotations.version>
-    <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-io.version>2.13.0</commons-io.version>
     <guava.version>32.1.2-jre</guava.version>
     <h2.version>2.2.222</h2.version>
@@ -39,12 +37,6 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>${annotations.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -115,11 +107,6 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>${snakeyaml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-beanutils</groupId>
-      <artifactId>commons-beanutils</artifactId>
-      <version>${commons-beanutils.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

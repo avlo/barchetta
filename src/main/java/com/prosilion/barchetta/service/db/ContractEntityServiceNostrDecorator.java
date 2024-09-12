@@ -126,10 +126,11 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     String nostrAppUserPubKey = contract.getNostrAppUserPubKey();
     PublicKey sender = new PublicKey(nostrAppUserPubKey);
 
-    ClassifiedListing classifiedListing = new ClassifiedListing(
-        contract.getText(),
-        "SUMMARY",
-        new PriceTag(BigDecimal.TEN, "btc", "once"));
+    ClassifiedListing classifiedListing = ClassifiedListing.builder(
+            contract.getText(),
+            "SUMMARY",
+            new PriceTag(BigDecimal.TEN, "btc", "once"))
+        .build();
 
     ClassifiedListingEvent classifiedListingEvent = new ClassifiedListingEvent(
         sender,
