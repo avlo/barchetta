@@ -32,21 +32,14 @@ public class EditUserController {
 
   @PostMapping("/edit")
   public String updateUser(@ModelAttribute("user") UserDto userDto, BindingResult result, Model model) {
-
     if (result.hasErrors()) {
       log.info("User [{}] returned with with binding errors:\n\t{}", userDto.getUsername(), result.getFieldErrors());
       model.addAttribute("user", userDto);
       return "redirect:/edit";
     }
 
-    try {
-      UserDto updatedUserDto = userServiceIF.update(userDto);
-      model.addAttribute("user", updatedUserDto);
-      return "redirect:/users";
-    } catch (InvocationTargetException | IllegalAccessException e) {
-      log.info("User [{}] InvocationTarget / IllegalAccess exception.", userDto.getUsername());
-      model.addAttribute("user", userDto);
-      return "redirect:/users";
-    }
+    UserDto updatedUserDto = userServiceIF.update(userDto);
+    model.addAttribute("user", updatedUserDto);
+    return "redirect:/users";
   }
 }

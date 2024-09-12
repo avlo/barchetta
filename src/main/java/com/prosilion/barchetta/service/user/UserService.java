@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 @Slf4j
@@ -42,9 +41,9 @@ public class UserService implements UserServiceIF {
   }
 
   @Override
-  public UserDto update(@NonNull UserDto userDto) throws InvocationTargetException, IllegalAccessException {
+  public UserDto update(@NonNull UserDto userDto) {
     log.info("CONTRACT USER - updating");
-    User user = userDto.convertToContractAppUser();
+    User user = userDto.convertToUser();
     User retrievedUser = find(user);
     log.info("Confirm retrieved existing contractAppUser [{}]", retrievedUser);
     User returnUser = userRepository.save(user);

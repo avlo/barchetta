@@ -7,12 +7,10 @@ import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 
-import java.lang.reflect.InvocationTargetException;
-
 public interface UserServiceIF {
   User findByUserId(Long id);
   User findByUsername(@NonNull String username);
   User findByPubKey(@NonNull String pubKey);
-  UserDto update(@NonNull UserDto userDto) throws InvocationTargetException, IllegalAccessException;
+  UserDto update(@NonNull UserDto userDto);
   CreatorRoleEnum getRole(Contract contract, AuthUserDetails user);
 }

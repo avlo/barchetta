@@ -28,16 +28,16 @@ public class ContractsController {
   public static final String USER_CONTRACTS_STR = "user_contracts";
   public static final String USERNAME_STR = "username";
 
-  private final ControllerServiceIF contractAppUserService;
+  private final ControllerServiceIF controllerService;
 
   @Autowired
   public ContractsController(ControllerServiceIF contractAppUserService) {
-    this.contractAppUserService = contractAppUserService;
+    this.controllerService = contractAppUserService;
   }
 
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws JsonProcessingException {
-    contractAppUserService.create(contract, contractAppUserService.findByUsername(user.getUsername()).getId());
+    controllerService.create(contract, controllerService.findByUsername(user.getUsername()).getId());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }
@@ -51,10 +51,10 @@ public class ContractsController {
   @GetMapping("/display_contract/{id}")
   public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws JsonProcessingException {
     log.info("Fetching selected contract: [{}]", contractId);
-    model.addAttribute(CONTRACT_STR, contractAppUserService.getContractByContractId(contractId));
+    model.addAttribute(CONTRACT_STR, controllerService.getContractByContractId(contractId));
     model.addAttribute(USERNAME_STR, user.getUsername());
-    model.addAttribute(COUNTER_PARTY_ID_STR, contractAppUserService.findByUsername(user.getUsername()).getId());
-    log.info("CounterPartyId: [{}]", contractAppUserService.findByUsername(user.getUsername()).getId());
+    model.addAttribute(COUNTER_PARTY_ID_STR, controllerService.findByUsername(user.getUsername()).getId());
+    log.info("CounterPartyId: [{}]", controllerService.findByUsername(user.getUsername()).getId());
     log.info("User for potential contract: {}", user.getUsername());
     return "thymeleaf/contract/preview_contract";
   }
@@ -62,17 +62,17 @@ public class ContractsController {
   @GetMapping("/my_contract/{id}")
   public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws JsonProcessingException {
     log.info("Fetching my contract: [{}]", contractId);
-    Contract contract = contractAppUserService.getContractByContractId(contractId);
+    Contract contract = controllerService.getContractByContractId(contractId);
     model.addAttribute(CONTRACT_STR, contract);
     model.addAttribute(USERNAME_STR, user.getUsername());
-    model.addAttribute(ROLE_STR, contractAppUserService.getRole(contract, user));
+    model.addAttribute(ROLE_STR, controllerService.getRole(contract, user));
     return "thymeleaf/contract/view_contract";
   }
 
   @PostMapping("/apply")
   public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
-    contractAppUserService.save(contract);
-    model.addAttribute(CONTRACTS_STR, contractAppUserService.getAll());
+    controllerService.saveAsCounterParty(contract, controllerService.findByUsername(user.getUsername()));
+    model.addAttribute(CONTRACTS_STR, controllerService.getAll());
     return "redirect:display_all";
   }
 
@@ -82,16 +82,16 @@ public class ContractsController {
     log.info("Contract id: [{}] ", contract.getId());
     log.info("Contract text: [{}] ", contract.getText());
     log.info("Contract appUserId: [{}] ", contract.getAppUserId());
-    contractAppUserService.save(contract);
-    model.addAttribute(CONTRACTS_STR, contractAppUserService.getAll());
+    controllerService.save(contract);
+    model.addAttribute(CONTRACTS_STR, controllerService.getAll());
     return "redirect:display_all";
   }
 
   private void setCanonicalModelAttributes(@NonNull AuthUserDetails user, @NonNull Model model) {
-    User contractAppUser = contractAppUserService.findByUsername(user.getUsername());
-    model.addAttribute(USER_CONTRACTS_STR, contractAppUserService.getAllContractsFor(contractAppUser));
-    model.addAttribute(OPEN_CONTRACTS_STR, contractAppUserService.getOpenContractsFor(contractAppUser));
-    model.addAttribute(CONTRACT_STR, contractAppUserService.constructContract(contractAppUser));
+    User contractAppUser = controllerService.findByUsername(user.getUsername());
+    model.addAttribute(USER_CONTRACTS_STR, controllerService.getAllContractsFor(contractAppUser));
+    model.addAttribute(OPEN_CONTRACTS_STR, controllerService.getOpenContractsFor(contractAppUser));
+    model.addAttribute(CONTRACT_STR, controllerService.constructContract(contractAppUser));
     model.addAttribute(USERNAME_STR, user.getUsername());
   }
 }

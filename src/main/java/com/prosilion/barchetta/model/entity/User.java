@@ -8,9 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.beanutils.BeanUtils;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Getter
 @Setter
@@ -31,9 +28,9 @@ public class User extends AppUser {
     return new User();
   }
 
-  public UserDto convertToDto() throws InvocationTargetException, IllegalAccessException {
+  public UserDto convertToDto() {
     UserDto userDto = new UserDto();
-    BeanUtils.copyProperties(userDto, this);
+    userDto.setNostrPubKey(nostrPubKey);
     return userDto;
   }
 }

@@ -62,7 +62,8 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
 //    TODO: hacky call to nostrWebSocketClient.getRelayResponse() below, revisit
 //    TODO: might/likely need multiple clients, 1 per user session
-    OkMessage decode = new BaseMessageDecoder<OkMessage>().decode(nostrWebSocketClient.getRelayResponse());
+    String relayResponse = nostrWebSocketClient.getRelayResponse();
+    OkMessage decode = new BaseMessageDecoder<OkMessage>().decode(relayResponse);
 
     if (!decode.getFlag())
       throw new NostrException("failed OK from relay");
@@ -122,16 +123,22 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   }
 
   private ClassifiedListingEvent convertToClassifiedListingEvent(Contract contract) {
-    return new ClassifiedListingEvent(
-        new PublicKey(
-            contract.getNostrAppUserPubKey()),
+    String nostrAppUserPubKey = contract.getNostrAppUserPubKey();
+    PublicKey sender = new PublicKey(nostrAppUserPubKey);
+
+    ClassifiedListing classifiedListing = new ClassifiedListing(
+        contract.getText(),
+        "SUMMARY",
+        new PriceTag(BigDecimal.TEN, "btc", "once"));
+
+    ClassifiedListingEvent classifiedListingEvent = new ClassifiedListingEvent(
+        sender,
         Kind.CLASSIFIED_LISTING,
         new ArrayList<>(),
         "CONTENT",
-        new ClassifiedListing(
-            contract.getText(),
-            "SUMMARY",
-            new PriceTag(BigDecimal.TEN, "btc", "once")));
+        classifiedListing);
+
+    return classifiedListingEvent;
   }
 
   private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) {

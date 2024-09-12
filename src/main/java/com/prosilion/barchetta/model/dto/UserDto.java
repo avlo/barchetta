@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.beanutils.BeanUtils;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Getter
 @Setter
@@ -16,9 +13,9 @@ import java.lang.reflect.InvocationTargetException;
 @NoArgsConstructor
 public class UserDto extends AppUserDto {
   private String nostrPubKey;
-  public User convertToContractAppUser() throws InvocationTargetException, IllegalAccessException {
+  public User convertToUser() {
     User user = new User();
-    BeanUtils.copyProperties(user, this);
+    user.setNostrPubKey(nostrPubKey);
     return user;
   }
 }

@@ -8,8 +8,6 @@ import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.InvocationTargetException;
-
 @Slf4j
 public class UserServiceNostrDecorator implements UserServiceNostrDecoratorIF {
   private final UserServiceIF userService;
@@ -34,7 +32,7 @@ public class UserServiceNostrDecorator implements UserServiceNostrDecoratorIF {
   }
 
   @Override
-  public UserDto update(@NonNull UserDto userDto) throws InvocationTargetException, IllegalAccessException {
+  public UserDto update(@NonNull UserDto userDto) {
     log.info("CONTRACT NOSTR USER - updating");
     return userService.update(userDto);
   }

@@ -20,6 +20,10 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class ControllerService implements ControllerServiceIF {
+
+  String ALICE_PUB_KEY = "111df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f";
+  String BOB_PUB_KEY = "222df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f";
+
   ContractEntityServiceIF contractEntityService;
   UserServiceIF userService;
 
@@ -33,9 +37,31 @@ public class ControllerService implements ControllerServiceIF {
   public Contract create(@NonNull Contract contract, @NonNull Long userId) throws JsonProcessingException {
     log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
     // TODO: check below contract doesn't already have existing different appuser ID
-    contract.setAppUserId(userService.findByUserId(userId).getId());
+    User user = userService.findByUserId(userId);
+    contract.setAppUserId(user.getId());
+    setAliceBobPubKey(user, contract);
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
     return create(contract);
+  }
+
+  private void setAliceBobPubKey(User user, Contract contract) {
+    if (user.getId().equals(1L)) {
+      contract.setNostrAppUserPubKey(ALICE_PUB_KEY);
+      user.setNostrPubKey(ALICE_PUB_KEY);
+//      userService.update(user.convertToDto());
+      return;
+    }
+
+    contract.setNostrCounterPartyPubKey(BOB_PUB_KEY);
+    user.setNostrPubKey(BOB_PUB_KEY);
+//    userService.update(user.convertToDto());
+  }
+
+  @Override
+  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user) {
+    User byUserId = userService.findByUserId(user.getId());
+    setAliceBobPubKey(byUserId, contract);
+    return save(contract);
   }
 
   @Override
@@ -54,7 +80,7 @@ public class ControllerService implements ControllerServiceIF {
 
   private Contract create(@NonNull Contract contract) throws JsonProcessingException {
     log.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
-    Contract savedContract = contractEntityService.save(contract);
+    Contract savedContract = save(contract);
     log.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
     return savedContract;
   }

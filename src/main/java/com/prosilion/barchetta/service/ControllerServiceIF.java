@@ -16,6 +16,7 @@ public interface ControllerServiceIF {
   User findByUsername(@NonNull String username);
   CreatorRoleEnum getRole(Contract contract, AuthUserDetails user);
   Contract save(@NonNull Contract contract);
+  Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user);
   List<Contract> getAll();
   List<Contract> getAllContractsFor(@NonNull AppUser appUser);
   List<Contract> getOpenContractsFor(@NonNull AppUser appUser);
