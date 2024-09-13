@@ -15,7 +15,10 @@ import nostr.base.PublicKey;
 import nostr.event.Kind;
 import nostr.event.impl.ClassifiedListing;
 import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.impl.GenericEvent;
+import nostr.event.json.codec.BaseEventEncoder;
 import nostr.event.json.codec.BaseMessageDecoder;
+import nostr.event.json.codec.GenericEventDecoder;
 import nostr.event.message.EventMessage;
 import nostr.event.message.OkMessage;
 import nostr.event.tag.PriceTag;
@@ -148,13 +151,12 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
     await().until(() -> !ObjectUtils.isEmpty(nostrWebSocketClient.getRelayResponse()));
 
-//    TODO: hacky call to nostrWebSocketClient.getRelayResponse() below, revisit
-//    TODO: might/likely need multiple clients, 1 per user session
-    IEvent event = new BaseMessageDecoder<EventMessage>().decode(nostrWebSocketClient.getRelayResponse()).getEvent();
+    EventMessage eventMessage = (EventMessage) new BaseMessageDecoder<>().decode(nostrWebSocketClient.getRelayResponse());
+    GenericEvent event = (GenericEvent) eventMessage.getEvent();
+    String encode = new BaseEventEncoder(event).encode();
 
-//    ClassifiedListingEvent classifiedListingEvent = new ObjectMapper().readValue(decode., ClassifiedListingEvent.class);
-
-    return (ClassifiedListingEvent) event;
+    ClassifiedListingEvent classifiedListingEvent = new GenericEventDecoder<>(ClassifiedListingEvent.class).decode(encode);
+    return classifiedListingEvent;
   }
 
   private String createReqJson(String subscriberId, String id) {
