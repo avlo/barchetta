@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.service.db;
 
-import com.prosilion.barchetta.client.NostrWebSocketClient;
+import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.user.UserServiceNostrDecoratorIF;
@@ -10,7 +10,6 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
-import nostr.base.IEvent;
 import nostr.base.PublicKey;
 import nostr.event.Kind;
 import nostr.event.impl.ClassifiedListing;
@@ -24,23 +23,20 @@ import nostr.event.message.OkMessage;
 import nostr.event.tag.PriceTag;
 import nostr.id.Identity;
 import nostr.util.NostrException;
-import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.awaitility.Awaitility.await;
-
 @Slf4j
 public class ContractEntityServiceNostrDecorator implements ContractEntityServiceIF {
   private final ContractEntityServiceIF contractService;
-  private final NostrWebSocketClient nostrWebSocketClient;
+  private final WebSocketClientIF nostrWebSocketClient;
   private final UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator;
 
   public ContractEntityServiceNostrDecorator(
       ContractEntityServiceIF contractService,
-      NostrWebSocketClient nostrWebSocketClient,
+      WebSocketClientIF nostrWebSocketClient,
       UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator) {
     this.contractService = contractService;
     this.nostrWebSocketClient = nostrWebSocketClient;
@@ -55,23 +51,18 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     ClassifiedListingEvent event = convertToClassifiedListingEvent(contract);
     String userPubKeyAsSubscriptionId = contract.getNostrAppUserPubKey();
 
-//    TODO: below temp placeholder
     event.setSignature(Identity.generateRandomIdentity().sign(event));
 
     EventMessage eventMessage = new EventMessageFactory(event, userPubKeyAsSubscriptionId).create();
-    nostrWebSocketClient.send(eventMessage);
 
-    await().until(() -> !ObjectUtils.isEmpty(nostrWebSocketClient.getRelayResponse()));
+    OkMessage okMessage = nostrWebSocketClient.send(eventMessage)
+        .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
+        .blockFirst();
 
-//    TODO: hacky call to nostrWebSocketClient.getRelayResponse() below, revisit
-//    TODO: might/likely need multiple clients, 1 per user session
-    String relayResponse = nostrWebSocketClient.getRelayResponse();
-    OkMessage decode = new BaseMessageDecoder<OkMessage>().decode(relayResponse);
-
-    if (!decode.getFlag())
+    if (!okMessage.getFlag())
       throw new NostrException("failed OK from relay");
 
-    contract.setNostrEventId(eventMessage.getEvent().getId());
+    contract.setNostrEventId(event.getId());
     return contractService.save(contract);
   }
 
@@ -147,16 +138,12 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) {
     String reqJson = createReqJson(subscriberId, eventId);
-    nostrWebSocketClient.send(reqJson);
-
-    await().until(() -> !ObjectUtils.isEmpty(nostrWebSocketClient.getRelayResponse()));
-
-    EventMessage eventMessage = (EventMessage) new BaseMessageDecoder<>().decode(nostrWebSocketClient.getRelayResponse());
-    GenericEvent event = (GenericEvent) eventMessage.getEvent();
-    String encode = new BaseEventEncoder(event).encode();
-
-    ClassifiedListingEvent classifiedListingEvent = new GenericEventDecoder<>(ClassifiedListingEvent.class).decode(encode);
-    return classifiedListingEvent;
+    return nostrWebSocketClient.send(reqJson)
+        .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
+        .map(eventMessage -> ((GenericEvent) eventMessage.getEvent()))
+        .map(event -> new BaseEventEncoder<>(event).encode())
+        .map(encode -> new GenericEventDecoder<>(ClassifiedListingEvent.class).decode(encode))
+        .blockFirst();
   }
 
   private String createReqJson(String subscriberId, String id) {
