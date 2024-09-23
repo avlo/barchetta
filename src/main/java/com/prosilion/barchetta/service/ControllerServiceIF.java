@@ -8,11 +8,12 @@ import com.prosilion.presto.security.entity.AppUser;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ControllerServiceIF {
   Contract create(@NonNull Contract contract, @NonNull Long userId) throws JsonProcessingException;
-  Contract getContractByContractId(@NonNull Long id);
+  Contract getContractByContractId(@NonNull Long id) throws IOException;
   User findByUsername(@NonNull String username);
   CreatorRoleEnum getRole(Contract contract, AuthUserDetails user);
   Contract save(@NonNull Contract contract);

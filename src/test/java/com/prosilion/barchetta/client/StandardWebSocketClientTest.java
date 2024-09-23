@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nostr.base.PublicKey;
 import nostr.event.tag.EventTag;
 import nostr.event.tag.GeohashTag;
@@ -12,11 +13,17 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Duration;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class NostrWebSocketClientTest {
+class StandardWebSocketClientTest {
   private static final String PRV_KEY_VALUE = "23c011c4c02de9aa98d48c3646c70bb0e7ae30bdae1dfed4d251cbceadaeeb7b";
   private static final String RELAY_URI = "ws://localhost:5555";
   private static final String SUBSCRIBER_ID = "NostrWebSocketClientTest-subscriber_001";
@@ -48,24 +55,25 @@ class NostrWebSocketClientTest {
   public static final BigDecimal NUMBER = new BigDecimal(PRICE_NUMBER);
 
   @Autowired
-  NettyWebSocketClient nettyWebSocketClient;
+  StandardWebSocketClient standardWebSocketClient;
 
   @BeforeEach
-  void setup() {
-    System.out.println("000000000000000000000000");
-    System.out.println("000000000000000000000000");
-    nettyWebSocketClient.send(eventJson());
-    System.out.println("000000000000000000000000");
-    System.out.println("000000000000000000000000");
+  void setup() throws IOException {
+    assertEquals(expectedEventResponseJson(ID), standardWebSocketClient.send(eventJson()).stream().findFirst().get());
   }
 
   @Test
-  void testSendRequestExpectEventResponse() {
-    System.out.println("111111111111111111111111");
-    System.out.println("111111111111111111111111");
-    nettyWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID));
-    System.out.println("111111111111111111111111");
-    System.out.println("111111111111111111111111");
+  void testSendRequestExpectEventResponse() throws IOException {
+    assertTrue(
+        JsonComparator.equalsJson(
+            new ObjectMapper().readTree(
+                expectedRequestResponseJson()
+            ),
+            new ObjectMapper().readTree(
+                standardWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID))
+                    .stream().findFirst().get()
+            )));
+    await().atMost(Duration.ofSeconds(3));
   }
 
   private String expectedEventResponseJson(String subscriptionId) {
@@ -85,7 +93,8 @@ class NostrWebSocketClientTest {
             "          \"pubkey\": \"" + PUB_KEY + "\",\n" +
             "          \"created_at\": " + CREATED_AT + ",\n" +
             "          \"tags\": [\n" +
-            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\", \"" + E_TAG.getMarker() + "\" ],\n" +
+//            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\", \"" + E_TAG.getMarker() + "\" ],\n" +
+            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\" ],\n" +
             "            [ \"g\", \"" + G_TAG.getLocation() + "\" ],\n" +
             "            [ \"t\", \"" + T_TAG.getHashTag() + "\" ],\n" +
             "            [ \"price\", \"" + NUMBER + "\", \"" + CURRENCY + "\", \"" + FREQUENCY + "\" ],\n" +
@@ -119,7 +128,7 @@ class NostrWebSocketClientTest {
               [ "title", "classified title" ],
               [ "published_at", "1726114798510" ],
               [ "summary", "classified summary" ],
-              [ "location", "classified peroulades" ]
+              [ "location", "classified location" ]
             ],
             "sig": "86f25c161fec51b9e441bdb2c09095d5f8b92fdce66cb80d9ef09fad6ce53eaa14c5e16787c42f5404905536e43ebec0e463aee819378a4acbe412c533e60546"
           }

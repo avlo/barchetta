@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.barchetta.client.NettyWebSocketClient;
+import com.prosilion.barchetta.client.ReactiveWebSocketClient;
 import com.prosilion.barchetta.service.db.ContractEntityService;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecorator;
@@ -29,11 +29,11 @@ public class NostrConfig {
   @Primary
   ContractEntityServiceIF contractServiceIF(
       ContractEntityService contractEntityService,
-      NettyWebSocketClient nettyWebSocketClient,
+      ReactiveWebSocketClient reactiveWebSocketClient,
       UserServiceNostrDecoratorIF userServiceNostrDecoratorIF) {
     return new ContractEntityServiceNostrDecorator(
         contractEntityService,
-        nettyWebSocketClient,
+        reactiveWebSocketClient,
         userServiceNostrDecoratorIF);
   }
 }

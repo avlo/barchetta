@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.IOException;
+
 @Slf4j
 @Controller
 @RequestMapping("/contract")
@@ -49,7 +51,7 @@ public class ContractsController {
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws JsonProcessingException {
+  public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(CONTRACT_STR, controllerService.getContractByContractId(contractId));
     model.addAttribute(USERNAME_STR, user.getUsername());
@@ -60,7 +62,7 @@ public class ContractsController {
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws JsonProcessingException {
+  public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching my contract: [{}]", contractId);
     Contract contract = controllerService.getContractByContractId(contractId);
     model.addAttribute(CONTRACT_STR, contract);

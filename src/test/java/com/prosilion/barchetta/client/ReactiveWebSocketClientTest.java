@@ -1,5 +1,7 @@
 package com.prosilion.barchetta.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nostr.base.PublicKey;
 import nostr.event.tag.EventTag;
 import nostr.event.tag.GeohashTag;
@@ -12,12 +14,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Duration;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SynchWebSocketClientTest {
+class ReactiveWebSocketClientTest {
   private static final String PRV_KEY_VALUE = "23c011c4c02de9aa98d48c3646c70bb0e7ae30bdae1dfed4d251cbceadaeeb7b";
   private static final String RELAY_URI = "ws://localhost:5555";
   private static final String SUBSCRIBER_ID = "NostrWebSocketClientTest-subscriber_001";
@@ -49,28 +55,31 @@ class SynchWebSocketClientTest {
   public static final BigDecimal NUMBER = new BigDecimal(PRICE_NUMBER);
 
   @Autowired
-  SynchronousClient synchronousClient;
+  ReactiveWebSocketClient reactiveWebSocketClient;
 
   @BeforeEach
-  void setup() throws IOException {
-    System.out.println("000000000000000000000000");
-    System.out.println("000000000000000000000000");
-    synchronousClient.send(eventJson()).forEach(System.out::println);
-    System.out.println("000000000000000000000000");
-    System.out.println("000000000000000000000000");
+  void setup() {
+    assertEquals(expectedEventResponseJson(ID), reactiveWebSocketClient.send(eventJson()).stream().findFirst().get());
   }
 
   @Test
-  void testSendRequestExpectEventResponse() throws IOException {
-    System.out.println("111111111111111111111111");
-    System.out.println("111111111111111111111111");
-    synchronousClient.send(createReqJson(SUBSCRIBER_ID, ID)).forEach(System.out::println);
-    System.out.println("111111111111111111111111");
-    System.out.println("111111111111111111111111");
+  void testSendRequestExpectEventResponse() throws JsonProcessingException {
+    assertTrue(
+        JsonComparator.equalsJson(
+            new ObjectMapper().readTree(
+                expectedRequestResponseJson()
+            ),
+            new ObjectMapper().readTree(
+                reactiveWebSocketClient
+                    .send(
+                        createReqJson(SUBSCRIBER_ID, ID))
+                    .stream().findFirst().get()
+            )));
+    await().atMost(Duration.ofSeconds(3));
   }
 
-  private String expectedEventResponseJson(String subscriptionId) {
-    return "[\"OK\",\"" + subscriptionId + "\",true,\"success: request processed\"]";
+  private String expectedEventResponseJson(String eventId) {
+    return "[\"OK\",\"" + eventId + "\",true,\"success: request processed\"]";
   }
 
   private String createReqJson(String subscriberId, String id) {
@@ -86,16 +95,17 @@ class SynchWebSocketClientTest {
             "          \"pubkey\": \"" + PUB_KEY + "\",\n" +
             "          \"created_at\": " + CREATED_AT + ",\n" +
             "          \"tags\": [\n" +
-            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\", \"" + E_TAG.getMarker() + "\" ],\n" +
+//            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\", \"" + E_TAG.getMarker() + "\" ],\n" +
+            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\" ],\n" +
             "            [ \"g\", \"" + G_TAG.getLocation() + "\" ],\n" +
             "            [ \"t\", \"" + T_TAG.getHashTag() + "\" ],\n" +
             "            [ \"price\", \"" + NUMBER + "\", \"" + CURRENCY + "\", \"" + FREQUENCY + "\" ],\n" +
             "            [ \"p\", \"" + P_TAG.getPublicKey() + "\" ],\n" +
             "            [ \"subject\", \"" + SUBJECT + "\" ],\n" +
-            "            [ \"published_at\", \"" + CREATED_AT + "\" ],\n" +
-            "            [ \"location\", \"" + LOCATION + "\" ],\n" +
             "            [ \"title\", \"" + TITLE + "\" ],\n" +
-            "            [ \"summary\", \"" + SUMMARY + "\" ]\n" +
+            "            [ \"published_at\", \"" + CREATED_AT + "\" ],\n" +
+            "            [ \"summary\", \"" + SUMMARY + "\" ],\n" +
+            "            [ \"location\", \"" + LOCATION + "\" ]\n" +
             "          ],\n" +
             "          \"sig\": \"" + SIGNATURE + "\"\n" +
             "        }]";
@@ -120,7 +130,7 @@ class SynchWebSocketClientTest {
               [ "title", "classified title" ],
               [ "published_at", "1726114798510" ],
               [ "summary", "classified summary" ],
-              [ "location", "classified peroulades" ]
+              [ "location", "classified location" ]
             ],
             "sig": "86f25c161fec51b9e441bdb2c09095d5f8b92fdce66cb80d9ef09fad6ce53eaa14c5e16787c42f5404905536e43ebec0e463aee819378a4acbe412c533e60546"
           }

@@ -24,6 +24,7 @@ import nostr.event.tag.PriceTag;
 import nostr.id.Identity;
 import nostr.util.NostrException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +57,9 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     EventMessage eventMessage = new EventMessageFactory(event, userPubKeyAsSubscriptionId).create();
 
     OkMessage okMessage = nostrWebSocketClient.send(eventMessage)
+        .stream()
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
-        .blockFirst();
+        .findFirst().get();
 
     if (!okMessage.getFlag())
       throw new NostrException("failed OK from relay");
@@ -66,6 +68,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     return contractService.save(contract);
   }
 
+  @SneakyThrows
   @Override
   public Contract getContractById(@NonNull Long id) {
     Contract contractByDbId = contractService.getContractById(id);
@@ -136,14 +139,15 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     return classifiedListingEvent;
   }
 
-  private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) {
+  private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) throws IOException {
     String reqJson = createReqJson(subscriberId, eventId);
     return nostrWebSocketClient.send(reqJson)
+        .stream()
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> ((GenericEvent) eventMessage.getEvent()))
         .map(event -> new BaseEventEncoder<>(event).encode())
         .map(encode -> new GenericEventDecoder<>(ClassifiedListingEvent.class).decode(encode))
-        .blockFirst();
+        .findFirst().get();
   }
 
   private String createReqJson(String subscriberId, String id) {
@@ -151,6 +155,9 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   }
 
   private Contract convertToContract(ClassifiedListingEvent classifiedListingEvent) {
-    return new Contract();
+    Contract contract = new Contract();
+    contract.setNostrAppUserPubKey(classifiedListingEvent.getPubKey().toString());
+    contract.setText(classifiedListingEvent.getClassifiedListing().getTitle());
+    return contract;
   }
 }

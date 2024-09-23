@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -67,9 +68,10 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract getContractByContractId(@NonNull Long id) {
+  public Contract getContractByContractId(@NonNull Long id) throws IOException {
     return contractEntityService.getContractById(id);
   }
+
   @Override
   public User findByUsername(@NonNull String username) {
     return userService.findByUsername(username);

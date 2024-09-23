@@ -5,12 +5,13 @@ import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ContractEntityServiceIF {
   @Transactional
   Contract save(@NonNull Contract contract);
-  Contract getContractById(@NonNull Long id);
+  Contract getContractById(@NonNull Long id) throws IOException;
   List<Contract> getContractsByAppUser(@NonNull AppUser appUser);
   List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser);
   List<Contract> getContractsByCoPartyId(@NonNull Long id);
