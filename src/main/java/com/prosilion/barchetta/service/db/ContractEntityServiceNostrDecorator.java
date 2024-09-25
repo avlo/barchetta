@@ -32,15 +32,15 @@ import java.util.List;
 @Slf4j
 public class ContractEntityServiceNostrDecorator implements ContractEntityServiceIF {
   private final ContractEntityServiceIF contractService;
-  private final WebSocketClientIF nostrWebSocketClient;
+  private final WebSocketClientIF webSocketClient;
   private final UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator;
 
   public ContractEntityServiceNostrDecorator(
       ContractEntityServiceIF contractService,
-      WebSocketClientIF nostrWebSocketClient,
+      WebSocketClientIF webSocketClient,
       UserServiceNostrDecoratorIF contractAppUserServiceNostrDecorator) {
     this.contractService = contractService;
-    this.nostrWebSocketClient = nostrWebSocketClient;
+    this.webSocketClient = webSocketClient;
     this.contractAppUserServiceNostrDecorator = contractAppUserServiceNostrDecorator;
   }
 
@@ -56,7 +56,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
     EventMessage eventMessage = new EventMessageFactory(event, userPubKeyAsSubscriptionId).create();
 
-    OkMessage okMessage = nostrWebSocketClient.send(eventMessage)
+    OkMessage okMessage = webSocketClient.send(eventMessage)
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
         .findFirst().get();
@@ -141,7 +141,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   private ClassifiedListingEvent reqClassifiedEventForPubKeyByEventId(String subscriberId, String eventId) throws IOException {
     String reqJson = createReqJson(subscriberId, eventId);
-    return nostrWebSocketClient.send(reqJson)
+    return webSocketClient.send(reqJson)
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> ((GenericEvent) eventMessage.getEvent()))
@@ -156,6 +156,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   private Contract convertToContract(ClassifiedListingEvent classifiedListingEvent) {
     Contract contract = new Contract();
+    contract.setNostrEventId(classifiedListingEvent.getId());
     contract.setNostrAppUserPubKey(classifiedListingEvent.getPubKey().toString());
     contract.setText(classifiedListingEvent.getClassifiedListing().getTitle());
     return contract;

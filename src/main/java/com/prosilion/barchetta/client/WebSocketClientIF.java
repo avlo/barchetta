@@ -1,6 +1,5 @@
 package com.prosilion.barchetta.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import nostr.event.BaseMessage;
 
 import java.io.IOException;
