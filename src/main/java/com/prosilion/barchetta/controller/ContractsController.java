@@ -7,6 +7,7 @@ import com.prosilion.barchetta.service.ControllerServiceIF;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -38,7 +39,7 @@ public class ContractsController {
   }
 
   @PostMapping("/create")
-  public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws JsonProcessingException {
+  public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws IOException, NostrException {
     controllerService.create(contract, controllerService.findByUsername(user.getUsername()).getId());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
@@ -72,14 +73,14 @@ public class ContractsController {
   }
 
   @PostMapping("/apply")
-  public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
+  public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws IOException, NostrException {
     controllerService.saveAsCounterParty(contract, controllerService.findByUsername(user.getUsername()));
     model.addAttribute(CONTRACTS_STR, controllerService.getAll());
     return "redirect:display_all";
   }
 
   @PostMapping("/vote")
-  public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws JsonProcessingException {
+  public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws IOException, NostrException {
     log.info("User [{}] voting on contract [{}]", user.getUsername(), contract);
     log.info("Contract id: [{}] ", contract.getId());
     log.info("Contract text: [{}] ", contract.getText());

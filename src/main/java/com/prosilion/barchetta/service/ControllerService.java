@@ -1,6 +1,5 @@
 package com.prosilion.barchetta.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.ContractStateEnum;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
@@ -11,6 +10,7 @@ import com.prosilion.presto.security.entity.AppUser;
 import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract create(@NonNull Contract contract, @NonNull Long userId) throws JsonProcessingException {
+  public Contract create(@NonNull Contract contract, @NonNull Long userId) throws IOException, NostrException {
     log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
     // TODO: check below contract doesn't already have existing different appuser ID
     User user = userService.findByUserId(userId);
@@ -62,7 +62,7 @@ public class ControllerService implements ControllerServiceIF {
 
   // TODO: remove this method when pubKey work is underway
   @Override
-  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user) {
+  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user) throws NostrException, IOException {
     User byUserId = userService.findByUserId(user.getId());
     setAliceBobPubKey(byUserId, contract);
     return save(contract);
@@ -83,7 +83,7 @@ public class ControllerService implements ControllerServiceIF {
     return userService.getRole(contract, user);
   }
 
-  private Contract create(@NonNull Contract contract) throws JsonProcessingException {
+  private Contract create(@NonNull Contract contract) throws IOException, NostrException {
     log.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
     Contract savedContract = save(contract);
     log.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
@@ -91,7 +91,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract save(@NonNull Contract contract) {
+  public Contract save(@NonNull Contract contract) throws NostrException, IOException {
 //            TODO: below time needs evolution
     contract.setAgreedCompletionTime(Calendar.getInstance().getTime());
 //            TODO: below time needs evolution

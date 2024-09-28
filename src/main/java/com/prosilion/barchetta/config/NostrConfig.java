@@ -29,11 +29,9 @@ public class NostrConfig {
   @Primary
   ContractEntityServiceIF contractServiceIF(
       ContractEntityService contractEntityService,
-      ReactiveWebSocketClient reactiveWebSocketClient,
-      UserServiceNostrDecoratorIF userServiceNostrDecoratorIF) {
+      ReactiveWebSocketClient reactiveWebSocketClient) {
     return new ContractEntityServiceNostrDecorator(
         contractEntityService,
-        reactiveWebSocketClient,
-        userServiceNostrDecoratorIF);
+        reactiveWebSocketClient);
   }
 }
