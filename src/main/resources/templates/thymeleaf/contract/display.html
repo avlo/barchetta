@@ -169,6 +169,11 @@
       <span th:if="${#fields.hasErrors('text')}" th:errors="${contract.text}"></span>
       <br>
 
+      <label>Payout</label>
+      <input type="number" th:field="${contract.payoutAmount}" id="payoutAmount" placeholder="payoutAmount">
+      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contract.payoutAmount}"></span>
+      <br>
+
       <label>Role:</label>
       <select name="creatorRole" th:field="${contract.creatorRole}">
         <option th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"

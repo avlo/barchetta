@@ -2,11 +2,13 @@ package com.prosilion.barchetta.model.entity;
 
 import lombok.Getter;
 
+@Getter
 public enum CreatorRoleEnum {
-  PAYER("Payer"),
-  PAYEE("Payee");
+  PAYER("payer"),
+  PAYEE("payee");
 
-  @Getter private final String creatorRoleType;
+  private final String creatorRoleType;
+
 
   CreatorRoleEnum(String creatorRoleType) {
     this.creatorRoleType = creatorRoleType;

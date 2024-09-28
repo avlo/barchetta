@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -18,20 +19,25 @@ public class Contract {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  private String nostrEventId;
-
-  private String nostrAppUserPubKey;
-  private String nostrCounterPartyPubKey;
-
-  private String text;
-  private Long payerStake, payeeStake, payoutAmount;
-  private Boolean completed;
-  private Date agreedCompletionTime;
-
-  private CreatorRoleEnum creatorRole;
-  private ContractStateEnum payerState;
-  private ContractStateEnum payeeState;
-
   private Long appUserId;
   private Long counterPartyId;
+
+  private String nostrClassifiedListingEventId; // done
+  private String nostrCalendarTimeBasedEventId;
+
+  private String nostrAppUserPubKey;  // done
+  private String nostrCounterPartyPubKey; // done, needs correctness confirmation
+
+  private String text; // done
+  private BigDecimal payerStake;
+  private BigDecimal payeeStake;
+  private BigDecimal payoutAmount; // done
+
+  private Boolean completed;
+  private Date agreedStartTime;
+  private Date agreedCompletionTime; // done
+
+  private CreatorRoleEnum creatorRole; // done
+  private ContractStateEnum payerState; // done
+  private ContractStateEnum payeeState; // done
 }

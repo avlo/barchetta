@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -91,6 +92,10 @@ public class ControllerService implements ControllerServiceIF {
 
   @Override
   public Contract save(@NonNull Contract contract) {
+//            TODO: below time needs evolution
+    contract.setAgreedCompletionTime(Calendar.getInstance().getTime());
+//            TODO: below time needs evolution
+    contract.setAgreedStartTime(Calendar.getInstance().getTime());
     return contractEntityService.save(contract);
   }
 
@@ -122,6 +127,8 @@ public class ControllerService implements ControllerServiceIF {
     contract.setAppUserId(id);
     contract.setPayerState(ContractStateEnum.APPROVE);
     contract.setPayeeState(ContractStateEnum.APPROVE);
+//            TODO: below time needs evolution
+    contract.setAgreedCompletionTime(Calendar.getInstance().getTime());
     return contract;
   }
 }
