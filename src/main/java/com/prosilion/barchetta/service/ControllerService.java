@@ -36,6 +36,12 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
+  public Contract create(@NonNull Contract contract, @NonNull String userName) throws IOException, NostrException {
+    log.info("Creating contract [{}], for userName [{}]", contract.getText(), userName);
+    return create(contract, findByUsername(userName).getId());
+  }
+
+  @Override
   public Contract create(@NonNull Contract contract, @NonNull Long userId) throws IOException, NostrException {
     log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
     // TODO: check below contract doesn't already have existing different appuser ID

@@ -40,7 +40,7 @@ public class ContractsController {
 
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws IOException, NostrException {
-    controllerService.create(contract, controllerService.findByUsername(user.getUsername()).getId());
+    controllerService.create(contract, user.getUsername());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }

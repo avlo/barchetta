@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ControllerServiceIF {
+  public Contract create(@NonNull Contract contract, @NonNull String userName) throws IOException, NostrException;
   Contract create(@NonNull Contract contract, @NonNull Long userId) throws IOException, NostrException;
   Contract getContractByContractId(@NonNull Long id) throws IOException;
   User findByUsername(@NonNull String username);
