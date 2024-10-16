@@ -22,7 +22,7 @@
     <h2.version>2.2.222</h2.version>
     <lombok.version>1.18.32</lombok.version>
     <nostr-java.version>0.6.1-SNAPSHOT</nostr-java.version>
-    <prestio.jpa.version>0.0.1-SNAPSHOT</prestio.jpa.version>
+    <presto.nostr.version>0.0.1-SNAPSHOT</presto.nostr.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
   </properties>
@@ -85,8 +85,8 @@
     </dependency>
     <dependency>
       <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>jpa</artifactId>
-      <version>${prestio.jpa.version}</version>
+      <artifactId>nostr</artifactId>
+      <version>${presto.nostr.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
