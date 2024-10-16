@@ -6,6 +6,7 @@ import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.user.UserServiceIF;
+import com.prosilion.presto.nostr.entity.NostrUser;
 import com.prosilion.presto.security.entity.AppUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,6 @@ import java.util.stream.Stream;
 @Service
 public class ControllerService implements ControllerServiceIF {
 
-  String ALICE_PUB_KEY = "111df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f";
-  String BOB_PUB_KEY = "222df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f";
-
   ContractEntityServiceIF contractEntityService;
   UserServiceIF userService;
 
@@ -35,41 +33,20 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract create(@NonNull Contract contract, @NonNull String userName) throws IOException, NostrException {
-    log.info("Creating contract [{}], for userName [{}]", contract.getText(), userName);
-    return create(contract, findByUsername(userName).getId());
-  }
-
-  @Override
-  public Contract create(@NonNull Contract contract, @NonNull Long userId) throws IOException, NostrException {
-    log.info("Creating contract [{}], for user userId [{}]", contract.getText(), userId);
+  public Contract create(@NonNull Contract contract, @NonNull NostrUser user) throws IOException, NostrException {
+    log.info("Creating contract [{}], for userName [{}]", contract.getText(), user.getUsername());
     // TODO: check below contract doesn't already have existing different appuser ID
-    User user = userService.findByUserId(userId);
-    contract.setAppUserId(user.getId());
-    setAliceBobPubKey(user, contract); // TODO: remove this call when pubKey work is underway
+    User foundUser = userService.findByUsername(user.getUsername());
+    contract.setAppUserId(foundUser.getId());
+    contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
     return create(contract);
   }
 
-  // TODO: below method when pubKey work is underway
-  private void setAliceBobPubKey(User user, Contract contract) {
-    if (user.getId().equals(1L)) {
-      contract.setNostrAppUserPubKey(ALICE_PUB_KEY);
-      user.setPubkey(ALICE_PUB_KEY);
-//      userService.update(user.convertToDto());
-      return;
-    }
-
-    contract.setNostrCounterPartyPubKey(BOB_PUB_KEY);
-    user.setPubkey(BOB_PUB_KEY);
-//    userService.update(user.convertToDto());
-  }
-
-  // TODO: remove this method when pubKey work is underway
   @Override
-  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull User user) throws NostrException, IOException {
-    User byUserId = userService.findByUserId(user.getId());
-    setAliceBobPubKey(byUserId, contract);
+  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull NostrUser user) throws NostrException, IOException {
+    User foundUser = userService.findByUsername(user.getUsername());
+    contract.setNostrCounterPartyPubKey(foundUser.getPubkey());
     return save(contract);
   }
 

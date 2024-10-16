@@ -39,7 +39,7 @@ public class ContractsController {
 
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal NostrUser user, @NonNull Contract contract, Model model) throws IOException, NostrException {
-    controllerService.create(contract, user.getUsername());
+    controllerService.create(contract, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }
@@ -73,7 +73,7 @@ public class ContractsController {
 
   @PostMapping("/apply")
   public String applyForContract(@AuthenticationPrincipal NostrUser user, Contract contract, Model model) throws IOException, NostrException {
-    controllerService.saveAsCounterParty(contract, controllerService.findByUsername(user.getUsername()));
+    controllerService.saveAsCounterParty(contract, user);
     model.addAttribute(CONTRACTS_STR, controllerService.getAll());
     return "redirect:display_all";
   }
