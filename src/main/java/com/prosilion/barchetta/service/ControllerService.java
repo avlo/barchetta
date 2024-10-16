@@ -7,7 +7,6 @@ import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.user.UserServiceIF;
 import com.prosilion.presto.security.entity.AppUser;
-import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -56,13 +55,13 @@ public class ControllerService implements ControllerServiceIF {
   private void setAliceBobPubKey(User user, Contract contract) {
     if (user.getId().equals(1L)) {
       contract.setNostrAppUserPubKey(ALICE_PUB_KEY);
-      user.setNostrPubKey(ALICE_PUB_KEY);
+      user.setPubkey(ALICE_PUB_KEY);
 //      userService.update(user.convertToDto());
       return;
     }
 
     contract.setNostrCounterPartyPubKey(BOB_PUB_KEY);
-    user.setNostrPubKey(BOB_PUB_KEY);
+    user.setPubkey(BOB_PUB_KEY);
 //    userService.update(user.convertToDto());
   }
 
@@ -85,7 +84,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public CreatorRoleEnum getRole(Contract contract, AuthUserDetails user) {
+  public CreatorRoleEnum getRole(Contract contract, User user) {
     return userService.getRole(contract, user);
   }
 

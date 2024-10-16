@@ -16,7 +16,9 @@ import lombok.Setter;
 @Embeddable
 @Entity
 public class User extends AppUser {
-  private String nostrPubKey;
+  private String username;
+  private String password;
+  private String pubkey;
 
   @Override
   public User getInstantiatedCustomAppUserType() {
@@ -30,7 +32,9 @@ public class User extends AppUser {
 
   public UserDto convertToDto() {
     UserDto userDto = new UserDto();
-    userDto.setNostrPubKey(nostrPubKey);
+    userDto.setName(username);
+    userDto.setPassword(password);
+    userDto.setPubkey(pubkey);
     return userDto;
   }
 }

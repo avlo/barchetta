@@ -5,8 +5,7 @@ import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.repository.UserRepository;
-import com.prosilion.presto.security.entity.AuthUserDetails;
-import com.prosilion.presto.security.service.AuthUserService;
+import com.prosilion.presto.nostr.service.NostrUserService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,12 @@ import java.util.Objects;
 @Service
 public class UserService implements UserServiceIF {
   private final UserRepository userRepository;
-  private final AuthUserService authUserService;
+  private final NostrUserService nostrUserService;
 
   @Autowired
-  public UserService(UserRepository userRepository, AuthUserService authUserService) {
+  public UserService(UserRepository userRepository, NostrUserService nostrUserService) {
     this.userRepository = userRepository;
-    this.authUserService = authUserService;
-  }
-
-  public User findByPubKey(@NonNull String pubKey) {
-    return userRepository.findByNostrPubKey(pubKey).get();
+    this.nostrUserService = nostrUserService;
   }
 
   @Override
@@ -37,7 +32,12 @@ public class UserService implements UserServiceIF {
 
   @Override
   public User findByUsername(@NonNull String username) {
-    return findByUserId(authUserService.getAppuserAuthuser(username).getId());
+    return findByUserId(nostrUserService.getAppuserAuthuser(username).getId());
+  }
+
+  @Override
+  public User findByPubKey(@NonNull String pubKey) {
+    return findByUserId(nostrUserService.findUserByPubkey(pubKey).getId());
   }
 
   @Override
@@ -52,7 +52,7 @@ public class UserService implements UserServiceIF {
   }
 
   @Override
-  public CreatorRoleEnum getRole(Contract contract, AuthUserDetails user) {
+  public CreatorRoleEnum getRole(Contract contract, User user) {
     return getRoleEnum(
         contract.getCreatorRole(),
         contract.getAppUserId(),

@@ -1,10 +1,9 @@
 package com.prosilion.barchetta.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.ControllerServiceIF;
-import com.prosilion.presto.security.entity.AuthUserDetails;
+import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -39,20 +38,20 @@ public class ContractsController {
   }
 
   @PostMapping("/create")
-  public String createContract(@AuthenticationPrincipal AuthUserDetails user, @NonNull Contract contract, Model model) throws IOException, NostrException {
+  public String createContract(@AuthenticationPrincipal NostrUser user, @NonNull Contract contract, Model model) throws IOException, NostrException {
     controllerService.create(contract, user.getUsername());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }
 
   @GetMapping("/display_all")
-  public String showUserContracts(@AuthenticationPrincipal AuthUserDetails user, Model model) {
+  public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display";
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(CONTRACT_STR, controllerService.getContractByContractId(contractId));
     model.addAttribute(USERNAME_STR, user.getUsername());
@@ -63,24 +62,24 @@ public class ContractsController {
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal AuthUserDetails user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching my contract: [{}]", contractId);
     Contract contract = controllerService.getContractByContractId(contractId);
     model.addAttribute(CONTRACT_STR, contract);
     model.addAttribute(USERNAME_STR, user.getUsername());
-    model.addAttribute(ROLE_STR, controllerService.getRole(contract, user));
+    model.addAttribute(ROLE_STR, controllerService.getRole(contract, controllerService.findByUsername(user.getUsername())));
     return "thymeleaf/contract/view_contract";
   }
 
   @PostMapping("/apply")
-  public String applyForContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws IOException, NostrException {
+  public String applyForContract(@AuthenticationPrincipal NostrUser user, Contract contract, Model model) throws IOException, NostrException {
     controllerService.saveAsCounterParty(contract, controllerService.findByUsername(user.getUsername()));
     model.addAttribute(CONTRACTS_STR, controllerService.getAll());
     return "redirect:display_all";
   }
 
   @PostMapping("/vote")
-  public String voteOnContract(@AuthenticationPrincipal AuthUserDetails user, Contract contract, Model model) throws IOException, NostrException {
+  public String voteOnContract(@AuthenticationPrincipal NostrUser user, Contract contract, Model model) throws IOException, NostrException {
     log.info("User [{}] voting on contract [{}]", user.getUsername(), contract);
     log.info("Contract id: [{}] ", contract.getId());
     log.info("Contract text: [{}] ", contract.getText());
@@ -90,7 +89,7 @@ public class ContractsController {
     return "redirect:display_all";
   }
 
-  private void setCanonicalModelAttributes(@NonNull AuthUserDetails user, @NonNull Model model) {
+  private void setCanonicalModelAttributes(@NonNull NostrUser user, @NonNull Model model) {
     User contractAppUser = controllerService.findByUsername(user.getUsername());
     model.addAttribute(USER_CONTRACTS_STR, controllerService.getAllContractsFor(contractAppUser));
     model.addAttribute(OPEN_CONTRACTS_STR, controllerService.getOpenContractsFor(contractAppUser));

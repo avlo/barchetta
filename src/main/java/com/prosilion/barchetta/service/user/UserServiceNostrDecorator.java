@@ -4,7 +4,6 @@ import com.prosilion.barchetta.model.dto.UserDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
-import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +37,7 @@ public class UserServiceNostrDecorator implements UserServiceNostrDecoratorIF {
   }
 
   @Override
-  public CreatorRoleEnum getRole(Contract contract, AuthUserDetails user) {
+  public CreatorRoleEnum getRole(Contract contract, User user) {
     return userService.getRole(contract, user);
   }
 }

@@ -12,10 +12,14 @@ import lombok.Setter;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class UserDto extends AppUserDto {
-  private String nostrPubKey;
+  private String name;
+  private String password;
+  private String pubkey;
   public User convertToUser() {
     User user = new User();
-    user.setNostrPubKey(nostrPubKey);
+    user.setUsername(name);
+    user.setPassword(password);
+    user.setPubkey(pubkey);
     return user;
   }
 }

@@ -4,7 +4,6 @@ import com.prosilion.barchetta.model.dto.UserDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
-import com.prosilion.presto.security.entity.AuthUserDetails;
 import lombok.NonNull;
 
 public interface UserServiceIF {
@@ -12,5 +11,5 @@ public interface UserServiceIF {
   User findByUsername(@NonNull String username);
   User findByPubKey(@NonNull String pubKey);
   UserDto update(@NonNull UserDto userDto);
-  CreatorRoleEnum getRole(Contract contract, AuthUserDetails user);
+  CreatorRoleEnum getRole(Contract contract, User user);
 }

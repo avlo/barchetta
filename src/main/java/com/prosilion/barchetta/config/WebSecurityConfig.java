@@ -1,9 +1,7 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.presto.JpaSecurityConfig;
-import com.prosilion.presto.jpa.controller.JpaAuthController;
-import com.prosilion.presto.web.controller.AuthController;
-import com.prosilion.presto.web.controller.UsersController;
+import com.prosilion.presto.NostrSecurityConfig;
+import com.prosilion.presto.nostr.controller.NostrAuthController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +15,9 @@ import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@ComponentScan(basePackages = "com.prosilion.presto.*")
+@ComponentScan(basePackages = {"com.prosilion.presto.nostr.*"})
 // TODO: below should not be necessary, revisit
-@Import({JpaSecurityConfig.class, UsersController.class, JpaAuthController.class, AuthController.class})
+@Import({NostrSecurityConfig.class, NostrAuthController.class})
 public class WebSecurityConfig {
 
   @Bean
