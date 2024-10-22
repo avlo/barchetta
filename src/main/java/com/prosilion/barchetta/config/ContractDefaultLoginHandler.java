@@ -11,7 +11,7 @@ import java.io.IOException;
 
 // TODO: refactor below + application.properties key=value into cad3 framework
 public class ContractDefaultLoginHandler implements AuthenticationSuccessHandler {
-  @Value("${scd.login.url.successful}")
+  @Value("${barchetta.login.url.successful}")
   private String successUrl;
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {

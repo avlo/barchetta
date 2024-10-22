@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.barchetta.client.ReactiveWebSocketClient;
+import com.prosilion.barchetta.client.StandardWebSocketClient;
 import com.prosilion.barchetta.service.db.ContractEntityService;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecorator;
@@ -25,13 +25,24 @@ public class NostrConfig {
     return new UserServiceNostrDecorator(userService);
   }
 
+//  TODO: below ReactiveWebSocketClient unexpectedly closes cnxn after send(), needs investigation
+//  @Bean
+//  @Primary
+//  ContractEntityServiceIF contractServiceIF(
+//      ContractEntityService contractEntityService,
+//      ReactiveWebSocketClient reactiveWebSocketClient) {
+//    return new ContractEntityServiceNostrDecorator(
+//        contractEntityService,
+//        reactiveWebSocketClient);
+//  }
+
   @Bean
   @Primary
   ContractEntityServiceIF contractServiceIF(
       ContractEntityService contractEntityService,
-      ReactiveWebSocketClient reactiveWebSocketClient) {
+      StandardWebSocketClient standardWebSocketClient) {
     return new ContractEntityServiceNostrDecorator(
         contractEntityService,
-        reactiveWebSocketClient);
+        standardWebSocketClient);
   }
 }
