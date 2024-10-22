@@ -8,6 +8,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,6 +38,7 @@ public class ContractsController {
     this.controllerService = contractAppUserService;
   }
 
+  @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal NostrUser user, @NonNull Contract contract, Model model) throws IOException, NostrException {
     controllerService.create(contract, user);
