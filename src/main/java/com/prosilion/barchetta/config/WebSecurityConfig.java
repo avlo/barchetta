@@ -32,10 +32,15 @@ public class WebSecurityConfig {
 
   @Bean
   public SecurityFilterChain scdFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
-    http.authorizeHttpRequests(authorize -> authorize
-        .requestMatchers(
-            mvc.pattern("/contract/**")).hasRole("USER")
-    );
+    http
+//        TODO: below should redirect http requests to https, but does not.  revisit
+        .requiresChannel(channel -> channel
+            .anyRequest().requiresSecure()
+        ).authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(mvc.pattern("/")).permitAll()
+            .requestMatchers(mvc.pattern("/index.html")).permitAll()
+            .requestMatchers(mvc.pattern("/contract/**")).hasRole("USER")
+        );
     return http.build();
   }
 }

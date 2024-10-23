@@ -38,6 +38,11 @@ public class ContractsController {
     this.controllerService = contractAppUserService;
   }
 
+  @GetMapping({"/index.html", "/"})
+  public String redirectIndex() {
+    return "forward:/register";
+  }
+
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal NostrUser user, @NonNull Contract contract, Model model) throws IOException, NostrException {
