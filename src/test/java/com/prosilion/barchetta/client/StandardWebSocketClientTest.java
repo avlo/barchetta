@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StandardWebSocketClientTest {
   private static final String PRV_KEY_VALUE = "23c011c4c02de9aa98d48c3646c70bb0e7ae30bdae1dfed4d251cbceadaeeb7b";
-  private static final String RELAY_URI = "wss://127.0.0.1:5555";
+  private static final String RELAY_URI = "wss://localhost:5555";
   private static final String SUBSCRIBER_ID = "NostrWebSocketClientTest-subscriber_001";
 
   public static final String ID = "299ab85049a7923e9cd82329c0fa489ca6fd6d21feeeac33543b1237e14a9e07";

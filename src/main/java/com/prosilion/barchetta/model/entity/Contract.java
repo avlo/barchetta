@@ -87,7 +87,7 @@ public class Contract {
         new PubKeyTag(
             new PublicKey(
                 getNostrAppUserPubKey()),
-            "wss://127.0.0.1:5555",
+            "wss://localhost:5555",
             getCreatorRole().getCreatorRoleType()));
 
 //    TODO: needs design validation- give current/enclosing method is called by save(), should below always be done for:
