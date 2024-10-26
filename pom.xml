@@ -12,15 +12,14 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.4</version>
   </parent>
 
   <properties>
     <java.version>22</java.version>
-    <spring-boot.version>3.3.1</spring-boot.version>
     <commons-io.version>2.13.0</commons-io.version>
     <guava.version>32.1.2-jre</guava.version>
-    <h2.version>2.2.222</h2.version>
+    <h2.version>2.2.224</h2.version>
     <lombok.version>1.18.32</lombok.version>
     <nostr-java.version>0.6.1-SNAPSHOT</nostr-java.version>
     <presto.nostr.version>0.0.1-SNAPSHOT</presto.nostr.version>
@@ -57,12 +56,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-websocket</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -72,37 +71,50 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webflux</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>com.prosilion.presto.starter</groupId>
       <artifactId>nostr</artifactId>
       <version>${presto.nostr.version}</version>
     </dependency>
+
+<!--    TODO: below two dependencies might be better integrated into above nostr starter?-->
+    <dependency>
+      <groupId>com.prosilion.presto.starter</groupId>
+      <artifactId>core</artifactId>
+      <version>${presto.nostr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.prosilion.presto.starter</groupId>
+      <artifactId>web</artifactId>
+      <version>${presto.nostr.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.thymeleaf.extras</groupId>
@@ -132,7 +144,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>${spring-boot.version}</version>
+      <version>${parent.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -143,7 +155,7 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${spring-boot.version}</version>
+          <version>${parent.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
