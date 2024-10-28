@@ -44,6 +44,12 @@
       <version>${nostr-java.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.prosilion.presto.starter</groupId>
+      <artifactId>nostr</artifactId>
+      <version>${presto.nostr.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
@@ -92,23 +98,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
       <version>${parent.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>nostr</artifactId>
-      <version>${presto.nostr.version}</version>
-    </dependency>
-
-<!--    TODO: below two dependencies might be better integrated into above nostr starter?-->
-    <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>core</artifactId>
-      <version>${presto.nostr.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>web</artifactId>
-      <version>${presto.nostr.version}</version>
     </dependency>
 
     <dependency>
