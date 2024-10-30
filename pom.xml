@@ -20,11 +20,14 @@
     <commons-io.version>2.13.0</commons-io.version>
     <guava.version>32.1.2-jre</guava.version>
     <h2.version>2.2.224</h2.version>
+    <mysql-connector-j.version>9.1.0</mysql-connector-j.version>
     <lombok.version>1.18.32</lombok.version>
     <nostr-java.version>0.6.1-SNAPSHOT</nostr-java.version>
     <presto.nostr.version>0.0.1-SNAPSHOT</presto.nostr.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
   </properties>
 
   <dependencyManagement>
@@ -110,11 +113,41 @@
       <artifactId>thymeleaf-extras-springsecurity6</artifactId>
       <version>${thymeleaf-extras-springsecurity6.version}</version>
     </dependency>
+
+    <!--    <dependency>-->
+    <!--      <groupId>com.prosilion.presto.starter</groupId>-->
+    <!--      <artifactId>h2db</artifactId>-->
+    <!--      <version>${project.version}</version>-->
+    <!--      <scope>runtime</scope>-->
+    <!--    </dependency>-->
+    <!--    <dependency>-->
+    <!--      <groupId>com.h2database</groupId>-->
+    <!--      <artifactId>h2</artifactId>-->
+    <!--      <version>${h2.version}</version>-->
+    <!--      <scope>runtime</scope>-->
+    <!--    </dependency>-->
+
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>${h2.version}</version>
+      <groupId>com.prosilion.presto.starter</groupId>
+      <artifactId>mysql</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>${mysql-connector-j.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-docker-compose</artifactId>
+      <version>${parent.version}</version>
+      <!--      <optional>true</optional>-->
+      <scope>runtime</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
@@ -139,19 +172,35 @@
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${parent.version}</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <!--  TODO: below buildpacks configuration appears to (currently) be necessary for JDK22, ref: -->
+        <!--  https://github.com/paketo-buildpacks/bellsoft-liberica/issues/565  -->
+        <configuration>
+          <image>
+            <env>
+              <BP_JVM_VERSION>22</BP_JVM_VERSION>
+            </env>
+            <buildpacks>
+              <buildpack>paketobuildpacks/azul-zulu</buildpack>
+              <buildpack>urn:cnb:builder:paketo-buildpacks/syft</buildpack>
+              <buildpack>urn:cnb:builder:paketo-buildpacks/executable-jar</buildpack>
+              <buildpack>urn:cnb:builder:paketo-buildpacks/spring-boot</buildpack>
+            </buildpacks>
+            <builder>paketobuildpacks/builder-jammy-base</builder>
+          </image>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
       </plugin>
     </plugins>
   </build>
