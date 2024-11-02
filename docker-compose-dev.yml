@@ -1,11 +1,11 @@
 services:
   barchetta-db:
-#    volumes:
-#      - "./schema-nostr-mysql.sql:/docker-entrypoint-initdb.d/1.sql"
+    volumes:
+      - ./src/main/resources/schema-nostr-mysql.sql:/docker-entrypoint-initdb.d/1.sql
     container_name: barchetta-mysqldb
     image: mysql:9.1.0
     ports:
-      - "3307:3307"
+      - "3326:3326"
     labels:
       org.springframework.boot.service-connection: mysql-servicecnxn-barchetta
     environment:
@@ -14,6 +14,7 @@ services:
       MYSQL_USER: mysqluser
       MYSQL_PASSWORD: mysqluserpass
       MYSQL_ROOT_PASSWORD: mysqlrootuserpass
+      MYSQL_TCP_PORT: 3326
     networks:
       docker-network:
     healthcheck:
@@ -26,16 +27,20 @@ services:
     image: barchetta:0.0.1-SNAPSHOT
     ports:
       - "8080:8080"
+      - "5555:5555"
       - "443:443"
     depends_on:
       barchetta-db:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://barchetta-mysqldb:3307/barchetta
+      SPRING_DATASOURCE_URL: jdbc:mysql://barchetta-mysqldb:3326/barchetta
 #      set below spring datasource parameters and credentials as desired
       SPRING_DATASOURCE_USERNAME: mysqluser
       SPRING_DATASOURCE_PASSWORD: mysqluserpass
+      SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_SQL_INIT_MODE: always
     networks:
       docker-network:
 volumes:
