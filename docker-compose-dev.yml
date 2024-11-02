@@ -24,7 +24,7 @@ services:
       timeout: 30s
   barchetta:
     container_name: barchetta-app
-    image: barchetta:0.0.1-SNAPSHOT
+    image: barchetta:0.0.2-SNAPSHOT
     ports:
       - "8080:8080"
       - "5555:5555"

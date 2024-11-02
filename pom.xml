@@ -4,7 +4,7 @@
 
   <groupId>com.prosilion</groupId>
   <artifactId>barchetta</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>barchetta</name>
   <description>Smart-Contract Negotation Framework</description>
   <packaging>war</packaging>
@@ -23,7 +23,7 @@
     <mysql-connector-j.version>9.1.0</mysql-connector-j.version>
     <lombok.version>1.18.32</lombok.version>
     <nostr-java.version>0.6.1-SNAPSHOT</nostr-java.version>
-    <presto.nostr.version>0.0.1-SNAPSHOT</presto.nostr.version>
+    <presto.nostr.version>0.0.2-SNAPSHOT</presto.nostr.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
