@@ -56,7 +56,7 @@ Show existing users (once Authenticated):
 
 Show available contracts / Engage contract:
 
-    localhost:8080/contract/display
+    localhost:8080/contract/display_all
 
 ## Viewing DB contents
 

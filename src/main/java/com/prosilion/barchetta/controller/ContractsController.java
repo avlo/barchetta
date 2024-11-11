@@ -48,13 +48,13 @@ public class ContractsController {
   public String createContract(@AuthenticationPrincipal NostrUser user, @NonNull Contract contract, Model model) throws IOException, NostrException {
     controllerService.create(contract, user);
     setCanonicalModelAttributes(user, model);
-    return "thymeleaf/contract/display";
+    return "thymeleaf/contract/display_all";
   }
 
   @GetMapping("/display_all")
   public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
     setCanonicalModelAttributes(user, model);
-    return "thymeleaf/contract/display";
+    return "thymeleaf/contract/display_all";
   }
 
   @GetMapping("/display_contract/{id}")
@@ -65,7 +65,7 @@ public class ContractsController {
     model.addAttribute(COUNTER_PARTY_ID_STR, controllerService.findByUsername(user.getUsername()).getId());
     log.info("CounterPartyId: [{}]", controllerService.findByUsername(user.getUsername()).getId());
     log.info("User for potential contract: {}", user.getUsername());
-    return "thymeleaf/contract/preview_contract";
+    return "thymeleaf/contract/contract_application_form";
   }
 
   @GetMapping("/my_contract/{id}")
