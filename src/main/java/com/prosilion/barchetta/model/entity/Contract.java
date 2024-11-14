@@ -1,29 +1,22 @@
 package com.prosilion.barchetta.model.entity;
 
+import com.prosilion.barchetta.model.dto.CalendarTimeBasedEventDto;
+import com.prosilion.barchetta.model.dto.ClassifiedListingEventDto;
+import com.prosilion.barchetta.model.dto.ContractDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import nostr.base.PublicKey;
-import nostr.event.BaseTag;
-import nostr.event.Kind;
-import nostr.event.impl.CalendarContent;
 import nostr.event.impl.CalendarTimeBasedEvent;
-import nostr.event.impl.ClassifiedListing;
 import nostr.event.impl.ClassifiedListingEvent;
-import nostr.event.impl.GenericTag;
-import nostr.event.tag.IdentifierTag;
-import nostr.event.tag.PriceTag;
 import nostr.event.tag.PubKeyTag;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Getter
 @Setter
@@ -36,90 +29,65 @@ public class Contract {
   private Long appUserId;
   private Long counterPartyId;
 
-  private String nostrClassifiedListingEventId; // done
+  private String nostrClassifiedListingEventId;
   private String nostrCalendarTimeBasedEventId;
 
-  private String nostrAppUserPubKey;  // done
-  private String nostrCounterPartyPubKey; // done, needs correctness confirmation
+  private String nostrAppUserPubKey;
+  private String nostrCounterPartyPubKey;
 
-  private String text; // done
-  private BigDecimal payerStake;
-  private BigDecimal payeeStake;
-  private BigDecimal payoutAmount; // done
+  @Transient
+  private ClassifiedListingEvent classifiedListingEvent;
+  @Transient
+  private CalendarTimeBasedEvent calendarTimeBasedEvent;
 
-  private Boolean completed;
-  private Date agreedStartTime;
-  private Date agreedCompletionTime; // done
+  public Contract(ClassifiedListingEvent classifiedListingEvent, CalendarTimeBasedEvent calendarTimeBasedEvent) {
+    this.classifiedListingEvent = classifiedListingEvent;
+    this.calendarTimeBasedEvent = calendarTimeBasedEvent;
 
-  private CreatorRoleEnum creatorRole; // done
-  private ContractStateEnum payerState; // done
-  private ContractStateEnum payeeState; // done
-
-  public ClassifiedListingEvent constructClassifiedListingEvent() {
-    ArrayList<BaseTag> baseTags = new ArrayList<>();
-    baseTags.add(GenericTag.create("payer_state", 52, String.valueOf(getPayerState())));
-    baseTags.add(GenericTag.create("payee_state", 52, String.valueOf(getPayeeState())));
-    return new ClassifiedListingEvent(
-        new PublicKey(getNostrAppUserPubKey()),
-        Kind.CLASSIFIED_LISTING,
-        baseTags,
-        "CLASSIFIED LISTING CONTENT",
-        ClassifiedListing.builder(
-                getText(),
-                "CLASSIFIED LISTING SUMMARY",
-                new PriceTag(getPayoutAmount(), "btc", "once"))
-            .build());
+    this.nostrClassifiedListingEventId = classifiedListingEvent.getId();
+    this.nostrCalendarTimeBasedEventId = calendarTimeBasedEvent.getId();
+    this.nostrAppUserPubKey = classifiedListingEvent.getPubKey().toHexString();
+    this.nostrCounterPartyPubKey = classifiedListingEvent.getPubKey().toHexString();
   }
 
-  public CalendarTimeBasedEvent constructCalendarTimeBasedEvent() {
-    CalendarContent calendarContent = CalendarContent.builder(
-            new IdentifierTag("UUID-NEEDS-COMPLETION-001"),
-            getText(),
-            getAgreedStartTime().getTime())
-        .build();
+  public String getText() {
+    return classifiedListingEvent.getContent();
+  }
 
-//    TODO: needs design validation- give current/enclosing method is called by save(), should below always be done for:
-//        a) appUser?
-//    TODO: explicit add() used since contract *SHOULD* have creator's pubkey
-    List<PubKeyTag> pubKeyTags = new ArrayList<>();
+  public CreatorRoleEnum getCreatorRole() {
+    String role = calendarTimeBasedEvent.getTags().stream()
+        .filter(tagsMap -> tagsMap.getCode().equals("p"))
+        .map(PubKeyTag.class::cast)
+        .filter(pubKeyTag -> pubKeyTag.getPublicKey().toHexString().equals(nostrAppUserPubKey))
+        .map(PubKeyTag::getPetName).findFirst().orElseThrow();
+    return CreatorRoleEnum.valueOf(role.toUpperCase());
+  }
 
-    pubKeyTags.add(
-        new PubKeyTag(
-            new PublicKey(
-                getNostrAppUserPubKey()),
-            "wss://localhost:5555",
-            getCreatorRole().getCreatorRoleType()));
-
-//    TODO: needs design validation- give current/enclosing method is called by save(), should below always be done for:
-//        a) counterParty?
-    Optional
-        .ofNullable(
-            getNostrCounterPartyPubKey())
-        .ifPresent(counterPartyPubKey -> pubKeyTags.add(
-            new PubKeyTag(new PublicKey(counterPartyPubKey))
-        ));
-
-    calendarContent.setParticipantPubKeys(pubKeyTags);
-
-//    TODO: POC design, needs revisit
-    ArrayList<BaseTag> baseTags = new ArrayList<>();
-    Optional
-        .ofNullable(
-//            TODO: below time needs evolution
-            getAgreedCompletionTime())
-        .ifPresent(aDate ->
-            baseTags.add(
-                GenericTag.create(
-                    "end",
-                    52,
-                    String.valueOf(aDate.getTime()))));
-
-    CalendarTimeBasedEvent calendarTimeBasedEvent = new CalendarTimeBasedEvent(
-        new PublicKey(getNostrAppUserPubKey()),
-        baseTags,
-        "CALENDAR-EVENT CONTENT",
-        calendarContent
+  public ContractDto convertToDto() {
+    ClassifiedListingEventDto classifiedListingEventDto = new ClassifiedListingEventDto(
+        classifiedListingEvent.getId(),
+        classifiedListingEvent.getPubKey().toHexString(),
+        classifiedListingEvent.getKind(),
+        new Date(classifiedListingEvent.getCreatedAt()),
+        classifiedListingEvent.getContent(),
+// TODO: proper tags
+//        classifiedListingEvent.getTags(),
+        new ArrayList<>(),
+        classifiedListingEvent.getSignature().toString()
     );
-    return calendarTimeBasedEvent;
+
+    CalendarTimeBasedEventDto calendarTimeBasedEventDto = new CalendarTimeBasedEventDto(
+        calendarTimeBasedEvent.getId(),
+        calendarTimeBasedEvent.getPubKey().toHexString(),
+        calendarTimeBasedEvent.getKind(),
+        new Date(calendarTimeBasedEvent.getCreatedAt()),
+        calendarTimeBasedEvent.getContent(),
+// TODO: proper tags
+//        calendarTimeBasedEvent.getTags(),
+        new ArrayList<>(),
+        calendarTimeBasedEvent.getSignature().toString()
+    );
+
+    return new ContractDto(classifiedListingEventDto, calendarTimeBasedEventDto);
   }
 }

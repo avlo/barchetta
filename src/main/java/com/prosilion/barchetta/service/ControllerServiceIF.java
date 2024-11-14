@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.service;
 
+import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ControllerServiceIF {
-  Contract create(@NonNull Contract contract, @NonNull NostrUser user) throws IOException, NostrException;
+  Contract createContract(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException;
   Contract getContractByContractId(@NonNull Long id) throws IOException;
   User findByUsername(@NonNull String username);
   CreatorRoleEnum getRole(Contract contract, User user);
@@ -21,5 +22,5 @@ public interface ControllerServiceIF {
   List<Contract> getAll();
   List<Contract> getAllContractsFor(@NonNull AppUser appUser);
   List<Contract> getOpenContractsFor(@NonNull AppUser appUser);
-  Contract constructContract(AppUser appUser);
+  ContractDto constructContract(AppUser appUser);
 }

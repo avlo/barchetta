@@ -1,7 +1,9 @@
 package com.prosilion.barchetta.service;
 
+import com.prosilion.barchetta.model.dto.CalendarTimeBasedEventDto;
+import com.prosilion.barchetta.model.dto.ClassifiedListingEventDto;
+import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.model.entity.ContractStateEnum;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
@@ -15,14 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class ControllerService implements ControllerServiceIF {
-
   ContractEntityServiceIF contractEntityService;
   UserServiceIF userService;
 
@@ -33,10 +33,10 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract create(@NonNull Contract contract, @NonNull NostrUser user) throws IOException, NostrException {
-    log.info("Creating contract [{}], for userName [{}]", contract.getText(), user.getUsername());
+  public Contract createContract(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException {
     // TODO: check below contract doesn't already have existing different appuser ID
     User foundUser = userService.findByUsername(user.getUsername());
+    Contract contract = contractDto.convertToEntity();
     contract.setAppUserId(foundUser.getId());
     contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
@@ -74,10 +74,6 @@ public class ControllerService implements ControllerServiceIF {
 
   @Override
   public Contract save(@NonNull Contract contract) throws NostrException, IOException {
-//            TODO: below time needs evolution
-    contract.setAgreedCompletionTime(Calendar.getInstance().getTime());
-//            TODO: below time needs evolution
-    contract.setAgreedStartTime(Calendar.getInstance().getTime());
     return contractEntityService.save(contract);
   }
 
@@ -100,17 +96,10 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract constructContract(AppUser appUser) {
-    return constructContract(appUser.getId());
-  }
-
-  private Contract constructContract(@NonNull Long id) {
-    Contract contract = new Contract();
-    contract.setAppUserId(id);
-    contract.setPayerState(ContractStateEnum.APPROVE);
-    contract.setPayeeState(ContractStateEnum.APPROVE);
-//            TODO: below time needs evolution
-    contract.setAgreedCompletionTime(Calendar.getInstance().getTime());
-    return contract;
+  public ContractDto constructContract(AppUser appUser) {
+    return new ContractDto(
+        new ClassifiedListingEventDto(),
+        new CalendarTimeBasedEventDto()
+    );
   }
 }

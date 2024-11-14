@@ -1,6 +1,7 @@
 package com.prosilion.barchetta.model.dto;
 
 import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.barchetta.model.entity.ContractOld;
 import com.prosilion.barchetta.model.entity.ContractStateEnum;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import lombok.NonNull;
@@ -16,8 +17,8 @@ import java.util.Optional;
 
 public class ContractFactory {
 
-  public static Contract convertToContract(@NonNull ClassifiedListingEvent classifiedListingEvent, @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent) {
-    Contract contract = new Contract();
+  public static ContractOld convertToContract(@NonNull ClassifiedListingEvent classifiedListingEvent, @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent) {
+    ContractOld contract = new ContractOld();
 
     // some contract attributes come from classifiedListingEvent...
     contract.setNostrClassifiedListingEventId(classifiedListingEvent.getId());

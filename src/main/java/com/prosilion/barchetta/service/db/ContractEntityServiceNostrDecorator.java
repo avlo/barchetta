@@ -1,7 +1,6 @@
 package com.prosilion.barchetta.service.db;
 
 import com.prosilion.barchetta.client.WebSocketClientIF;
-import com.prosilion.barchetta.model.dto.ContractFactory;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
@@ -17,7 +16,6 @@ import nostr.event.json.codec.BaseMessageDecoder;
 import nostr.event.json.codec.GenericEventDecoder;
 import nostr.event.message.EventMessage;
 import nostr.event.message.OkMessage;
-import nostr.id.Identity;
 import nostr.util.NostrException;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,12 +36,8 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   @Override
   public Contract save(@NonNull Contract contract) throws IOException, NostrException {
     log.info("saving contract {}", contract);
-    ClassifiedListingEvent classifiedListingEvent = contract.constructClassifiedListingEvent();
-    CalendarTimeBasedEvent calendarTimeBasedEvent = contract.constructCalendarTimeBasedEvent();
-
-    Identity identity = Identity.generateRandomIdentity();
-    classifiedListingEvent.setSignature(identity.sign(classifiedListingEvent));
-    calendarTimeBasedEvent.setSignature(identity.sign(calendarTimeBasedEvent));
+    ClassifiedListingEvent classifiedListingEvent = contract.getClassifiedListingEvent();
+    CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
     OkMessage okMessageClassifiedListing = sendRequest(
         new EventMessageFactory(classifiedListingEvent, contract.getNostrAppUserPubKey()).create()
@@ -55,8 +49,6 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     if (!okMessageClassifiedListing.getFlag() || !okMessageCalendarTimeBasedEvent.getFlag())
       throw new NostrException("failed OK from relay");
 
-    contract.setNostrClassifiedListingEventId(classifiedListingEvent.getId());
-    contract.setNostrCalendarTimeBasedEventId(calendarTimeBasedEvent.getId());
     return contractService.save(contract);
   }
 
@@ -73,13 +65,19 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   @Override
   public Contract getContractById(@NonNull Long id) {
     Contract contractByDbId = contractService.getContractById(id);
-    return ContractFactory.convertToContract(
-        request(
-            contractByDbId.getNostrClassifiedListingEventId(),
-            ClassifiedListingEvent.class),
-        request(
-            contractByDbId.getNostrCalendarTimeBasedEventId(),
-            CalendarTimeBasedEvent.class));
+
+    ClassifiedListingEvent classifiedListingEvent = request(
+        contractByDbId.getNostrClassifiedListingEventId(),
+        ClassifiedListingEvent.class);
+
+    CalendarTimeBasedEvent calendarTimeBasedEvent = request(
+        contractByDbId.getNostrCalendarTimeBasedEventId(),
+        CalendarTimeBasedEvent.class);
+
+    contractByDbId.setClassifiedListingEvent(classifiedListingEvent);
+    contractByDbId.setCalendarTimeBasedEvent(calendarTimeBasedEvent);
+
+    return contractByDbId;
   }
 
   @Override
