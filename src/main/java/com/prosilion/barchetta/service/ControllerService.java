@@ -12,6 +12,8 @@ import com.prosilion.presto.nostr.entity.NostrUser;
 import com.prosilion.presto.security.entity.AppUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import nostr.event.tag.PriceTag;
+import nostr.event.tag.PubKeyTag;
 import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -98,6 +100,8 @@ public class ControllerService implements ControllerServiceIF {
   @Override
   public ContractDto constructContract(AppUser appUser) {
     return new ContractDto(
+        new PubKeyTag(),
+        new PriceTag(),
         new ClassifiedListingEventDto(),
         new CalendarTimeBasedEventDto()
     );

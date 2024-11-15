@@ -11,10 +11,13 @@ import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nostr.base.PublicKey;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.tag.PriceTag;
 import nostr.event.tag.PubKeyTag;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -88,6 +91,28 @@ public class Contract {
         calendarTimeBasedEvent.getSignature().toString()
     );
 
-    return new ContractDto(classifiedListingEventDto, calendarTimeBasedEventDto);
+    String role = calendarTimeBasedEvent.getTags().stream()
+        .filter(tagsMap -> tagsMap.getCode().equals("p"))
+        .map(PubKeyTag.class::cast)
+        .filter(pubKeyTag -> pubKeyTag.getPublicKey().toHexString().equals(nostrAppUserPubKey))
+        .map(PubKeyTag::getPetName).findFirst().orElseThrow();
+
+    BigDecimal price = calendarTimeBasedEvent.getTags().stream()
+        .filter(tagsMap -> tagsMap.getCode().equals("price"))
+        .map(PriceTag.class::cast)
+        .map(PriceTag::getNumber).findFirst().orElseThrow();
+
+    return new ContractDto(
+        new PubKeyTag(
+            new PublicKey(nostrAppUserPubKey),
+            "ws://localhost:555",
+            role),
+        new PriceTag(
+            price,
+            "BTC",
+            "1"),
+        classifiedListingEventDto,
+        calendarTimeBasedEventDto
+    );
   }
 }

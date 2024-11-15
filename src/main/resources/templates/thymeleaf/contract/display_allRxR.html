@@ -165,17 +165,20 @@
     <h4>Create Contract</h4>
     <form action="#" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
       <label>Contract Text</label>
-      <input type="text" th:field="${contractDto.classifiedListingEventDto.content}" id="text" placeholder="text">
-      <span th:if="${#fields.hasErrors('text')}" th:errors="${contractDto.classifiedListingEventDto.content}"></span>
+      <input type="content" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
+             placeholder="content">
+      <!--      TODO: re-add error check below, currently failing-->
+      <!--      <span th:if="${#fields.hasErrors('contractDto.classifiedListingEventDto.content')}" th:errors="${contractDto.classifiedListingEventDto.content}"></span>-->
       <br>
 
       <label>Payout</label>
-      <input type="number" th:field="${contractDto.classifiedListingEventDto.tags.get(4).get(1)}" id="payoutAmount" placeholder="payoutAmount">
-      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contractDto.classifiedListingEventDto.tags.get(4).get(1)}"></span>
+      <input type="number" th:field="${contractDto.priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
+      <!--      TODO: re-add error check below, currently failing-->
+<!--      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contractDto.priceTag.number}"></span>-->
       <br>
 
       <label>Role:</label>
-      <select name="creatorRole" th:field="${contractDto.calendarTimeBasedEventDto.tags.get(7).get(3)}">
+      <select name="creatorRole" th:field="${contractDto.pubKeyTag.petName}">
         <option th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>
