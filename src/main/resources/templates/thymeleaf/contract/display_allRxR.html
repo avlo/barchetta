@@ -5,6 +5,8 @@
   <title>Contracts</title>
   <link rel="stylesheet" th:href="@{/css/simple.css}"/>
   <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="/js/nip-99.js"></script>
 </head>
 <body>
 <header>Contracts</header>
@@ -163,28 +165,33 @@
 
   <section>
     <h4>Create Contract</h4>
-    <form action="#" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
-      <label>Contract Text</label>
-      <input type="content" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
+    <form>
+      <input type="hidden" th:field="${contractDto.calendarTimeBasedEventDto}" id="ctbEventDto">
+      <input type="hidden" th:field="${contractDto.classifiedListingEventDto}" id="clEventDto">
+
+      <label for="content">Contract Text</label>
+      <input type="text" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
              placeholder="content">
       <!--      TODO: re-add error check below, currently failing-->
       <!--      <span th:if="${#fields.hasErrors('contractDto.classifiedListingEventDto.content')}" th:errors="${contractDto.classifiedListingEventDto.content}"></span>-->
       <br>
 
-      <label>Payout</label>
+      <label for="payoutAmount">Payout</label>
       <input type="number" th:field="${contractDto.priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
       <!--      TODO: re-add error check below, currently failing-->
-<!--      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contractDto.priceTag.number}"></span>-->
+      <!--      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contractDto.priceTag.number}"></span>-->
       <br>
 
       <label>Role:</label>
       <select name="creatorRole" th:field="${contractDto.pubKeyTag.petName}">
-        <option th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
+        <option id="role" th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>
       <br>
 
-      <input type="submit" value="Create Contract">
+<!--      <input type="submit" value="Create Contract">-->
+      <button id="submit99" class="btn btn-default" type="submit" disabled="disabled">Send Nip-99 Event
+      </button>
     </form>
   </section>
 </main>
