@@ -24,15 +24,17 @@ async function createEvent(typeScriptEvent) {
     //     )
     // );
 
-    signEvent(typeScriptEvent).then(fullyPopulatedSignedEvent => sendData(fullyPopulatedSignedEvent));
+    signEvent(typeScriptEvent)
+        .then(ctbEventJson => $
+            .extend(
+                document.getElementById('ctbEventDto'),
+                ctbEventJson));
 
-    // .then(ctbEventJson => $
-    //     .extend(
-    //         document.getElementById('ctbEventDto'),
-    //         ctbEventJson)
-    //     .then(extendedCTBEventDto => form
-    //         .setAttribute(
-    //             "ctbEventDto", extendedCTBEventDto)))
+    // .then(extendedCTBEventDto => form
+    //     .setAttribute(
+    //         "ctbEventDto", extendedCTBEventDto)))
+
+    // .then(ctbEventJson => sendData(fullyPopulatedSignedEvent));
 
     // .then(window.nostr
     //     .signEvent(
@@ -79,9 +81,8 @@ function generateCTBEventJson() {
         ['published_at', dateNow],
         ['summary', "CTBEvent summary field: " + $("#content").val()],
         ['location', "CTBEvent location field"],
-        // ['p', await window.nostr.getPublicKey(), "ws://localhost:5555", $("#role").val()]
-        // ['p', "3920fe811a15252eddc9b5a779fb35689e8ccf4c066a1988e20c54c1cae47316", "ws://localhost:5555", $("#role").val()]
-        ['p', "3920fe811a15252eddc9b5a779fb35689e8ccf4c066a1988e20c54c1cae47316"]
+        // ['p', window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
+        ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
     ];
 
     console.log("generateCTBEventJson() checkpoint (since prohibited from console logging CTBEvent event JSON)");
