@@ -75,15 +75,15 @@ async function signEvent(event) {
 
 function generateCTBEventJson() {
     const dateNow = Math.floor(Date.now() / 1000);
-    const ctbEventTags = [
-        ['subject', "CTBEvent subject field: " + $("#content").val()],
-        ['title', "CTBEvent title field: " + $("#content").val()],
-        ['published_at', dateNow],
-        ['summary', "CTBEvent summary field: " + $("#content").val()],
-        ['location', "CTBEvent location field"],
-        // ['p', window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
-        ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
-    ];
+    // const ctbEventTags = [
+    //     ['subject', "CTBEvent subject field: " + $("#content").val()],
+    //     ['title', "CTBEvent title field: " + $("#content").val()],
+    //     ['published_at', dateNow],
+    //     ['summary', "CTBEvent summary field: " + $("#content").val()],
+    //     ['location', "CTBEvent location field"],
+    //     ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
+    //     // ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
+    // ];
 
     console.log("generateCTBEventJson() checkpoint (since prohibited from console logging CTBEvent event JSON)");
 
@@ -92,7 +92,15 @@ function generateCTBEventJson() {
         kind: 31923,
         created_at: dateNow,
         content: ("CTBEvent content field: " + $("#content").val()),
-        tags: ctbEventTags,
+        tags: [
+            ['subject', "CTBEvent subject field: " + $("#content").val()],
+            ['title', "CTBEvent title field: " + $("#content").val()],
+            ['published_at', dateNow],
+            ['summary', "CTBEvent summary field: " + $("#content").val()],
+            ['location', "CTBEvent location field"],
+            // ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
+            ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
+        ],
         pubkey: '',
         sig: ''
     }
