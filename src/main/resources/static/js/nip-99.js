@@ -98,8 +98,8 @@ async function generateCTBEventJson() {
             ['published_at', dateNow],
             ['summary', "CTBEvent summary field: " + $("#content").val()],
             ['location', "CTBEvent location field"],
-            // ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
-            ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
+            ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
+            // ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
         ],
         pubkey: '',
         sig: ''
