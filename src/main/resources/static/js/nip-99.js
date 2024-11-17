@@ -1,7 +1,7 @@
 $(function () {
     $("form").on('submit', (e) => e.preventDefault());
     $("#submit99").prop("disabled", false);
-    $("#submit99").click(() => createEvent(generateCTBEventJson()));
+    $("#submit99").click(async () => createEvent(await generateCTBEventJson()));
 });
 
 async function createEvent(typeScriptEvent) {
@@ -73,7 +73,7 @@ async function signEvent(event) {
     return signedPopulatedEvent;
 }
 
-function generateCTBEventJson() {
+async function generateCTBEventJson() {
     const dateNow = Math.floor(Date.now() / 1000);
     // const ctbEventTags = [
     //     ['subject', "CTBEvent subject field: " + $("#content").val()],

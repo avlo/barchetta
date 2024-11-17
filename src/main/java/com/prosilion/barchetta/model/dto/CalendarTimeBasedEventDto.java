@@ -26,7 +26,7 @@ public class CalendarTimeBasedEventDto {
   private Integer kind;
   private Date created_at;
   private String content;
-  private List<List<String>> tags;
+  private List<BaseTag> tags;
   private String sig;
 
   CalendarTimeBasedEvent convertToEntity() {
