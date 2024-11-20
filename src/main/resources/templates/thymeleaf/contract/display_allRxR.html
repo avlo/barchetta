@@ -4,16 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-  <script src="/js/nip-99.js">
-      // <script type="text/javascript" th:src="@{/js/nip-99.js}">
-      let contractDto = $('#contractDto');
-      let classifiedListingEventDto = $('#classifiedListingEventDto');
-      let calendarTimeBasedEventDto = $('#calendarTimeBasedEventDto');
-      let classifiedListingEventDtoAttr = contractDto.getAttribute('classifiedListingEventDto');
-      // contractDtoVal = $('#contractDto').val();
-  </script>
-
+  <script type="text/javascript" th:src="@{/js/nip-99.js}"></script>
   <link rel="stylesheet" th:href="@{/css/simple.css}"/>
   <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
   <title>Contracts</title>
@@ -175,12 +166,10 @@
 
   <section>
     <h4>Create Contract</h4>
+    <form th:id="createContract" th:action="@{/contract/create}" th:name="createContract" th:object="${contractDto}" th:method="POST" th:type="submit">
 
-    <form th:id="createContract" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
-
-      <input th:type="hidden" th:id="contractDto" th:name="contractDto" th:value='${contractDto}'/>
-      <input th:type="hidden" th:id="classifiedListingEventDto" th:name="classifiedListingEventDto" th:value='${contractDto.classifiedListingEventDto}'/>
-      <input th:type="hidden" th:id="calendarTimeBasedEventDto" th:name="calendarTimeBasedEventDto" th:value='${contractDto.calendarTimeBasedEventDto}'/>
+      <input th:type="hidden" th:id="classifiedListingEventDto" th:class="${classifiedListingEventDto}">
+      <input th:type="hidden" th:id="calendarTimeBasedEventDto" th:class="${calendarTimeBasedEventDto}">
 
       <label>Contract Text</label>
       <input type="text" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
@@ -198,7 +187,7 @@
       </select>
       <br>
 
-      <input type="submit" value="Create Contract"/>
+      <button th:id="formSubmit" class="btn btn-default">Create Contract</button>
     </form>
   </section>
 </main>

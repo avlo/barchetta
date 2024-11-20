@@ -1,23 +1,32 @@
 let dateNow;
+let calendarTimeBasedEventDto = $("#calendarTimeBasedEventDto");
+let classifiedListingEventDto = $("#classifiedListingEventDto");
+let contractDto = $("#contractDto");
 
 $(document).ready(function () {
-    $('#createContract').on('submit', async function (event) {
-        event.preventDefault();
+    let form = $('#createContract');
+    // let formById = document.getElementById("createContract");
+    form.on('submit', async function (e) {
+        e.preventDefault();
         dateNow = Math.floor(Date.now() / 1000);
         await createEventRxR(await generateCTBEventJson());
-        console.log(contractDto);
         $.ajax({
             type: 'POST',
             url: '/contract/create',
-            data: contractDto,
+
+            // data: form.serialize(),
+            // data: form.serializeArray(),
+            // data: new FormData(document.querySelector('form'))
+            data: new FormData(form),
+
             // contentType: 'application/json',
             // data: JSON.stringify(product),
-            // success: function (response) {
-            //     alert('Product added: ' + response.name);
-            //     location.reload();
-            // },
+            success: function (response) {
+                console.log('completed: ' + response.name);
+                // location.reload();
+            },
             error: function (error) {
-                alert('Error adding product');
+                alert('Error');
             }
         });
     });
@@ -60,7 +69,7 @@ async function generateCLEventJson(ctbEventId) {
             ['price', $("#payoutAmount").val(), "BTC", "1"],
             ['p', await window.nostr.getPublicKey(), "ws://localhost:5555", $("#role").val()],
             // ['p', "111df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f", "ws://localhost:5555", $("#role").val()]
-            ['a', "31923: " + await window.nostr.getPublicKey() + ":" + ctbEventId]
+            ['a', "31923:" + await window.nostr.getPublicKey() + ":" + ctbEventId]
         ],
         pubkey: '',
         sig: ''
@@ -68,17 +77,20 @@ async function generateCLEventJson(ctbEventId) {
 }
 
 async function createEventRxR(generatedCTBEventJson) {
+    let classifiedListingEventDtoLocal;
+    let calendarTimeBasedEventDtoLocal;
+
     await signEvent(generatedCTBEventJson)
         .then(signedCtbEventJson =>
-            calendarTimeBasedEventDto = $.extend(calendarTimeBasedEventDto, signedCtbEventJson));
+            calendarTimeBasedEventDtoLocal = $.extend(calendarTimeBasedEventDto, signedCtbEventJson));
 
-    classifiedListingEventDto = $.extend(
+    classifiedListingEventDtoLocal = $.extend(
         classifiedListingEventDto,
         await signEvent(
-            await generateCLEventJson(calendarTimeBasedEventDto.id)));
+            await generateCLEventJson(calendarTimeBasedEventDtoLocal.id)));
 
-    contractDto.setAttribute("classifiedListingEventDto", classifiedListingEventDto);
-    contractDto.setAttribute("calendarTimeBasedEventDto", calendarTimeBasedEventDto);
+    contractDto.classifiedListingEventDto = classifiedListingEventDtoLocal;
+    contractDto.calendarTimeBasedEventDto = calendarTimeBasedEventDtoLocal;
 }
 
 async function signEvent(event) {
@@ -86,32 +98,4 @@ async function signEvent(event) {
     const signedPopulatedEvent = await window.nostr.signEvent(event);
     console.log('signEvent() output: ' + signedPopulatedEvent);
     return signedPopulatedEvent;
-}
-
-function sendEvent() {
-    console.log("******************");
-    console.log("******************");
-    console.log("calendarTimeBasedEventDto: ", calendarTimeBasedEventDto);
-    console.log("-------------");
-    console.log("classifiedListingEventDto: ", classifiedListingEventDto);
-    console.log("=============");
-    console.log("contractDto: ", contractDto);
-    console.log("******************");
-    console.log("******************");
-    const form = document.querySelector('form');
-    // let formData = new FormData(contractDto);
-    form.submit();
-}
-
-async function sendData() {
-    contractDto.setAttribute("classifiedListingEventDto", classifiedListingEventDto);
-    contractDto.setAttribute("calendarTimeBasedEventDto", calendarTimeBasedEventDto);
-    const form = document.querySelector('form');
-    const formData = new FormData(form);
-    const response = await fetch("contract/create", {
-        method: "POST",
-        // Set the FormData instance as the request body
-        body: formData,
-    });
-    console.log(await response.json());
 }
