@@ -1,11 +1,10 @@
 let dateNow;
 let calendarTimeBasedEventDto = $("#calendarTimeBasedEventDto");
 let classifiedListingEventDto = $("#classifiedListingEventDto");
-let contractDto = $("#contractDto");
+let contractDtoLocal = $("#contractDto");
 
 $(document).ready(function () {
     let form = $('#createContract');
-    // let formById = document.getElementById("createContract");
     form.on('submit', async function (e) {
         e.preventDefault();
         dateNow = Math.floor(Date.now() / 1000);
@@ -15,9 +14,10 @@ $(document).ready(function () {
             url: '/contract/create',
 
             // data: form.serialize(),
-            // data: form.serializeArray(),
-            // data: new FormData(document.querySelector('form'))
-            data: new FormData(form),
+            data: form.serializeArray(),
+            // data: new FormData(document.querySelector('form')),
+            // data: new FormData(document.getElementById('form')),
+            // data: new FormData(form),
 
             // contentType: 'application/json',
             // data: JSON.stringify(product),
@@ -89,8 +89,9 @@ async function createEventRxR(generatedCTBEventJson) {
         await signEvent(
             await generateCLEventJson(calendarTimeBasedEventDtoLocal.id)));
 
-    contractDto.classifiedListingEventDto = classifiedListingEventDtoLocal;
-    contractDto.calendarTimeBasedEventDto = calendarTimeBasedEventDtoLocal;
+    console.log("debug contractDto here as contractDtoLocal is dup which mimght override original");
+    contractDtoLocal.classifiedListingEventDto = classifiedListingEventDtoLocal;
+    contractDtoLocal.calendarTimeBasedEventDto = calendarTimeBasedEventDtoLocal;
 }
 
 async function signEvent(event) {
