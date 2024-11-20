@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <title>Contracts</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <script src="/js/nip-99.js">
+      // <script type="text/javascript" th:src="@{/js/nip-99.js}">
+      let contractDto = $('#contractDto');
+      let classifiedListingEventDto = $('#classifiedListingEventDto');
+      let calendarTimeBasedEventDto = $('#calendarTimeBasedEventDto');
+      let classifiedListingEventDtoAttr = contractDto.getAttribute('classifiedListingEventDto');
+      // contractDtoVal = $('#contractDto').val();
+  </script>
+
   <link rel="stylesheet" th:href="@{/css/simple.css}"/>
   <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="/js/nip-99.js"></script>
+  <title>Contracts</title>
 </head>
 <body>
 <header>Contracts</header>
@@ -165,21 +175,20 @@
 
   <section>
     <h4>Create Contract</h4>
-    <form>
-      <input type="hidden" th:field="${contractDto.calendarTimeBasedEventDto}" id="ctbEventDto">
-      <input type="hidden" th:field="${contractDto.classifiedListingEventDto}" id="clEventDto">
 
-      <label for="content">Contract Text</label>
+    <form th:id="createContract" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
+
+      <input th:type="hidden" th:id="contractDto" th:name="contractDto" th:value='${contractDto}'/>
+      <input th:type="hidden" th:id="classifiedListingEventDto" th:name="classifiedListingEventDto" th:value='${contractDto.classifiedListingEventDto}'/>
+      <input th:type="hidden" th:id="calendarTimeBasedEventDto" th:name="calendarTimeBasedEventDto" th:value='${contractDto.calendarTimeBasedEventDto}'/>
+
+      <label>Contract Text</label>
       <input type="text" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
              placeholder="content">
-      <!--      TODO: re-add error check below, currently failing-->
-      <!--      <span th:if="${#fields.hasErrors('contractDto.classifiedListingEventDto.content')}" th:errors="${contractDto.classifiedListingEventDto.content}"></span>-->
       <br>
 
-      <label for="payoutAmount">Payout</label>
+      <label>Payout</label>
       <input type="number" th:field="${contractDto.priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
-      <!--      TODO: re-add error check below, currently failing-->
-      <!--      <span th:if="${#fields.hasErrors('payoutAmount')}" th:errors="${contractDto.priceTag.number}"></span>-->
       <br>
 
       <label>Role:</label>
@@ -189,9 +198,7 @@
       </select>
       <br>
 
-<!--      <input type="submit" value="Create Contract">-->
-      <button id="submit99" class="btn btn-default" type="submit" disabled="disabled">Send Nip-99 Event
-      </button>
+      <input type="submit" value="Create Contract"/>
     </form>
   </section>
 </main>
