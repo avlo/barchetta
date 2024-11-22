@@ -1,23 +1,30 @@
 let dateNow;
 let calendarTimeBasedEventDto = $("#calendarTimeBasedEventDto");
 let classifiedListingEventDto = $("#classifiedListingEventDto");
-let contractDtoLocal = $("#contractDto");
+// let contractDtoLocal  = $("#contractDto");
+let contractDtoLocal;
+
+function formSubmit(varContractDtoLocal) {
+    contractDtoLocal = varContractDtoLocal;
+}
 
 $(document).ready(function () {
     let form = $('#createContract');
     form.on('submit', async function (e) {
         e.preventDefault();
         dateNow = Math.floor(Date.now() / 1000);
-        await createEventRxR(await generateCTBEventJson());
+        await createEventRxR();
+        let serializedForm = form.serialize();
+        let serializedFormAsArray = form.serializeArray();
         $.ajax({
             type: 'POST',
             url: '/contract/create',
 
-            // data: form.serialize(),
-            data: form.serializeArray(),
+            // data: serializedForm,
+            // data: serializedFormAsArray,
             // data: new FormData(document.querySelector('form')),
             // data: new FormData(document.getElementById('form')),
-            // data: new FormData(form),
+            data: new FormData(form),
 
             // contentType: 'application/json',
             // data: JSON.stringify(product),
@@ -33,17 +40,17 @@ $(document).ready(function () {
 });
 
 async function generateCTBEventJson() {
-    let $content = $("#content");
+    let content = $("#content");
     return {
         id: '',
         kind: 31923,
         created_at: dateNow,
-        content: ("CTBEvent content field: " + $content.val()),
+        content: ("CTBEvent content field: " + content.val()),
         tags: [
-            ['subject', "CTBEvent subject field: " + $content.val()],
-            ['title', "CTBEvent title field: " + $content.val()],
+            ['subject', "CTBEvent subject field: " + content.val()],
+            ['title', "CTBEvent title field: " + content.val()],
             ['published_at', dateNow],
-            ['summary', "CTBEvent summary field: " + $content.val()],
+            ['summary', "CTBEvent summary field: " + content.val()],
             ['location', "CTBEvent location field"],
             ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
             // ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
@@ -54,17 +61,17 @@ async function generateCTBEventJson() {
 }
 
 async function generateCLEventJson(ctbEventId) {
-    let $content = $("#content");
+    let content = $("#content");
     return {
         id: '',
         kind: 30402,
         created_at: dateNow,
-        content: "CLEvent content field: " + $content.val(),
+        content: "CLEvent content field: " + content.val(),
         tags: [
-            ['subject', "CLEvent subject field: " + $content.val()],
-            ['title', "CLEvent title field: " + $content.val()],
+            ['subject', "CLEvent subject field: " + content.val()],
+            ['title', "CLEvent title field: " + content.val()],
             ['published_at', dateNow],
-            ['summary', "CLEvent summary field: " + $content.val()],
+            ['summary', "CLEvent summary field: " + content.val()],
             ['location', "CLEvent location field"],
             ['price', $("#payoutAmount").val(), "BTC", "1"],
             ['p', await window.nostr.getPublicKey(), "ws://localhost:5555", $("#role").val()],
@@ -76,22 +83,16 @@ async function generateCLEventJson(ctbEventId) {
     }
 }
 
-async function createEventRxR(generatedCTBEventJson) {
-    let classifiedListingEventDtoLocal;
-    let calendarTimeBasedEventDtoLocal;
+async function createEventRxR() {
+    calendarTimeBasedEventDto = await $.extend(
+        calendarTimeBasedEventDto,
+        await signEvent(
+            await generateCTBEventJson()));
 
-    await signEvent(generatedCTBEventJson)
-        .then(signedCtbEventJson =>
-            calendarTimeBasedEventDtoLocal = $.extend(calendarTimeBasedEventDto, signedCtbEventJson));
-
-    classifiedListingEventDtoLocal = $.extend(
+    classifiedListingEventDto = await $.extend(
         classifiedListingEventDto,
         await signEvent(
-            await generateCLEventJson(calendarTimeBasedEventDtoLocal.id)));
-
-    console.log("debug contractDto here as contractDtoLocal is dup which mimght override original");
-    contractDtoLocal.classifiedListingEventDto = classifiedListingEventDtoLocal;
-    contractDtoLocal.calendarTimeBasedEventDto = calendarTimeBasedEventDtoLocal;
+            await generateCLEventJson(calendarTimeBasedEventDto.id)));
 }
 
 async function signEvent(event) {

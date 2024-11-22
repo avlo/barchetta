@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
@@ -168,27 +168,27 @@
     <h4>Create Contract</h4>
     <form id="createContract" action="#" th:action="@{/create}" th:object="${contractDto}" method="post">
 
-      <input th:type="hidden" th:id="classifiedListingEventDto" th:class="${contractDto.classifiedListingEventDto}">
-      <input th:type="hidden" th:id="calendarTimeBasedEventDto" th:class="${contractDto.calendarTimeBasedEventDto}">
+      <input th:type="hidden" th:field="*{classifiedListingEventDto}">
+      <input th:type="hidden" th:field="*{calendarTimeBasedEventDto}">
 
       <label>Contract Text</label>
-      <input type="text" th:field="${contractDto.classifiedListingEventDto.content}" id="content"
+      <input type="text" th:field="*{classifiedListingEventDto.content}" id="content"
              placeholder="content">
       <br>
 
       <label>Payout</label>
-      <input type="number" th:field="${contractDto.priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
+      <input type="number" th:field="*{priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
       <br>
 
       <label>Role:</label>
-      <select name="creatorRole" th:field="${contractDto.pubKeyTag.petName}">
+      <select name="creatorRole" th:field="*{pubKeyTag.petName}">
         <option id="role" th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>
       <br>
 
-<!--      <button th:id="formSubmit" class="btn btn-default">Create Contract</button>-->
-      <input type="submit" class="btn btn-primary" value="Create Contract">
+      <!--      <button th:id="formSubmit" class="btn btn-default">Create Contract</button>-->
+      <input type="submit" th:attr="onclick=|formSubmit('${contractDto}')|" class="btn btn-primary" value="Create Contract">
     </form>
   </section>
 </main>
