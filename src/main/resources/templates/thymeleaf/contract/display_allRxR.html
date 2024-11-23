@@ -168,8 +168,8 @@
     <h4>Create Contract</h4>
     <form id="createContract" action="#" th:action="@{/create}" th:object="${contractDto}" method="post">
 
-      <input th:type="hidden" th:field="*{classifiedListingEventDto}"/>
-      <input th:type="hidden" th:field="*{calendarTimeBasedEventDto}"/>
+      <input th:type="hidden" th:field="*{classifiedListingEventJson}"/>
+      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}"/>
 
       <label>Contract Text</label>
       <input type="text" id="content"/>

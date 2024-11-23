@@ -29,9 +29,9 @@ async function generateCTBEventJson() {
         created_at: dateNow,
         content: ("CTBEvent content field: " + content.val()),
         tags: [
-            ['subject', "CTBEvent subject field: " + content.val()],
+            ['d', "UUID-"+dateNow],
             ['title', "CTBEvent title field: " + content.val()],
-            ['published_at', dateNow],
+            ['start', dateNow+100000],
             ['summary', "CTBEvent summary field: " + content.val()],
             ['location', "CTBEvent location field"],
             ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
@@ -66,17 +66,17 @@ async function generateCLEventJson(ctbEventId) {
 }
 
 async function createEventRxR() {
-    let calendarTimeBasedEventDto =
+    let calendarTimeBasedEventJson =
         await signEvent(
             await generateCTBEventJson());
 
-    document.getElementById('calendarTimeBasedEventDto').value = JSON.stringify(calendarTimeBasedEventDto);
+    document.getElementById('calendarTimeBasedEventJson').value = JSON.stringify(calendarTimeBasedEventJson);
 
-    let classifiedListingEventDto =
+    let classifiedListingEventJson =
         await signEvent(
-            await generateCLEventJson(calendarTimeBasedEventDto.id));
+            await generateCLEventJson(calendarTimeBasedEventJson.id));
 
-    document.getElementById('classifiedListingEventDto').value = JSON.stringify(classifiedListingEventDto);
+    document.getElementById('classifiedListingEventJson').value = JSON.stringify(classifiedListingEventJson);
 }
 
 async function signEvent(event) {

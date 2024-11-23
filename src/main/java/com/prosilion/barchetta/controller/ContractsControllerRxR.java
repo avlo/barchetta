@@ -65,7 +65,7 @@ public class ContractsControllerRxR {
   @GetMapping("/display_contract/{id}")
   public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching selected contract: [{}]", contractId);
-    model.addAttribute(CONTRACT_STR, controllerService.getContractByContractId(contractId).convertToDto());
+    model.addAttribute(CONTRACT_STR, controllerService.getContractByContractId(contractId));
     model.addAttribute(USERNAME_STR, user.getUsername());
     model.addAttribute(COUNTER_PARTY_ID_STR, controllerService.findByUsername(user.getUsername()).getId());
     log.info("CounterPartyId: [{}]", controllerService.findByUsername(user.getUsername()).getId());
@@ -77,7 +77,7 @@ public class ContractsControllerRxR {
   public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching my contract: [{}]", contractId);
     Contract contract = controllerService.getContractByContractId(contractId);
-    model.addAttribute(CONTRACT_STR, contract.convertToDto());
+    model.addAttribute(CONTRACT_STR, contract);
     model.addAttribute(USERNAME_STR, user.getUsername());
     model.addAttribute(ROLE_STR, controllerService.getRole(contract, controllerService.findByUsername(user.getUsername())));
     return "thymeleaf/contract/view_contract";
