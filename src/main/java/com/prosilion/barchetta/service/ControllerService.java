@@ -1,7 +1,5 @@
 package com.prosilion.barchetta.service;
 
-import com.prosilion.barchetta.model.dto.CalendarTimeBasedEventDto;
-import com.prosilion.barchetta.model.dto.ClassifiedListingEventDto;
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;

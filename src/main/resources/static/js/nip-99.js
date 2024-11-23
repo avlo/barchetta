@@ -16,8 +16,6 @@ function ajaxSubmit(data) {
         type: 'post',
         url: '/contract/create',
         data: data
-        // contentType: 'application/json',
-        // contentType: 'application/json; charset=utf-8;'
     });
 }
 

@@ -19,11 +19,9 @@ public class ContractDto {
   private String calendarTimeBasedEventJson;
 
   public Contract convertToEntity() {
-    ClassifiedListingEvent classifiedListingEvent = mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class);
-    CalendarTimeBasedEvent calendarTimeBasedEvent = mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class);
     return new Contract(
-        classifiedListingEvent,
-        calendarTimeBasedEvent
+        mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class),
+        mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class)
     );
   }
 
