@@ -1,43 +1,25 @@
 let dateNow;
-let calendarTimeBasedEventDto = $("#calendarTimeBasedEventDto");
-let classifiedListingEventDto = $("#classifiedListingEventDto");
-// let contractDtoLocal  = $("#contractDto");
-let contractDtoLocal;
-
-function formSubmit(varContractDtoLocal) {
-    contractDtoLocal = varContractDtoLocal;
-}
 
 $(document).ready(function () {
-    let form = $('#createContract');
-    form.on('submit', async function (e) {
+    $("#createContract").submit(async function (e) {
         e.preventDefault();
         dateNow = Math.floor(Date.now() / 1000);
         await createEventRxR();
-        let serializedForm = form.serialize();
-        let serializedFormAsArray = form.serializeArray();
-        $.ajax({
-            type: 'POST',
-            url: '/contract/create',
-
-            // data: serializedForm,
-            // data: serializedFormAsArray,
-            // data: new FormData(document.querySelector('form')),
-            // data: new FormData(document.getElementById('form')),
-            data: new FormData(form),
-
-            // contentType: 'application/json',
-            // data: JSON.stringify(product),
-            success: function (response) {
-                console.log('completed: ' + response.name);
-                // location.reload();
-            },
-            error: function (error) {
-                alert('Error');
-            }
-        });
+        ajaxSubmit(
+            $(this).serializeArray()
+        );
     });
 });
+
+function ajaxSubmit(data) {
+    $.ajax({
+        type: 'post',
+        url: '/contract/create',
+        data: data
+        // contentType: 'application/json',
+        // contentType: 'application/json; charset=utf-8;'
+    });
+}
 
 async function generateCTBEventJson() {
     let content = $("#content");
@@ -84,15 +66,17 @@ async function generateCLEventJson(ctbEventId) {
 }
 
 async function createEventRxR() {
-    calendarTimeBasedEventDto = await $.extend(
-        calendarTimeBasedEventDto,
+    let calendarTimeBasedEventDto =
         await signEvent(
-            await generateCTBEventJson()));
+            await generateCTBEventJson());
 
-    classifiedListingEventDto = await $.extend(
-        classifiedListingEventDto,
+    document.getElementById('calendarTimeBasedEventDto').value = JSON.stringify(calendarTimeBasedEventDto);
+
+    let classifiedListingEventDto =
         await signEvent(
-            await generateCLEventJson(calendarTimeBasedEventDto.id)));
+            await generateCLEventJson(calendarTimeBasedEventDto.id));
+
+    document.getElementById('classifiedListingEventDto').value = JSON.stringify(classifiedListingEventDto);
 }
 
 async function signEvent(event) {

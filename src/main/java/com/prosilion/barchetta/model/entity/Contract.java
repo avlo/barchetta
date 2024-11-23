@@ -111,8 +111,8 @@ public class Contract {
             price,
             "BTC",
             "1"),
-        classifiedListingEventDto,
-        calendarTimeBasedEventDto
+        classifiedListingEventDto.toString(),
+        calendarTimeBasedEventDto.toString()
     );
   }
 }

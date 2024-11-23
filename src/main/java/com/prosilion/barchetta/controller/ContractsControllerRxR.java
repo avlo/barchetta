@@ -14,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +48,7 @@ public class ContractsControllerRxR {
   @PostMapping("/create")
   public String createContract(
       @AuthenticationPrincipal NostrUser user,
-      @ModelAttribute ContractDto contractDto,
+      ContractDto contractDto,
       Model model) throws IOException, NostrException {
     controllerService.createContract(contractDto, user);
     model.addAttribute(CONTRACT_STR, contractDto);

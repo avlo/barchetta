@@ -102,8 +102,8 @@ public class ControllerService implements ControllerServiceIF {
     return new ContractDto(
         new PubKeyTag(),
         new PriceTag(),
-        new ClassifiedListingEventDto(),
-        new CalendarTimeBasedEventDto()
+        "",
+        ""
     );
   }
 }
