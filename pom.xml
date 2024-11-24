@@ -4,7 +4,7 @@
 
   <groupId>com.prosilion</groupId>
   <artifactId>barchetta</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <name>barchetta</name>
   <description>Smart-Contract Negotation Framework</description>
   <packaging>war</packaging>

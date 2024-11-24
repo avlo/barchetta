@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <title>Contract Preview</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link rel="stylesheet" th:href="@{/css/simple.css}"/>
   <link rel="stylesheet" th:href="@{/css/tablestyles.css}"/>
+  <title>Contract Preview</title>
 </head>
 <main>
   <a href="https://localhost:8080/contract/display_all">display all</a>
   <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
-      sec:authentication="principal.username"/></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
-      sec:authentication="principal.authorities"/></code></h4>
+      sec:authentication="principal.username"></span></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.authorities"></span></code></h4>
   <section>
     <h4>Apply for Contract</h4>
     <form action="#" th:action="@{/contract/apply}" th:object="${contract}" method="post">

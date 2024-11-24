@@ -25,7 +25,8 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/contract")
 public class ContractsController {
-  public static final String CONTRACT_STR = "contractDto";
+  public static final String CONTRACT_DTO_STR = "contractDto";
+  public static final String CONTRACT_STR = "contract";
   public static final String CONTRACTS_STR = "contracts";
   public static final String COUNTER_PARTY_ID_STR = "counter_party_id";
   public static final String OPEN_CONTRACTS_STR = "open_contracts";
@@ -57,6 +58,7 @@ public class ContractsController {
     controllerService.createContract(contractDto, user);
     setCanonicalModelAttributes(user, model);
 //  TODO: below "display_all" varies from other method returns since display_all.html ajax.complete doesn't work with thymeleaf/contract/display_all.  revisit
+    TODO: below is red flag, might/likely corrupt ajax return
     return "display_all";
   }
 
@@ -111,7 +113,7 @@ public class ContractsController {
     User contractAppUser = controllerService.findByUsername(user.getUsername());
     model.addAttribute(USER_CONTRACTS_STR, controllerService.getAllContractsFor(contractAppUser));
     model.addAttribute(OPEN_CONTRACTS_STR, controllerService.getOpenContractsFor(contractAppUser));
-    model.addAttribute(CONTRACT_STR, controllerService.constructContract(contractAppUser));
+    model.addAttribute(CONTRACT_DTO_STR, controllerService.constructContract(contractAppUser));
     model.addAttribute(USERNAME_STR, user.getUsername());
   }
 }
