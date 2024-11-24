@@ -27,12 +27,7 @@
         <th>CoPartyPubKey</th>
         <th>Role</th>
         <th>Text</th>
-        <th>PayerStake</th>
-        <th>PayeeStake</th>
         <th>Payout$$$</th>
-        <th>PayerState</th>
-        <th>PayeeState</th>
-        <th>Completed</th>
       </tr>
       </thead>
       <tbody>
@@ -68,22 +63,7 @@
           </a>
         </td>
         <td>
-          [[${user_contract.payerStake}]]
-        </td>
-        <td>
-          [[${user_contract.payeeStake}]]
-        </td>
-        <td>
           [[${user_contract.payoutAmount}]]
-        </td>
-        <td>
-          [[${user_contract.payerState}]]
-        </td>
-        <td>
-          [[${user_contract.payeeState}]]
-        </td>
-        <td>
-          [[${user_contract.completed}]]
         </td>
       </tr>
       </tbody>
@@ -101,12 +81,7 @@
         <th>CoPartyPubKey</th>
         <th>Role</th>
         <th>Text</th>
-        <th>PayerStake</th>
-        <th>PayeeStake</th>
         <th>Payout$$$</th>
-        <th>PayerState</th>
-        <th>PayeeState</th>
-        <th>Completed</th>
       </tr>
       </thead>
       <tbody>
@@ -142,22 +117,7 @@
           </a>
         </td>
         <td>
-          [[${open_contract.payerStake}]]
-        </td>
-        <td>
-          [[${open_contract.payeeStake}]]
-        </td>
-        <td>
-          [[${open_contract.payoutAmount}]]
-        </td>
-        <td>
-          [[${open_contract.payerState}]]
-        </td>
-        <td>
-          [[${open_contract.payeeState}]]
-        </td>
-        <td>
-          [[${open_contract.completed}]]
+          [[${open_contract?.payoutAmount}]]
         </td>
       </tr>
       </tbody>

@@ -48,6 +48,10 @@ public class Contract {
     return classifiedListingEvent.getContent();
   }
 
+  public String getPayoutAmount() {
+    return classifiedListingEvent.getClassifiedListing().getPriceTag().getNumber().toPlainString();
+  }
+
   public CreatorRoleEnum getCreatorRole() {
     String role = calendarTimeBasedEvent.getTags().stream()
         .filter(PubKeyTag.class::isInstance)

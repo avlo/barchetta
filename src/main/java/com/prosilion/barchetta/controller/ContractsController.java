@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 
@@ -44,22 +45,27 @@ public class ContractsController {
     return "forward:/register";
   }
 
+//  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
+//  TODO: below @ResponseBody required because display_all.html submit is done via ajax.  revisit
+  @ResponseBody
   public String createContract(
       @AuthenticationPrincipal NostrUser user,
       ContractDto contractDto,
       Model model) throws IOException, NostrException {
     controllerService.createContract(contractDto, user);
-    model.addAttribute(CONTRACT_STR, contractDto);
     setCanonicalModelAttributes(user, model);
-    return "thymeleaf/contract/display_allRxR";
+//  TODO: below "display_all" varies from other method returns since display_all.html ajax.complete doesn't work with thymeleaf/contract/display_all.  revisit
+    return "display_all";
   }
 
+//  TODO: below security not being applied, needs investigation
+  @Secured({"ROLE_USER", "USER"})
   @GetMapping("/display_all")
   public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
     setCanonicalModelAttributes(user, model);
-    return "thymeleaf/contract/display_allRxR";
+    return "thymeleaf/contract/display_all";
   }
 
   @GetMapping("/display_contract/{id}")
@@ -87,7 +93,7 @@ public class ContractsController {
   public String applyForContract(@AuthenticationPrincipal NostrUser user, Contract contract, Model model) throws IOException, NostrException {
     controllerService.saveAsCounterParty(contract, user);
     model.addAttribute(CONTRACTS_STR, controllerService.getAll());
-    return "redirect:display_allRxR";
+    return "redirect:display_all";
   }
 
   @PostMapping("/vote")
@@ -98,7 +104,7 @@ public class ContractsController {
     log.info("Contract appUserId: [{}] ", contract.getAppUserId());
     controllerService.save(contract);
     model.addAttribute(CONTRACTS_STR, controllerService.getAll());
-    return "redirect:display_allRxR";
+    return "redirect:display_all";
   }
 
   private void setCanonicalModelAttributes(@NonNull NostrUser user, @NonNull Model model) {

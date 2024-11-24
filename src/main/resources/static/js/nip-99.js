@@ -4,23 +4,29 @@ $(document).ready(function () {
     $("#createContract").submit(async function (e) {
         e.preventDefault();
         dateNow = Math.floor(Date.now() / 1000);
-        await createEventRxR();
+        await createEvent();
         ajaxSubmit(
+// TODO: would be nice to have a normal submit here instead of ajax serialized form object.  revisit
             $(this).serializeArray()
         );
     });
 });
 
+// TODO: would be nice to do normal submit here instead of ajax.  revisit
 function ajaxSubmit(data) {
     $.ajax({
         type: 'post',
         url: '/contract/create',
-        data: data
+        data: data,
+        // async: false,
+        success: function(result) {
+            location.href = result; // page redirect from controller return value
+        }
     });
 }
 
 async function generateCTBEventJson() {
-    let content = $("#content");
+    const content = $("#content");
     return {
         id: '',
         kind: 31923,
@@ -41,7 +47,7 @@ async function generateCTBEventJson() {
 }
 
 async function generateCLEventJson(ctbEventId) {
-    let content = $("#content");
+    const content = $("#content");
     return {
         id: '',
         kind: 30402,
@@ -63,14 +69,14 @@ async function generateCLEventJson(ctbEventId) {
     }
 }
 
-async function createEventRxR() {
-    let calendarTimeBasedEventJson =
+async function createEvent() {
+    const calendarTimeBasedEventJson =
         await signEvent(
             await generateCTBEventJson());
 
     document.getElementById('calendarTimeBasedEventJson').value = JSON.stringify(calendarTimeBasedEventJson);
 
-    let classifiedListingEventJson =
+    const classifiedListingEventJson =
         await signEvent(
             await generateCLEventJson(calendarTimeBasedEventJson.id));
 
