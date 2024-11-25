@@ -126,10 +126,10 @@
 
   <section>
     <h4>Create Contract</h4>
-    <form id="createContract" action="#" th:action="@{/create}" th:object="${contractDto}" method="post">
+    <form th:id="createContract" action="#" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
 
-      <input th:type="hidden" th:field="*{classifiedListingEventJson}"/>
-      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}"/>
+      <input th:type="hidden" th:field="*{classifiedListingEventJson}" th:id="classifiedListingEventJson" th:name="classifiedListingEventJson">
+      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}" th:id="calendarTimeBasedEventJson" th:name="calendarTimeBasedEventJson">
 
       <label>Contract Text</label>
       <input type="text" id="content"/>
@@ -146,7 +146,7 @@
       </select>
       <br>
 
-      <input type="submit" class="btn btn-primary" value="Create Contract">
+      <button class="btn btn-primary" th:type="submit">Create Contract</button>
     </form>
   </section>
 </main>

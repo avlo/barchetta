@@ -1,28 +1,28 @@
 let dateNow;
 
 $(document).ready(function () {
-    $("#createContract").submit(async function (e) {
+    $("#createContract").submit(function (e) {
         e.preventDefault();
+        const form = this;
         dateNow = Math.floor(Date.now() / 1000);
-        await createEvent();
-        ajaxSubmit(
-// TODO: would be nice to have a normal submit here instead of ajax serialized form object.  revisit
-            $(this).serializeArray()
-        );
+        createEvent().then(function () {
+            form.submit();
+        })
     });
 });
 
-// TODO: would be nice to do normal submit here instead of ajax.  revisit
-function ajaxSubmit(data) {
-    $.ajax({
-        type: 'post',
-        url: '/contract/create',
-        data: data,
-        // async: false,
-        success: function(result) {
-            location.href = result; // page redirect from controller return value
-        }
-    });
+async function createEvent() {
+    const calendarTimeBasedEventJson =
+        await signEvent(
+            await generateCTBEventJson());
+
+    document.getElementById('calendarTimeBasedEventJson').value = JSON.stringify(calendarTimeBasedEventJson);
+
+    const classifiedListingEventJson =
+        await signEvent(
+            await generateCLEventJson(calendarTimeBasedEventJson.id));
+
+    document.getElementById('classifiedListingEventJson').value = JSON.stringify(classifiedListingEventJson);
 }
 
 async function generateCTBEventJson() {
@@ -67,20 +67,6 @@ async function generateCLEventJson(ctbEventId) {
         pubkey: '',
         sig: ''
     }
-}
-
-async function createEvent() {
-    const calendarTimeBasedEventJson =
-        await signEvent(
-            await generateCTBEventJson());
-
-    document.getElementById('calendarTimeBasedEventJson').value = JSON.stringify(calendarTimeBasedEventJson);
-
-    const classifiedListingEventJson =
-        await signEvent(
-            await generateCLEventJson(calendarTimeBasedEventJson.id));
-
-    document.getElementById('classifiedListingEventJson').value = JSON.stringify(classifiedListingEventJson);
 }
 
 async function signEvent(event) {
