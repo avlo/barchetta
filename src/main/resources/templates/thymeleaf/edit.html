@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <title>Edit User</title>
@@ -9,13 +9,13 @@
 <header>Edit User</header>
 <main>
   <a href="https://localhost:8080/contract/display_all">display all</a>
-  <b>User:</b> <span sec:authentication="principal.username"/>
-  <b>Role(s):</b> <span sec:authentication="principal.authorities"/>
+  <b>User:</b> <span sec:authentication="principal.username"></span>
+  <b>Role(s):</b> <span sec:authentication="principal.authorities"></span>
 
   <form action="#" th:action="@{/edit}" th:object="${user}" method="post">
     <p>
       <label>User Nostr Public Key</label>
-      <input type="text" id="nostrPubKey" placeholder="User Pubkey" name="nostrPubKey" th:value="${user.nostrPubKey}">
+      <input type="text" id="nostrPubKey" placeholder="User Pubkey" name="nostrPubKey" th:value="${user.pubkey}">
     </p>
     <input type="hidden" id="user_id" name="user_id" th:value="${user.id}"/>
     <input type="submit" value="Save">

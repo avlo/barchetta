@@ -6,12 +6,14 @@ import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.repository.UserRepository;
 import com.prosilion.presto.nostr.service.NostrUserService;
+import com.prosilion.presto.security.entity.AppUserAuthUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,12 +29,15 @@ public class UserService implements UserServiceIF {
 
   @Override
   public User findByUserId(Long id) {
-    return userRepository.findById(id).get();
+    Optional<User> byId = userRepository.findById(id);
+    return byId.get();
   }
 
   @Override
   public User findByUsername(@NonNull String username) {
-    return findByUserId(nostrUserService.getAppuserAuthuser(username).getId());
+    AppUserAuthUser appuserAuthuser = nostrUserService.getAppuserAuthuser(username);
+    Long id = appuserAuthuser.getId();
+    return findByUserId(id);
   }
 
   @Override

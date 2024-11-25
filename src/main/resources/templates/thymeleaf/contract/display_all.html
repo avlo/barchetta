@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-      lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -14,7 +13,8 @@
 <main>
   <a href="https://localhost:8080/contract/display_all">display all</a>
   <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
-      sec:authentication="principal.username"></span></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.username"></span></code>&emsp;Role(s): <code
+      class="language-plaintext highlighter-rouge"><span
       sec:authentication="principal.authorities"></span></code></h4>
   <section>
     <h4>My Contracts</h4>
@@ -28,42 +28,42 @@
         <th>Role</th>
         <th>Text</th>
         <th>Payout$$$</th>
+        <th>PayerState</th>
+        <th>PayeeState</th>
       </tr>
       </thead>
       <tbody>
       <tr th:each="user_contract: ${user_contracts}">
         <td>
           <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract.getAppUserId()}]]
+            [[${user_contract?.getAppUserId()}]]
           </a>
         </td>
         <td>
           <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract?.nostrAppUserPubKey}]]
+            [[${user_contract?.getNostrAppUserPubKey()}]]
           </a>
         </td>
         <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract?.counterPartyId}]]
-          </a>
+          [[${user_contract?.getCounterPartyId()}]]
         </td>
         <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract?.nostrCounterPartyPubKey}]]
-          </a>
+          [[${user_contract?.getNostrCounterPartyPubKey()}]]
         </td>
         <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract.creatorRole}]]
-          </a>
+          [[${user_contract?.getCreatorRole()}]]
         </td>
         <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${user_contract.getId()})}">
-            [[${user_contract.getText()}]]
-          </a>
+          [[${user_contract?.getText()}]]
         </td>
         <td>
-          [[${user_contract.payoutAmount}]]
+          [[${user_contract?.getPrice()}]]
+        </td>
+        <td>
+          [[${user_contract?.getPayerState()}]]
+        </td>
+        <td>
+          [[${user_contract?.getPayerState()}]]
         </td>
       </tr>
       </tbody>
@@ -82,42 +82,43 @@
         <th>Role</th>
         <th>Text</th>
         <th>Payout$$$</th>
+        <th>PayerState</th>
+        <th>PayeeState</th>
+
       </tr>
       </thead>
       <tbody>
       <tr th:each="open_contract: ${open_contracts}">
         <td>
           <a th:href="@{/contract/display_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract.getAppUserId()}]]
-          </a>
-        </td>
-        <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract?.nostrAppUserPubKey}]]
+            [[${open_contract?.getAppUserId()}]]
           </a>
         </td>
         <td>
           <a th:href="@{/contract/display_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract?.counterPartyId}]]
+            [[${open_contract?.getNostrAppUserPubKey()}]]
           </a>
         </td>
         <td>
-          <a th:href="@{/contract/my_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract?.nostrCounterPartyPubKey}]]
-          </a>
+          [[${open_contract?.getCounterPartyId()}]]
         </td>
         <td>
-          <a th:href="@{/contract/display_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract.creatorRole}]]
-          </a>
+          [[${open_contract?.getNostrCounterPartyPubKey()}]]
         </td>
         <td>
-          <a th:href="@{/contract/display_contract/{id}(id=${open_contract.getId()})}">
-            [[${open_contract.getText()}]]
-          </a>
+          [[${open_contract?.getCreatorRole()}]]
         </td>
         <td>
-          [[${open_contract?.payoutAmount}]]
+          [[${open_contract?.getText()}]]
+        </td>
+        <td>
+          [[${user_contract?.getPrice()}]]
+        </td>
+        <td>
+          [[${user_contract?.getPayerState()()}]]
+        </td>
+        <td>
+          [[${user_contract?.getPayeeState()}]]
         </td>
       </tr>
       </tbody>
@@ -128,19 +129,21 @@
     <h4>Create Contract</h4>
     <form th:id="createContract" action="#" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
 
-      <input th:type="hidden" th:field="*{classifiedListingEventJson}" th:id="classifiedListingEventJson" th:name="classifiedListingEventJson">
-      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}" th:id="calendarTimeBasedEventJson" th:name="calendarTimeBasedEventJson">
+      <input th:type="hidden" th:field="*{classifiedListingEventJson}" th:id="classifiedListingEventJson"
+             th:name="classifiedListingEventJson">
+      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}" th:id="calendarTimeBasedEventJson"
+             th:name="calendarTimeBasedEventJson">
 
       <label>Contract Text</label>
       <input type="text" id="content"/>
       <br>
 
       <label>Payout</label>
-      <input type="number" th:field="*{priceTag.number}" id="payoutAmount" placeholder="payoutAmount">
+      <input type="number" th:field="*{price}" id="payoutAmount" placeholder="payoutAmount">
       <br>
 
       <label>Role:</label>
-      <select name="creatorRole" th:field="*{pubKeyTag.petName}">
+      <select name="creatorRole" th:field="*{role}">
         <option id="role" th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>

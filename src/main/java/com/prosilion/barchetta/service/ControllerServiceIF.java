@@ -15,12 +15,14 @@ import java.util.List;
 public interface ControllerServiceIF {
   Contract createContract(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException;
   Contract getContractByContractId(@NonNull Long id) throws IOException;
+  ContractDto getContractDtoByContractId(@NonNull Long id) throws IOException;
   User findByUsername(@NonNull String username);
   CreatorRoleEnum getRole(Contract contract, User user);
+  Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException;
   Contract save(@NonNull Contract contract) throws NostrException, IOException;
-  Contract saveAsCounterParty(@NonNull Contract contract, @NonNull NostrUser user) throws NostrException, IOException;
+  Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException;
   List<Contract> getAll();
   List<Contract> getAllContractsFor(@NonNull AppUser appUser);
   List<Contract> getOpenContractsFor(@NonNull AppUser appUser);
-  ContractDto constructContract(AppUser appUser);
+  ContractDto constructContractDto(AppUser appUser);
 }

@@ -14,7 +14,7 @@
       sec:authentication="principal.authorities"></span></code></h4>
   <section>
     <h4>Apply for Contract</h4>
-    <form action="#" th:action="@{/contract/apply}" th:object="${contract}" method="post">
+    <form action="#" th:action="@{/contract/apply}" th:object="${contractDto}" method="post">
       <table style="width:90%">
         <thead>
         <tr>
@@ -25,34 +25,34 @@
         </thead>
         <tbody>
         <tr>
-          <td th:text="${contract.getAppUserId()}"/>
-          <td th:text="${contract.creatorRole}"/>
-          <td th:text="${contract.getText()}"/>
+          <td th:text="${contractDto.appUserId}"/>
+          <td th:text="${contractDto.role}"/>
+          <td th:text="${contractDto.text}"/>
         </tr>
         <tr>
           <label>Nostr PubKey:</label>
-          <select name="nostrAppUserPubKey" th:field="${contract.nostrAppUserPubKey}" id="nostrAppUserPubKey">
+          <select name="nostrAppUserPubKey" th:field="${contractDto.nostrAppUserPubKey}" id="nostrAppUserPubKey">
             <option th:value="'ReqClientComponent-ID-001'" th:text="'ReqClientComponent-ID-001'"></option>
             <option th:value="'ReqClientComponent-ID-002'" th:text="'ReqClientComponent-ID-002'"></option>
           </select>
         </tr>
 
-        <input type="hidden" th:field="${contract.id}" id="id"/>
-        <input type="hidden" th:field="${contract.text}" id="text"/>
+        <input type="hidden" th:field="${contractDto.id}" id="id"/>
+        <input type="hidden" th:field="${contractDto.text}" id="text"/>
 
-        <input type="hidden" th:field="${contract.payerStake}" id="payerStake"/>
-        <input type="hidden" th:field="${contract.payeeStake}" id="payeeStake"/>
-        <input type="hidden" th:field="${contract.payoutAmount}" id="payoutAmount"/>
+        <input type="hidden" th:field="${contractDto.payerStake}" id="payerStake"/>
+        <input type="hidden" th:field="${contractDto.payeeStake}" id="payeeStake"/>
+        <input type="hidden" th:field="${contractDto.price}" id="payoutAmount"/>
 
-        <input type="hidden" th:field="${contract.payerState}" id="payerState"/>
-        <input type="hidden" th:field="${contract.payeeState}" id="payeeState"/>
-        <input type="hidden" th:field="${contract.completed}" id="completed"/>
+        <input type="hidden" th:field="${contractDto.payerState}" id="payerState"/>
+        <input type="hidden" th:field="${contractDto.payeeState}" id="payeeState"/>
+        <input type="hidden" th:field="${contractDto.completed}" id="completed"/>
 
         <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
 
-        <input type="hidden" th:field="${contract.creatorRole}" id="creatorRole"/>
+        <input type="hidden" th:field="${contractDto.role}" id="creatorRole"/>
 
-        <input type="hidden" th:field="${contract.appUserId}" id="appUserId"/>
+        <input type="hidden" th:field="${contractDto.appUserId}" id="appUserId"/>
         <input type="hidden" th:value="${counter_party_id}" name="counterPartyId"/>
 
         <input type="submit" value="Accept Contract (Preview page)">

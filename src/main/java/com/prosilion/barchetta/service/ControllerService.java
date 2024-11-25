@@ -10,8 +10,6 @@ import com.prosilion.presto.nostr.entity.NostrUser;
 import com.prosilion.presto.security.entity.AppUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import nostr.event.tag.PriceTag;
-import nostr.event.tag.PubKeyTag;
 import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,8 +42,9 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull Contract contract, @NonNull NostrUser user) throws NostrException, IOException {
+  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException {
     User foundUser = userService.findByUsername(user.getUsername());
+    Contract contract = getContractByContractId(contractId);
     contract.setNostrCounterPartyPubKey(foundUser.getPubkey());
     return save(contract);
   }
@@ -53,6 +52,11 @@ public class ControllerService implements ControllerServiceIF {
   @Override
   public Contract getContractByContractId(@NonNull Long id) throws IOException {
     return contractEntityService.getContractById(id);
+  }
+
+  @Override
+  public ContractDto getContractDtoByContractId(@NonNull Long id) throws IOException {
+    return contractEntityService.getContractById(id).convertToDto();
   }
 
   @Override
@@ -70,6 +74,11 @@ public class ControllerService implements ControllerServiceIF {
     Contract savedContract = save(contract);
     log.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
     return savedContract;
+  }
+
+  @Override
+  public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException {
+    return contractEntityService.save(contractDto.convertToEntity());
   }
 
   @Override
@@ -96,12 +105,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public ContractDto constructContract(AppUser appUser) {
-    return new ContractDto(
-        new PubKeyTag(),
-        new PriceTag(),
-        "",
-        ""
-    );
+  public ContractDto constructContractDto(AppUser appUser) {
+    return new ContractDto();
   }
 }
