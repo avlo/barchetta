@@ -82,30 +82,37 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @Override
   public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
-    return contractService.getContractsByAppUser(appUser);
+    return contractService.getContractsByAppUser(appUser).stream()
+        .map(Contract::getId)
+        .map(this::getContractById).toList();
   }
 
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
-    return contractService.getAvailableOppositeRoleContractsByAppUser(appUser);
+    return contractService.getAvailableOppositeRoleContractsByAppUser(appUser).stream()
+        .map(Contract::getId)
+        .map(this::getContractById).toList();
   }
 
   @Override
   public List<Contract> getContractsByCoPartyId(@NonNull Long id) {
-    return contractService.getContractsByCoPartyId(id);
+    return contractService.getContractsByCoPartyId(id).stream()
+        .map(Contract::getId)
+        .map(this::getContractById).toList();
   }
 
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUserId(@NonNull Long id) {
-    return contractService.getAvailableOppositeRoleContractsByAppUserId(id);
+    return contractService.getAvailableOppositeRoleContractsByAppUserId(id).stream()
+        .map(Contract::getId)
+        .map(this::getContractById).toList();
   }
 
   @Override
   public List<Contract> getContractsByAppUserId(@NonNull Long id) {
     return contractService.getContractsByAppUserId(id).stream()
-        .map(contract ->
-            getContractById(contract.getId()))
-        .toList();
+        .map(Contract::getId)
+        .map(this::getContractById).toList();
   }
 
   @Override
