@@ -39,11 +39,11 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     ClassifiedListingEvent classifiedListingEvent = contract.getClassifiedListingEvent();
     CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
-    OkMessage okMessageClassifiedListing = sendRequest(
+    OkMessage okMessageClassifiedListing = createNostrEvent(
         new EventMessageFactory(classifiedListingEvent, contract.getNostrAppUserPubKey()).create()
     );
 
-    OkMessage okMessageCalendarTimeBasedEvent = sendRequest(
+    OkMessage okMessageCalendarTimeBasedEvent = createNostrEvent(
         new EventMessageFactory(calendarTimeBasedEvent, contract.getNostrAppUserPubKey()).create());
 
     if (!okMessageClassifiedListing.getFlag() || !okMessageCalendarTimeBasedEvent.getFlag())
@@ -53,8 +53,9 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   }
 
   @NotNull
-  private OkMessage sendRequest(EventMessage classifiedListingEventMessage) throws IOException {
-    return webSocketClient.send(classifiedListingEventMessage)
+  private OkMessage createNostrEvent(EventMessage classifiedListingEventMessage) throws IOException {
+    return webSocketClient
+        .send(classifiedListingEventMessage)
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
         .findFirst()
@@ -66,11 +67,11 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   public Contract getContractById(@NonNull Long id) {
     Contract contractByDbId = contractService.getContractById(id);
 
-    ClassifiedListingEvent classifiedListingEvent = request(
+    ClassifiedListingEvent classifiedListingEvent = sendNostrRequest(
         contractByDbId.getNostrClassifiedListingEventId(),
         ClassifiedListingEvent.class);
 
-    CalendarTimeBasedEvent calendarTimeBasedEvent = request(
+    CalendarTimeBasedEvent calendarTimeBasedEvent = sendNostrRequest(
         contractByDbId.getNostrCalendarTimeBasedEventId(),
         CalendarTimeBasedEvent.class);
 
@@ -120,7 +121,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     return contractService.getAll();
   }
 
-  private <T extends GenericEvent> T request(String eventId, Class<T> type) throws IOException {
+  private <T extends GenericEvent> T sendNostrRequest(String eventId, Class<T> type) throws IOException {
     return webSocketClient
         .send(
             createReqJson("NEEDS-RESOLUTION", eventId))
