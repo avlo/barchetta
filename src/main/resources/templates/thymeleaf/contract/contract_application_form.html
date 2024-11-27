@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -10,17 +11,19 @@
 <main>
   <a href="https://localhost:8080/contract/display_all">display all</a>
   <h4 id="sec_user">User: <code class="language-plaintext highlighter-rouge"><span
-      sec:authentication="principal.username"></span></code>&emsp;Role(s): <code class="language-plaintext highlighter-rouge"><span
+      sec:authentication="principal.username"></span></code>&emsp;Role(s): <code
+      class="language-plaintext highlighter-rouge"><span
       sec:authentication="principal.authorities"></span></code></h4>
   <section>
     <h4>Apply for Contract</h4>
-    <form action="#" th:action="@{/contract/apply}" th:object="${contractDto}" method="post">
+    <form action="#" th:action="@{/contract/apply/{id}(id=${contractDto.id})}" method="post">
       <table style="width:90%">
         <thead>
         <tr>
           <th>AppUserID</th>
           <th>Creator Role</th>
           <th>Contract Text</th>
+          <th>PubKey</th>
         </tr>
         </thead>
         <tbody>
@@ -28,36 +31,11 @@
           <td th:text="${contractDto.appUserId}"/>
           <td th:text="${contractDto.role}"/>
           <td th:text="${contractDto.text}"/>
+          <td th:text="${contractDto.nostrAppUserPubKey}"/>
         </tr>
-        <tr>
-          <label>Nostr PubKey:</label>
-          <select name="nostrAppUserPubKey" th:field="${contractDto.nostrAppUserPubKey}" id="nostrAppUserPubKey">
-            <option th:value="'ReqClientComponent-ID-001'" th:text="'ReqClientComponent-ID-001'"></option>
-            <option th:value="'ReqClientComponent-ID-002'" th:text="'ReqClientComponent-ID-002'"></option>
-          </select>
-        </tr>
-
-        <input type="hidden" th:field="${contractDto.id}" id="id"/>
-        <input type="hidden" th:field="${contractDto.text}" id="text"/>
-
-        <input type="hidden" th:field="${contractDto.payerStake}" id="payerStake"/>
-        <input type="hidden" th:field="${contractDto.payeeStake}" id="payeeStake"/>
-        <input type="hidden" th:field="${contractDto.price}" id="payoutAmount"/>
-
-        <input type="hidden" th:field="${contractDto.payerState}" id="payerState"/>
-        <input type="hidden" th:field="${contractDto.payeeState}" id="payeeState"/>
-        <input type="hidden" th:field="${contractDto.completed}" id="completed"/>
-
-        <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
-
-        <input type="hidden" th:field="${contractDto.role}" id="creatorRole"/>
-
-        <input type="hidden" th:field="${contractDto.appUserId}" id="appUserId"/>
-        <input type="hidden" th:value="${counter_party_id}" name="counterPartyId"/>
-
-        <input type="submit" value="Accept Contract (Preview page)">
         </tbody>
       </table>
+      <button th:type="submit" class="button">Accept Contract (Preview page)</button>
     </form>
   </section>
 </main>

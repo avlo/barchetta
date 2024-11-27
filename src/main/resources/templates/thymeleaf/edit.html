@@ -14,10 +14,10 @@
 
   <form action="#" th:action="@{/edit}" th:object="${user}" method="post">
     <p>
-      <label>User Nostr Public Key</label>
-      <input type="text" id="nostrPubKey" placeholder="User Pubkey" name="nostrPubKey" th:value="${user.pubkey}">
+      <label for="nostrPubKey">User Nostr Public Key</label>
+      <input type="text" id="nostrPubKey" placeholder="User Pubkey" name="nostrPubKey" th:value="*{pubkey}">
     </p>
-    <input type="hidden" id="user_id" name="user_id" th:value="${user.id}"/>
+    <input type="hidden" id="user_id" name="user_id" th:value="*{id}"/>
     <input type="submit" value="Save">
   </form>
 </main>

@@ -44,11 +44,8 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
-  public String createContract(
-      @AuthenticationPrincipal NostrUser user,
-      ContractDto contractDto,
-      Model model) throws IOException, NostrException {
-    controllerService.createContract(contractDto, user);
+  public String createContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException {
+    controllerService.saveAsCreator(contractDto, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
@@ -84,11 +81,11 @@ public class ContractsController {
     return "thymeleaf/contract/view_contract";
   }
 
-  @PostMapping("/apply")
-  public String applyForContract(@AuthenticationPrincipal NostrUser user, Long contractId, Model model) throws IOException, NostrException {
+  @PostMapping("/apply/{id}")
+  public String applyForContract(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException {
     controllerService.saveAsCounterParty(contractId, user);
-    model.addAttribute(CONTRACTS_STR, controllerService.getAll());
-    return "redirect:display_all";
+    setCanonicalModelAttributes(user, model);
+    return "thymeleaf/contract/display_all";
   }
 
   @PostMapping("/vote")

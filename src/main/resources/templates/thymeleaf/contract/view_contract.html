@@ -22,13 +22,15 @@
           <th>AppUserID</th>
           <th>Creator Role</th>
           <th>Contract Text</th>
+          <th>PubKey</th>
         </tr>
         </thead>
         <tbody>
         <tr>
-          <td th:text="${contractDto.id}"/>
-          <td th:text="${contractDto.role}"/>
-          <td th:text="${contractDto.text}"/>
+          <td th:text="*{id}"/>
+          <td th:text="*{role}"/>
+          <td th:text="*{text}"/>
+          <td th:text="*{nostrAppUserPubKey}"/>
         </tr>
         </tbody>
       </table>
@@ -58,16 +60,16 @@
         </div>
       </div>
       <div>
-        <input type="hidden" th:field="${contractDto.id}" id="id"/>
-        <input type="hidden" th:field="${contractDto.text}" id="text"/>
-        <input type="hidden" th:field="${contractDto.payerStake}" id="payerStake"/>
-        <input type="hidden" th:field="${contractDto.payeeStake}" id="payeeStake"/>
-        <input type="hidden" th:field="${contractDto.price}" id="payoutAmount"/>
-        <input type="hidden" th:field="${contractDto.completed}" id="completed"/>
+        <input type="hidden" th:field="*{id}" id="id"/>
+        <input type="hidden" th:field="*{text}" id="text"/>
+        <input type="hidden" th:field="*{payerStake}" id="payerStake"/>
+        <input type="hidden" th:field="*{payeeStake}" id="payeeStake"/>
+        <input type="hidden" th:field="*{price}" id="payoutAmount"/>
+        <input type="hidden" th:field="*{completed}" id="completed"/>
         <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
-        <input type="hidden" th:field="${contractDto.role}" id="creatorRole"/>
-        <input type="hidden" th:field="${contractDto.appUserId}" id="appUserId"/>
-        <input type="hidden" th:value="${contractDto.counterPartyId}" name="counterPartyId"/>
+        <input type="hidden" th:field="*{role}" id="creatorRole"/>
+        <input type="hidden" th:field="*{appUserId}" id="appUserId"/>
+        <input type="hidden" th:value="*{counterPartyId}" name="counterPartyId"/>
       </div>
       <input type="submit" value="Accept Contract (View page)">
     </form>

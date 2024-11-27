@@ -47,7 +47,7 @@ public class Contract {
     this.nostrClassifiedListingEventId = classifiedListingEvent.getId();
     this.nostrCalendarTimeBasedEventId = calendarTimeBasedEvent.getId();
     this.nostrAppUserPubKey = classifiedListingEvent.getPubKey().toHexString();
-    this.nostrCounterPartyPubKey = classifiedListingEvent.getPubKey().toHexString();
+//    this.nostrCounterPartyPubKey = classifiedListingEvent.getPubKey().toHexString();
   }
 
   public String getText() {
@@ -150,7 +150,7 @@ public class Contract {
         .findAny().map(GenericTag.class::cast)
         .orElse(
             GenericTag.create(stateCode, 52, String.valueOf(ContractStateEnum.APPROVE)))
-        .getAttributes().get(0).getValue();
+        .getAttributes().getFirst().getValue();
     return String.valueOf(value).toUpperCase();
   }
 }

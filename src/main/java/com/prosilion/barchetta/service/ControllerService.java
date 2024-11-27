@@ -31,21 +31,22 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract createContract(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException {
+  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException {
     // TODO: check below contract doesn't already have existing different appuser ID
     User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = contractDto.convertToEntity();
     contract.setAppUserId(foundUser.getId());
     contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
-    return create(contract);
+    return save(contract);
   }
 
   @Override
   public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException {
-    User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = getContractByContractId(contractId);
-    contract.setNostrCounterPartyPubKey(foundUser.getPubkey());
+    User foundUser = userService.findByUsername(user.getUsername());
+    contract.setCounterPartyId(foundUser.getId());
+    contract.setNostrCounterPartyPubKey(user.getPubkey());
     return save(contract);
   }
 
@@ -69,16 +70,9 @@ public class ControllerService implements ControllerServiceIF {
     return userService.getRole(contract, user);
   }
 
-  private Contract create(@NonNull Contract contract) throws IOException, NostrException {
-    log.info("Saving contract [{}], appUser ID [{}], role [{}]", contract.getText(), contract.getAppUserId(), contract.getCreatorRole());
-    Contract savedContract = save(contract);
-    log.info("Contract saved [{}], appUser ID [{}], role [{}]", savedContract.getText(), savedContract.getAppUserId(), savedContract.getCreatorRole());
-    return savedContract;
-  }
-
   @Override
   public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException {
-    return contractEntityService.save(contractDto.convertToEntity());
+    return save(contractDto.convertToEntity());
   }
 
   @Override
