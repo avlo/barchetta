@@ -1,8 +1,8 @@
 package com.prosilion.barchetta.service.db;
 
 import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.repository.ContractRepository;
-import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,28 +31,18 @@ public class ContractEntityService implements ContractEntityServiceIF {
   }
 
   @Override
-  public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
-    return getContractsByAppUserId(appUser.getId());
+  public List<Contract> getContractsByAppUser(@NonNull User appUser) {
+    return contractRepository.getContractsByAppUserId(appUser.getId());
   }
 
   @Override
-  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
-    return getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
+  public List<Contract> getContractsByCoParty(@NonNull User appUser) {
+    return contractRepository.getContractsByCoPartyId(appUser.getId());
   }
 
   @Override
-  public List<Contract> getContractsByCoPartyId(@NonNull Long id) {
-    return contractRepository.getContractsByCoPartyId(id);
-  }
-
-  @Override
-  public List<Contract> getAvailableOppositeRoleContractsByAppUserId(@NonNull Long id) {
-    return contractRepository.getOpenContractsFor(id);
-  }
-
-  @Override
-  public List<Contract> getContractsByAppUserId(@NonNull Long id) {
-    return contractRepository.getContractsByAppUserId(id);
+  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull User appUser) {
+    return contractRepository.getOpenContractsFor(appUser.getId());
   }
 
   @Override

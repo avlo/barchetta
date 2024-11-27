@@ -1,12 +1,9 @@
 package com.prosilion.barchetta.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.NonNull;
 import nostr.event.BaseMessage;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -20,14 +17,12 @@ import java.util.concurrent.ExecutionException;
 
 import static org.awaitility.Awaitility.await;
 
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class StandardWebSocketClient extends TextWebSocketHandler implements WebSocketClientIF {
   private final WebSocketSession clientSession;
   private List<String> events = new ArrayList<>();
   private boolean completed = false;
 
-  public StandardWebSocketClient(@Value("${nostr.relay.uri}") String relayUri) throws ExecutionException, InterruptedException {
+  public StandardWebSocketClient(@NonNull String relayUri) throws ExecutionException, InterruptedException {
     this.clientSession = new org.springframework.web.socket.client.standard.StandardWebSocketClient().execute(this, new WebSocketHttpHeaders(), URI.create(relayUri)).get();
   }
 

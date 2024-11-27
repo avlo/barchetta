@@ -2,8 +2,7 @@ package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.User;
-import com.prosilion.barchetta.service.ControllerServiceIF;
-import com.prosilion.presto.nostr.entity.NostrUser;
+import com.prosilion.barchetta.service.NostrControllerServiceIF;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Controller
@@ -29,11 +29,11 @@ public class ContractsController {
   public static final String OPEN_CONTRACTS_STR = "open_contracts";
   public static final String USER_CONTRACTS_STR = "user_contracts";
 
-  private final ControllerServiceIF controllerService;
+  private final NostrControllerServiceIF controllerService;
 
   @Autowired
-  public ContractsController(ControllerServiceIF contractAppUserService) {
-    this.controllerService = contractAppUserService;
+  public ContractsController(NostrControllerServiceIF nostrControllerServiceIF) {
+    this.controllerService = nostrControllerServiceIF;
   }
 
   @GetMapping({"/index.html", "/"})
@@ -44,7 +44,7 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
-  public String createContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException {
+  public String createContract(@AuthenticationPrincipal User user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     controllerService.saveAsCreator(contractDto, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
@@ -53,17 +53,17 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @GetMapping("/display_all")
-  public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
+  public String showUserContracts(@AuthenticationPrincipal User user, Model model) {
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showAvailableContracts(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        controllerService.getContractDtoByContractId(contractId));
+        controllerService.getContractDtoByContractId(contractId, user));
     model.addAttribute(
         COUNTER_PARTY_ID_STR,
         controllerService.findByUsername(user.getUsername()).getId());
@@ -73,23 +73,23 @@ public class ContractsController {
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showMyContracts(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching my contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        controllerService.getContractDtoByContractId(contractId));
+        controllerService.getContractDtoByContractId(contractId, user));
     return "thymeleaf/contract/view_contract";
   }
 
   @PostMapping("/apply/{id}")
-  public String applyForContract(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException {
+  public String applyForContract(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     controllerService.saveAsCounterParty(contractId, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
 
   @PostMapping("/vote")
-  public String voteOnContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException {
+  public String voteOnContract(@AuthenticationPrincipal User user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     log.info("User [{}] voting on contractDto [{}]", user.getUsername(), contractDto);
     log.info("Contract id: [{}] ", contractDto.getId());
     log.info("Contract text: [{}] ", contractDto.getText());
@@ -99,10 +99,10 @@ public class ContractsController {
     return "redirect:display_all";
   }
 
-  private void setCanonicalModelAttributes(@NonNull NostrUser user, @NonNull Model model) {
+  private void setCanonicalModelAttributes(@NonNull User user, @NonNull Model model) {
     User contractAppUser = controllerService.findByUsername(user.getUsername());
     model.addAttribute(USER_CONTRACTS_STR, controllerService.getAllContractsFor(contractAppUser));
     model.addAttribute(OPEN_CONTRACTS_STR, controllerService.getOpenContractsFor(contractAppUser));
-    model.addAttribute(CONTRACT_DTO_STR, controllerService.constructContractDto(contractAppUser));
+    model.addAttribute(CONTRACT_DTO_STR, controllerService.constructContractDto());
   }
 }

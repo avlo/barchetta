@@ -6,8 +6,6 @@ import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.user.UserServiceIF;
-import com.prosilion.presto.nostr.entity.NostrUser;
-import com.prosilion.presto.security.entity.AppUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -31,8 +30,8 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException {
-    // TODO: check below contract doesn't already have existing different appuser ID
+  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull User user) throws IOException, NostrException, ExecutionException, InterruptedException {
+    // TODO: check below contract doesn't already have existing different appuser ID or other/clean sol'n
     User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = contractDto.convertToEntity();
     contract.setAppUserId(foundUser.getId());
@@ -42,7 +41,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException {
+  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull User user) throws NostrException, IOException, ExecutionException, InterruptedException {
     Contract contract = getContractByContractId(contractId);
     User foundUser = userService.findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
@@ -51,13 +50,13 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract getContractByContractId(@NonNull Long id) throws IOException {
-    return contractEntityService.getContractById(id);
+  public ContractDto getContractDtoByContractId(@NonNull Long id) {
+    return getContractByContractId(id).convertToDto();
   }
 
   @Override
-  public ContractDto getContractDtoByContractId(@NonNull Long id) throws IOException {
-    return contractEntityService.getContractById(id).convertToDto();
+  public Contract getContractByContractId(@NonNull Long id) {
+    return contractEntityService.getContractById(id);
   }
 
   @Override
@@ -71,12 +70,12 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException {
+  public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
     return save(contractDto.convertToEntity());
   }
 
   @Override
-  public Contract save(@NonNull Contract contract) throws NostrException, IOException {
+  public Contract save(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
     return contractEntityService.save(contract);
   }
 
@@ -86,20 +85,20 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public List<Contract> getAllContractsFor(@NonNull AppUser appUser) {
+  public List<Contract> getAllContractsFor(@NonNull User appUser) {
     return Stream.concat(
-            contractEntityService.getContractsByAppUserId(appUser.getId()).stream(),
-            contractEntityService.getContractsByCoPartyId(appUser.getId()).stream())
+            contractEntityService.getContractsByAppUser(appUser).stream(),
+            contractEntityService.getContractsByCoParty(appUser).stream())
         .toList();
   }
 
   @Override
-  public List<Contract> getOpenContractsFor(@NonNull AppUser appUser) {
-    return contractEntityService.getAvailableOppositeRoleContractsByAppUserId(appUser.getId());
+  public List<Contract> getOpenContractsFor(@NonNull User appUser) {
+    return contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser);
   }
 
   @Override
-  public ContractDto constructContractDto(AppUser appUser) {
+  public ContractDto constructContractDto() {
     return new ContractDto();
   }
 }
