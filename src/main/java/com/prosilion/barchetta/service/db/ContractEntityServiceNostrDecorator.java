@@ -30,11 +30,13 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class ContractEntityServiceNostrDecorator implements ContractEntityServiceNostrDecoratorIF {
   private final String relayUri;
-  private final ContractEntityServiceIF contractService;
+  private final ContractEntityServiceIF contractEntityService;
   private final Map<String, WebSocketClientIF> webSocketClientMap = new HashMap<>();
 
-  public ContractEntityServiceNostrDecorator(ContractEntityServiceIF contractService, String relayUri) {
-    this.contractService = contractService;
+  public ContractEntityServiceNostrDecorator(
+      @NonNull ContractEntityServiceIF contractEntityService,
+      @NonNull String relayUri) {
+    this.contractEntityService = contractEntityService;
     this.relayUri = relayUri;
   }
 
@@ -63,7 +65,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     if (!okMessageClassifiedListing.getFlag() || !okMessageCalendarTimeBasedEvent.getFlag())
       throw new NostrException("failed OK from relay");
 
-    return contractService.save(contract);
+    return contractEntityService.save(contract);
   }
 
   @NotNull
@@ -78,7 +80,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @SneakyThrows
   @Override
-  public Contract getContractById(@NonNull Long id, @NonNull String pubKey) {
+  public Contract getContractByIdAndPubKey(@NonNull Long id, @NonNull String pubKey) {
     Contract contractByDbId = getContractById(id);
 
     ClassifiedListingEvent classifiedListingEvent = sendNostrRequest(
@@ -97,22 +99,22 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @Override
   public Contract getContractById(@NotNull Long id) {
-    return contractService.getContractById(id);
+    return contractEntityService.getContractById(id);
   }
 
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull User user) {
-    return getContractsById(contractService.getAvailableOppositeRoleContractsByAppUser(user));
+    return getContractsById(contractEntityService.getAvailableOppositeRoleContractsByAppUser(user));
   }
 
   @Override
   public List<Contract> getContractsByCoParty(@NonNull User user) {
-    return getContractsById(contractService.getContractsByCoParty(user));
+    return getContractsById(contractEntityService.getContractsByCoParty(user));
   }
 
   @Override
   public List<Contract> getContractsByAppUser(@NonNull User user) {
-    List<Contract> contractsByAppUser = contractService.getContractsByAppUser(user);
+    List<Contract> contractsByAppUser = contractEntityService.getContractsByAppUser(user);
     return getContractsById(contractsByAppUser);
   }
 
@@ -125,7 +127,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @Override
   public List<Contract> getAll() {
-    return contractService.getAll();
+    return contractEntityService.getAll();
   }
 
   private <T extends GenericEvent> T sendNostrRequest(String eventId, String pubKey, Class<T> type) throws IOException, ExecutionException, InterruptedException {

@@ -29,11 +29,11 @@ public class ContractsController {
   public static final String OPEN_CONTRACTS_STR = "open_contracts";
   public static final String USER_CONTRACTS_STR = "user_contracts";
 
-  private final NostrControllerServiceIF controllerService;
+  private final NostrControllerServiceIF nostrControllerService;
 
   @Autowired
-  public ContractsController(NostrControllerServiceIF nostrControllerServiceIF) {
-    this.controllerService = nostrControllerServiceIF;
+  public ContractsController(@NonNull NostrControllerServiceIF nostrControllerService) {
+    this.nostrControllerService = nostrControllerService;
   }
 
   @GetMapping({"/index.html", "/"})
@@ -45,7 +45,7 @@ public class ContractsController {
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal User user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
-    controllerService.saveAsCreator(contractDto, user);
+    nostrControllerService.saveAsCreator(contractDto, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
@@ -63,11 +63,11 @@ public class ContractsController {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        controllerService.getContractDtoByContractId(contractId, user));
+        nostrControllerService.getContractDtoByContractIdAndPubkey(contractId, user));
     model.addAttribute(
         COUNTER_PARTY_ID_STR,
-        controllerService.findByUsername(user.getUsername()).getId());
-    log.info("CounterPartyId: [{}]", controllerService.findByUsername(user.getUsername()).getId());
+        nostrControllerService.findByUsername(user.getUsername()).getId());
+    log.info("CounterPartyId: [{}]", nostrControllerService.findByUsername(user.getUsername()).getId());
     log.info("User for potential contract: {}", user.getUsername());
     return "thymeleaf/contract/contract_application_form";
   }
@@ -77,13 +77,13 @@ public class ContractsController {
     log.info("Fetching my contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        controllerService.getContractDtoByContractId(contractId, user));
+        nostrControllerService.getContractDtoByContractIdAndPubkey(contractId, user));
     return "thymeleaf/contract/view_contract";
   }
 
   @PostMapping("/apply/{id}")
   public String applyForContract(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
-    controllerService.saveAsCounterParty(contractId, user);
+    nostrControllerService.saveAsCounterParty(contractId, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
@@ -94,15 +94,15 @@ public class ContractsController {
     log.info("Contract id: [{}] ", contractDto.getId());
     log.info("Contract text: [{}] ", contractDto.getText());
     log.info("Contract appUserId: [{}] ", contractDto.getAppUserId());
-    controllerService.saveDto(contractDto);
-    model.addAttribute(CONTRACTS_STR, controllerService.getAll());
+    nostrControllerService.saveDto(contractDto);
+    model.addAttribute(CONTRACTS_STR, nostrControllerService.getAll());
     return "redirect:display_all";
   }
 
   private void setCanonicalModelAttributes(@NonNull User user, @NonNull Model model) {
-    User contractAppUser = controllerService.findByUsername(user.getUsername());
-    model.addAttribute(USER_CONTRACTS_STR, controllerService.getAllContractsFor(contractAppUser));
-    model.addAttribute(OPEN_CONTRACTS_STR, controllerService.getOpenContractsFor(contractAppUser));
-    model.addAttribute(CONTRACT_DTO_STR, controllerService.constructContractDto());
+    User contractAppUser = nostrControllerService.findByUsername(user.getUsername());
+    model.addAttribute(USER_CONTRACTS_STR, nostrControllerService.getAllContractsFor(contractAppUser));
+    model.addAttribute(OPEN_CONTRACTS_STR, nostrControllerService.getOpenContractsFor(contractAppUser));
+    model.addAttribute(CONTRACT_DTO_STR, nostrControllerService.constructContractDto());
   }
 }

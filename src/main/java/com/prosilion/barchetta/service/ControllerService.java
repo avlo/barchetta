@@ -24,7 +24,9 @@ public class ControllerService implements ControllerServiceIF {
   UserServiceIF userService;
 
   @Autowired
-  public ControllerService(ContractEntityServiceIF contractEntityService, UserServiceIF userService) {
+  public ControllerService(
+      @NonNull ContractEntityServiceIF contractEntityService,
+      @NonNull UserServiceIF userService) {
     this.contractEntityService = contractEntityService;
     this.userService = userService;
   }
@@ -35,6 +37,7 @@ public class ControllerService implements ControllerServiceIF {
     User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = contractDto.convertToEntity();
     contract.setAppUserId(foundUser.getId());
+//    TODO: below line should be refactored into NostrControllerService
     contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
     return save(contract);
@@ -45,6 +48,7 @@ public class ControllerService implements ControllerServiceIF {
     Contract contract = getContractByContractId(contractId);
     User foundUser = userService.findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
+//    TODO: below line should be refactored into NostrControllerService
     contract.setNostrCounterPartyPubKey(user.getPubkey());
     return save(contract);
   }

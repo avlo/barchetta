@@ -33,6 +33,7 @@ public class ContractDto {
 
   public Contract convertToEntity() {
     return new Contract(
+//        TODO: below two lines need refactor into a NostrContractDto variant
         mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class),
         mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class)
     );
