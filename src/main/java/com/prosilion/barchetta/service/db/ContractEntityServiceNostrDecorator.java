@@ -3,7 +3,7 @@ package com.prosilion.barchetta.service.db;
 import com.prosilion.barchetta.client.StandardWebSocketClient;
 import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.model.entity.User;
+import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -40,24 +40,20 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     this.relayUri = relayUri;
   }
 
-  private WebSocketClientIF getSocket(String key) throws ExecutionException, InterruptedException {
-    WebSocketClientIF webSocketClientIF = webSocketClientMap.putIfAbsent(key, new StandardWebSocketClient(relayUri));
-    WebSocketClientIF webSocketClientIF1 = Optional.ofNullable(webSocketClientIF).orElse(webSocketClientMap.get(key));
-    return webSocketClientIF1;
-  }
-
   @Transactional
   @Override
-  public Contract save(@NonNull Contract contract) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
     log.info("saving contract {}", contract);
     ClassifiedListingEvent classifiedListingEvent = contract.getClassifiedListingEvent();
     CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
+//    TODO: worth keeping in mind, we're swallowing OKMessage here instead of returning to subscriber/client/UI
     OkMessage okMessageClassifiedListing = createNostrEvent(
         new EventMessageFactory(classifiedListingEvent, contract.getNostrAppUserPubKey()).create(),
         contract.getNostrAppUserPubKey()
     );
 
+//    TODO: worth keeping in mind, we're swallowing OKMessage here instead of returning to subscriber/client/UI
     OkMessage okMessageCalendarTimeBasedEvent = createNostrEvent(
         new EventMessageFactory(calendarTimeBasedEvent, contract.getNostrAppUserPubKey()).create(),
         contract.getNostrAppUserPubKey());
@@ -68,27 +64,17 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     return contractEntityService.save(contract);
   }
 
-  @NotNull
-  private OkMessage createNostrEvent(EventMessage classifiedListingEventMessage, String pubKey) throws IOException, ExecutionException, InterruptedException {
-    return getSocket(pubKey)
-        .send(classifiedListingEventMessage)
-        .stream()
-        .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
-        .findFirst()
-        .orElseThrow();
-  }
-
   @SneakyThrows
   @Override
-  public Contract getContractByIdAndPubKey(@NonNull Long id, @NonNull String pubKey) {
-    Contract contractByDbId = getContractById(id);
+  public Contract getContract(@NonNull Long contractId, @NonNull String pubKeySubscriptionId) {
+    Contract contractByDbId = getContract(contractId);
 
     ClassifiedListingEvent classifiedListingEvent = sendNostrRequest(
-        contractByDbId.getNostrClassifiedListingEventId(), pubKey,
+        contractByDbId.getNostrClassifiedListingEventId(), pubKeySubscriptionId,
         ClassifiedListingEvent.class);
 
     CalendarTimeBasedEvent calendarTimeBasedEvent = sendNostrRequest(
-        contractByDbId.getNostrCalendarTimeBasedEventId(), pubKey,
+        contractByDbId.getNostrCalendarTimeBasedEventId(), pubKeySubscriptionId,
         CalendarTimeBasedEvent.class);
 
     contractByDbId.setClassifiedListingEvent(classifiedListingEvent);
@@ -98,42 +84,57 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   }
 
   @Override
-  public Contract getContractById(@NotNull Long id) {
-    return contractEntityService.getContractById(id);
+  public Contract getContract(@NotNull Long id) {
+    return contractEntityService.getContract(id);
   }
 
   @Override
-  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull User user) {
-    return getContractsById(contractEntityService.getAvailableOppositeRoleContractsByAppUser(user));
+  public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
+    return populateContracts(contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser));
   }
 
   @Override
-  public List<Contract> getContractsByCoParty(@NonNull User user) {
-    return getContractsById(contractEntityService.getContractsByCoParty(user));
+  public List<Contract> getContractsByCoParty(@NonNull AppUser coParty) {
+    return populateContracts(contractEntityService.getContractsByCoParty(coParty));
   }
 
   @Override
-  public List<Contract> getContractsByAppUser(@NonNull User user) {
-    List<Contract> contractsByAppUser = contractEntityService.getContractsByAppUser(user);
-    return getContractsById(contractsByAppUser);
+  public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
+    List<Contract> contractsByAppUser = contractEntityService.getContractsByAppUser(appUser);
+    return populateContracts(contractsByAppUser);
+  }
+
+  @Override
+  public List<Contract> getAllContracts(@NonNull String pubKeySubscriptionId) {
+    return getAllContracts().stream()
+        .map(Contract::getId)
+        .map(contractId -> getContract(contractId, pubKeySubscriptionId)).toList();
+  }
+
+  @Override
+  public List<Contract> getAllContracts() {
+    return contractEntityService.getAllContracts();
   }
 
   @NotNull
-  private List<Contract> getContractsById(List<Contract> contracts) {
-    return contracts.stream()
-        .map(Contract::getId)
-        .map(this::getContractById).toList();
-  }
-
-  @Override
-  public List<Contract> getAll() {
-    return contractEntityService.getAll();
-  }
-
-  private <T extends GenericEvent> T sendNostrRequest(String eventId, String pubKey, Class<T> type) throws IOException, ExecutionException, InterruptedException {
+  private OkMessage createNostrEvent(
+      @NonNull EventMessage classifiedListingEventMessage,
+      @NonNull String pubKey) throws ExecutionException, InterruptedException, IOException {
     return getSocket(pubKey)
+        .send(classifiedListingEventMessage)
+        .stream()
+        .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  private <T extends GenericEvent> T sendNostrRequest(
+      @NonNull String eventId,
+      @NonNull String pubKeySubscriberId,
+      @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
+    return getSocket(pubKeySubscriberId)
         .send(
-            createReqJson(pubKey, eventId))
+            createReqJson(pubKeySubscriberId, eventId))
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
@@ -143,7 +144,19 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
         .orElseThrow();
   }
 
-  private String createReqJson(String subscriberId, String id) {
+  private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
     return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
+  }
+
+  private List<Contract> populateContracts(List<Contract> contracts) {
+    return contracts.stream()
+        .map(Contract::getId)
+        .map(this::getContract).toList();
+  }
+
+  private WebSocketClientIF getSocket(@NonNull String key) throws ExecutionException, InterruptedException {
+    WebSocketClientIF webSocketClientIF = webSocketClientMap.putIfAbsent(key, new StandardWebSocketClient(relayUri));
+    WebSocketClientIF webSocketClientIF1 = Optional.ofNullable(webSocketClientIF).orElse(webSocketClientMap.get(key));
+    return webSocketClientIF1;
   }
 }

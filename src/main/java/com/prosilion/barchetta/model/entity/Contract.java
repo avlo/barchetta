@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
@@ -40,7 +41,9 @@ public class Contract {
   @Transient
   private CalendarTimeBasedEvent calendarTimeBasedEvent;
 
-  public Contract(ClassifiedListingEvent classifiedListingEvent, CalendarTimeBasedEvent calendarTimeBasedEvent) {
+  public Contract(
+      @NonNull ClassifiedListingEvent classifiedListingEvent,
+      @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent) {
     this.classifiedListingEvent = classifiedListingEvent;
     this.calendarTimeBasedEvent = calendarTimeBasedEvent;
 

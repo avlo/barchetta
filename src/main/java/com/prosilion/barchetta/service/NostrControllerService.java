@@ -5,7 +5,9 @@ import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecoratorIF;
+import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 @Service
 public class NostrControllerService implements NostrControllerServiceIF {
   private final ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator;
@@ -29,44 +32,54 @@ public class NostrControllerService implements NostrControllerServiceIF {
   }
 
   @Override
-//  TODO: ContractDto needs NostrContractDto variant w/ cleEvent & ctbEvent refactored out of
-//      ContractDto and into NostrContractDto
-  public ContractDto constructContractDto() {
-    return controllerService.constructContractDto();
+  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
+    User foundUser = findByUsername(user.getUsername());
+    Contract contract = contractDto.convertToEntity();
+    contract.setAppUserId(foundUser.getId());
+    contract.setNostrAppUserPubKey(user.getPubkey());
+    log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
+    return save(contract);
   }
 
   @Override
-  public Contract saveAsCreator(@NonNull ContractDto contract, @NonNull User user) throws IOException, NostrException, ExecutionException, InterruptedException {
-    return controllerService.saveAsCreator(contract, user);
+  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
+    Contract contract = getContract(contractId, user);
+    User foundUser = findByUsername(user.getUsername());
+    contract.setCounterPartyId(foundUser.getId());
+    contract.setNostrCounterPartyPubKey(user.getPubkey());
+    return save(contract);
   }
 
   @Override
-  public Contract getContractByContractId(@NonNull Long id) throws IOException {
-    System.out.println("000000000000000");
-    System.out.println("000000000000000");
-    System.out.println("this should never get called in nostr context");
-    System.out.println("double check such then uncomment below throw exception");
-    System.out.println("000000000000000");
-    System.out.println("000000000000000");
-//    throw new IOException("NostrControllerService.getContractByContractId(@NonNull Long id) has been called but should be NostrControllerService.getContractDtoByContractIdAndPubkey(@NonNull Long id, @NotNull User user) instead");
-    return controllerService.getContractByContractId(id);
+  public ContractDto getContractDto(@NonNull Long id, @NotNull NostrUser user) {
+    return getContract(id, user).convertToDto();
   }
 
   @Override
-  public ContractDto getContractDtoByContractIdAndPubkey(@NonNull Long id, @NotNull User user) {
-    return contractEntityServiceNostrDecorator.getContractByIdAndPubKey(id, user.getPubkey()).convertToDto();
+  public Contract getContract(@NonNull Long id, @NotNull NostrUser user) {
+    return contractEntityServiceNostrDecorator.getContract(id, user.getPubkey());
   }
 
   @Override
-  public ContractDto getContractDtoByContractId(@NonNull Long id) {
+  public Contract getContract(@NonNull Long id) throws IOException {
+    System.out.println("000000000000000");
+    System.out.println("000000000000000");
+    System.out.println("this method should never get called in nostr context since it only requires id");
+    System.out.println("confirm as such then uncomment below to throw exception");
+    System.out.println("000000000000000");
+    System.out.println("000000000000000");
+    throw new IOException("NostrControllerService.getContract(@NonNull Long id) has been erroneously called.   NostrControllerService.getContract(@NonNull Long id, @NotNull User user) should be called instead");
+  }
+
+  @Override
+  public ContractDto getContractDto(@NonNull Long id) throws IOException {
     System.out.println("111111111111111");
     System.out.println("111111111111111");
-    System.out.println("this should never get called in nostr context");
-    System.out.println("double check such then uncomment below throw exception");
+    System.out.println("this method should never get called in nostr context since it only requires id");
+    System.out.println("confirm as such then uncomment below to throw exception");
     System.out.println("111111111111111");
     System.out.println("111111111111111");
-//    throw new IOException("NostrControllerService.getContractByContractId(@NonNull Long id) has been called but should be NostrControllerService.getContractDtoByContractIdAndPubkey(@NonNull Long id, @NotNull User user) instead");
-    return controllerService.getContractDtoByContractId(id);
+    throw new IOException("NostrControllerService.getContractDto(@NonNull Long id) has been erroneously called.   NostrControllerService.getContractDto(@NonNull Long id, @NotNull User user) should be called instead");
   }
 
   @Override
@@ -75,37 +88,53 @@ public class NostrControllerService implements NostrControllerServiceIF {
   }
 
   @Override
-  public CreatorRoleEnum getRole(Contract contract, User user) {
+  public CreatorRoleEnum getRole(@NonNull Contract contract, @NonNull User user) {
     return controllerService.getRole(contract, user);
   }
 
   @Override
   public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return controllerService.saveDto(contractDto);
+    return save(contractDto.convertToEntity());
   }
 
   @Override
   public Contract save(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return controllerService.save(contract);
+    return contractEntityServiceNostrDecorator.save(contract);
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull User user) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return controllerService.saveAsCounterParty(contractId, user);
+  public List<Contract> getAllContracts() throws IOException {
+    System.out.println("222222222222222");
+    System.out.println("222222222222222");
+    System.out.println("this method should never get called in nostr context since it only requires id");
+    System.out.println("confirm as such then uncomment below to throw exception");
+    System.out.println("222222222222222");
+    System.out.println("222222222222222");
+    throw new IOException("NostrControllerService.getAllContracts() has been erroneously called.   NostrControllerService.getAllContracts(@NotNull User user) should be called instead");
   }
 
   @Override
-  public List<Contract> getAll() {
-    return controllerService.getAll();
+  public List<Contract> getAllContracts(@NonNull NostrUser nostrUser) {
+    return contractEntityServiceNostrDecorator.getAllContracts(nostrUser.getPubkey());
   }
 
   @Override
-  public List<Contract> getAllContractsFor(@NonNull User user) {
-    return controllerService.getAllContractsFor(user);
+  public List<Contract> getAllContracts(@NonNull User user) {
+    return List.of();
+  }
+  @Override
+  public List<Contract> getOpenContracts(@NonNull User user) {
+    return List.of();
+  }
+  @Override
+  public List<Contract> getOpenContracts(@NonNull NostrUser appUser) {
+    return contractEntityServiceNostrDecorator.getAvailableOppositeRoleContractsByAppUser(findByUsername(appUser.getUsername()));
   }
 
   @Override
-  public List<Contract> getOpenContractsFor(@NonNull User user) {
-    return controllerService.getOpenContractsFor(user);
+//  TODO: ContractDto needs NostrContractDto variant w/ cleEvent & ctbEvent refactored out of
+//      ContractDto and into NostrContractDto
+  public ContractDto constructContractDto() {
+    return controllerService.constructContractDto();
   }
 }

@@ -1,8 +1,8 @@
 package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
-import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.NostrControllerServiceIF;
+import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -44,7 +44,7 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
-  public String createContract(@AuthenticationPrincipal User user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public String createContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     nostrControllerService.saveAsCreator(contractDto, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
@@ -53,17 +53,17 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @GetMapping("/display_all")
-  public String showUserContracts(@AuthenticationPrincipal User user, Model model) {
+  public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        nostrControllerService.getContractDtoByContractIdAndPubkey(contractId, user));
+        nostrControllerService.getContractDto(contractId, user));
     model.addAttribute(
         COUNTER_PARTY_ID_STR,
         nostrControllerService.findByUsername(user.getUsername()).getId());
@@ -73,36 +73,35 @@ public class ContractsController {
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
     log.info("Fetching my contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        nostrControllerService.getContractDtoByContractIdAndPubkey(contractId, user));
+        nostrControllerService.getContractDto(contractId, user));
     return "thymeleaf/contract/view_contract";
   }
 
   @PostMapping("/apply/{id}")
-  public String applyForContract(@AuthenticationPrincipal User user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public String applyForContract(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     nostrControllerService.saveAsCounterParty(contractId, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
 
   @PostMapping("/vote")
-  public String voteOnContract(@AuthenticationPrincipal User user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public String voteOnContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     log.info("User [{}] voting on contractDto [{}]", user.getUsername(), contractDto);
     log.info("Contract id: [{}] ", contractDto.getId());
     log.info("Contract text: [{}] ", contractDto.getText());
     log.info("Contract appUserId: [{}] ", contractDto.getAppUserId());
     nostrControllerService.saveDto(contractDto);
-    model.addAttribute(CONTRACTS_STR, nostrControllerService.getAll());
+    model.addAttribute(CONTRACTS_STR, nostrControllerService.getAllContracts());
     return "redirect:display_all";
   }
 
-  private void setCanonicalModelAttributes(@NonNull User user, @NonNull Model model) {
-    User contractAppUser = nostrControllerService.findByUsername(user.getUsername());
-    model.addAttribute(USER_CONTRACTS_STR, nostrControllerService.getAllContractsFor(contractAppUser));
-    model.addAttribute(OPEN_CONTRACTS_STR, nostrControllerService.getOpenContractsFor(contractAppUser));
+  private void setCanonicalModelAttributes(@NonNull NostrUser nostrUser, @NonNull Model model) {
+    model.addAttribute(USER_CONTRACTS_STR, nostrControllerService.getAllContracts(nostrUser));
+    model.addAttribute(OPEN_CONTRACTS_STR, nostrControllerService.getOpenContracts(nostrUser));
     model.addAttribute(CONTRACT_DTO_STR, nostrControllerService.constructContractDto());
   }
 }

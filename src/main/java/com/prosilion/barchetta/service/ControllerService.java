@@ -6,6 +6,7 @@ import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
 import com.prosilion.barchetta.service.user.UserServiceIF;
+import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
@@ -32,7 +33,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull User user) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     // TODO: check below contract doesn't already have existing different appuser ID or other/clean sol'n
     User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = contractDto.convertToEntity();
@@ -44,8 +45,8 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull User user) throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract contract = getContractByContractId(contractId);
+  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
+    Contract contract = getContract(contractId);
     User foundUser = userService.findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
 //    TODO: below line should be refactored into NostrControllerService
@@ -54,13 +55,13 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public ContractDto getContractDtoByContractId(@NonNull Long id) {
-    return getContractByContractId(id).convertToDto();
+  public ContractDto getContractDto(@NonNull Long contractId) {
+    return getContract(contractId).convertToDto();
   }
 
   @Override
-  public Contract getContractByContractId(@NonNull Long id) {
-    return contractEntityService.getContractById(id);
+  public Contract getContract(@NonNull Long contractId) {
+    return contractEntityService.getContract(contractId);
   }
 
   @Override
@@ -84,12 +85,12 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public List<Contract> getAll() {
-    return contractEntityService.getAll();
+  public List<Contract> getAllContracts() {
+    return contractEntityService.getAllContracts();
   }
 
   @Override
-  public List<Contract> getAllContractsFor(@NonNull User appUser) {
+  public List<Contract> getAllContracts(@NonNull User appUser) {
     return Stream.concat(
             contractEntityService.getContractsByAppUser(appUser).stream(),
             contractEntityService.getContractsByCoParty(appUser).stream())
@@ -97,7 +98,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public List<Contract> getOpenContractsFor(@NonNull User appUser) {
+  public List<Contract> getOpenContracts(@NonNull User appUser) {
     return contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser);
   }
 
