@@ -103,7 +103,6 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     return getContract(contractEntityService.getContract(id));
   }
 
-  @SneakyThrows
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
     return contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser).stream()
