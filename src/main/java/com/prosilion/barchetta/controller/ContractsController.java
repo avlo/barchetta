@@ -100,7 +100,7 @@ public class ContractsController {
   }
 
   private void setCanonicalModelAttributes(@NonNull NostrUser nostrUser, @NonNull Model model) {
-    model.addAttribute(USER_CONTRACTS_STR, nostrControllerService.getAllContracts(nostrUser));
+    model.addAttribute(USER_CONTRACTS_STR, nostrControllerService.getAllNostrUserContracts(nostrUser));
     model.addAttribute(OPEN_CONTRACTS_STR, nostrControllerService.getOpenContracts(nostrUser));
     model.addAttribute(CONTRACT_DTO_STR, nostrControllerService.constructContractDto());
   }

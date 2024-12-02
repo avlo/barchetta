@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -57,7 +58,7 @@ public class NostrControllerService implements NostrControllerServiceIF {
 
   @Override
   public Contract getContract(@NonNull Long id, @NotNull NostrUser user) {
-    return contractEntityServiceNostrDecorator.getContract(id, user.getPubkey());
+    return contractEntityServiceNostrDecorator.getNostrContract(id);
   }
 
   @Override
@@ -103,32 +104,31 @@ public class NostrControllerService implements NostrControllerServiceIF {
   }
 
   @Override
-  public List<Contract> getAllContracts() throws IOException {
-    System.out.println("222222222222222");
-    System.out.println("222222222222222");
-    System.out.println("this method should never get called in nostr context since it only requires id");
-    System.out.println("confirm as such then uncomment below to throw exception");
-    System.out.println("222222222222222");
-    System.out.println("222222222222222");
-    throw new IOException("NostrControllerService.getAllContracts() has been erroneously called.   NostrControllerService.getAllContracts(@NotNull User user) should be called instead");
+  public List<Contract> getAllContracts() {
+    return contractEntityServiceNostrDecorator.getAllContracts();
   }
 
   @Override
-  public List<Contract> getAllContracts(@NonNull NostrUser nostrUser) {
-    return contractEntityServiceNostrDecorator.getAllContracts(nostrUser.getPubkey());
+  public List<Contract> getAllNostrUserContracts(@NonNull NostrUser nostrUser) {
+    return getAllUserContracts(findByUsername(nostrUser.getUsername()));
   }
 
   @Override
-  public List<Contract> getAllContracts(@NonNull User user) {
-    return List.of();
+  public List<Contract> getAllUserContracts(@NonNull User user) {
+    return Stream.concat(
+            contractEntityServiceNostrDecorator.getContractsByAppUser(user).stream(),
+            contractEntityServiceNostrDecorator.getContractsByCoParty(user).stream())
+        .toList();
   }
-  @Override
-  public List<Contract> getOpenContracts(@NonNull User user) {
-    return List.of();
-  }
+
   @Override
   public List<Contract> getOpenContracts(@NonNull NostrUser appUser) {
-    return contractEntityServiceNostrDecorator.getAvailableOppositeRoleContractsByAppUser(findByUsername(appUser.getUsername()));
+    return getOpenContracts(findByUsername(appUser.getUsername()));
+  }
+
+  @Override
+  public List<Contract> getOpenContracts(@NonNull User user) {
+    return contractEntityServiceNostrDecorator.getAvailableOppositeRoleContractsByAppUser(user);
   }
 
   @Override

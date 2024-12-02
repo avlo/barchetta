@@ -76,7 +76,7 @@ public class ControllerService implements ControllerServiceIF {
 
   @Override
   public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return save(contractDto.convertToEntity());
+   return save(contractDto.convertToEntity());
   }
 
   @Override
@@ -90,7 +90,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public List<Contract> getAllContracts(@NonNull User appUser) {
+  public List<Contract> getAllUserContracts(@NonNull User appUser) {
     return Stream.concat(
             contractEntityService.getContractsByAppUser(appUser).stream(),
             contractEntityService.getContractsByCoParty(appUser).stream())

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface NostrControllerServiceIF extends ControllerServiceIF {
-  List<Contract> getAllContracts(@NonNull NostrUser user);
+  List<Contract> getAllNostrUserContracts(@NonNull NostrUser user);
   List<Contract> getOpenContracts(@NonNull NostrUser nostrUser);
   Contract getContract(@NonNull Long id, @NotNull NostrUser user);
   ContractDto getContractDto(@NonNull Long id, @NonNull NostrUser nostrUser);

@@ -18,20 +18,19 @@ import nostr.event.json.codec.GenericEventDecoder;
 import nostr.event.message.EventMessage;
 import nostr.event.message.OkMessage;
 import nostr.util.NostrException;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ContractEntityServiceNostrDecorator implements ContractEntityServiceNostrDecoratorIF {
   private final String relayUri;
   private final ContractEntityServiceIF contractEntityService;
-  private final Map<String, WebSocketClientIF> webSocketClientMap = new HashMap<>();
+  private final Map<Long, WebSocketClientIF> subscriberIdSocketClientMap = new ConcurrentHashMap<>();
 
   public ContractEntityServiceNostrDecorator(
       @NonNull ContractEntityServiceIF contractEntityService,
@@ -47,16 +46,26 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     ClassifiedListingEvent classifiedListingEvent = contract.getClassifiedListingEvent();
     CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
-//    TODO: worth keeping in mind, we're swallowing OKMessage here instead of returning to subscriber/client/UI
+    Contract savedContract = contractEntityService.save(contract);
+//    worth keeping in mind- swallowing OKMessage here instead of returning to subscriber/client/UI
     OkMessage okMessageClassifiedListing = createNostrEvent(
-        new EventMessageFactory(classifiedListingEvent, contract.getNostrAppUserPubKey()).create(),
-        contract.getNostrAppUserPubKey()
+
+//    second parameter to EventMessageFactory(event, subscriptionId)
+//    is subscriptionId.  what to use for subscriptionId? options:
+//      2) contract.getId() *** ideal + sensible
+//      1) classifiedListingEvent.getId() + calendarTimeBasedEvent.getId()
+        new EventMessageFactory(classifiedListingEvent, savedContract.getId().toString()).create(),
+
+//    second parameter to createNostrEvent(EventMessage, socketId)
+//    is currently contract.getNostrAppUserPubKey().  other options:
+//      1) contract.getId() *** ideal + sensible
+        savedContract.getId()
     );
 
-//    TODO: worth keeping in mind, we're swallowing OKMessage here instead of returning to subscriber/client/UI
+//    worth keeping in mind- swallowing OKMessage here instead of returning to subscriber/client/UI
     OkMessage okMessageCalendarTimeBasedEvent = createNostrEvent(
-        new EventMessageFactory(calendarTimeBasedEvent, contract.getNostrAppUserPubKey()).create(),
-        contract.getNostrAppUserPubKey());
+        new EventMessageFactory(calendarTimeBasedEvent, savedContract.getId().toString()).create(),
+        savedContract.getId());
 
     if (!okMessageClassifiedListing.getFlag() || !okMessageCalendarTimeBasedEvent.getFlag())
       throw new NostrException("failed OK from relay");
@@ -66,15 +75,15 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @SneakyThrows
   @Override
-  public Contract getContract(@NonNull Long contractId, @NonNull String pubKeySubscriptionId) {
+  public Contract getNostrContract(@NonNull Long contractId) {
     Contract contractByDbId = getContract(contractId);
 
     ClassifiedListingEvent classifiedListingEvent = sendNostrRequest(
-        contractByDbId.getNostrClassifiedListingEventId(), pubKeySubscriptionId,
+        contractByDbId.getNostrClassifiedListingEventId(), contractId,
         ClassifiedListingEvent.class);
 
     CalendarTimeBasedEvent calendarTimeBasedEvent = sendNostrRequest(
-        contractByDbId.getNostrCalendarTimeBasedEventId(), pubKeySubscriptionId,
+        contractByDbId.getNostrCalendarTimeBasedEventId(), contractId,
         CalendarTimeBasedEvent.class);
 
     contractByDbId.setClassifiedListingEvent(classifiedListingEvent);
@@ -84,57 +93,71 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   }
 
   @Override
-  public Contract getContract(@NotNull Long id) {
+  public Contract getContract(@NonNull Long id) {
     return contractEntityService.getContract(id);
   }
 
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
-    return populateContracts(contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser));
+    List<Contract> availableOppositeRoleContractsByAppUser = contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser);
+    List<Contract> populatedOppositeRoleContracts = populateContracts(availableOppositeRoleContractsByAppUser);
+    return populatedOppositeRoleContracts;
   }
 
   @Override
   public List<Contract> getContractsByCoParty(@NonNull AppUser coParty) {
-    return populateContracts(contractEntityService.getContractsByCoParty(coParty));
+    List<Contract> contractsByCoParty = contractEntityService.getContractsByCoParty(coParty);
+    List<Contract> populatedCounterPartyContracts = populateContracts(contractsByCoParty);
+    return populatedCounterPartyContracts;
   }
 
   @Override
   public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
     List<Contract> contractsByAppUser = contractEntityService.getContractsByAppUser(appUser);
-    return populateContracts(contractsByAppUser);
+    List<Contract> populatedAppUserContracts = populateContracts(contractsByAppUser);
+    return populatedAppUserContracts;
   }
 
   @Override
-  public List<Contract> getAllContracts(@NonNull String pubKeySubscriptionId) {
+  public List<Contract> getAllContractsBySubscriberId(@NonNull String pubKeySubscriptionId) {
     return getAllContracts().stream()
         .map(Contract::getId)
-        .map(contractId -> getContract(contractId, pubKeySubscriptionId)).toList();
+        .map(contractId -> getContract(contractId)).toList();
   }
 
   @Override
   public List<Contract> getAllContracts() {
-    return contractEntityService.getAllContracts();
+    List<Contract> allContracts = contractEntityService.getAllContracts();
+    List<Contract> populatedContracts = populateContracts(allContracts);
+    return populatedContracts;
   }
 
-  @NotNull
   private OkMessage createNostrEvent(
-      @NonNull EventMessage classifiedListingEventMessage,
-      @NonNull String pubKey) throws ExecutionException, InterruptedException, IOException {
-    return getSocket(pubKey)
-        .send(classifiedListingEventMessage)
+      @NonNull EventMessage eventMessage,
+      @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
+//  TODO: are there (existing/superconductor/etc) use cases with:
+//    1) a client both generating events AND requesting events?
+//        i would think- yes
+//
+//  TODO: currently using contract.getId() as subscriptionId for event *creation*- which:
+//    2) consider using a general/global barchetta ID for event *creation* since
+//    1) may be superfluous, as only this class/decorator does anything with OkResponse
+    return getSocket(subscriptionId)
+        .send(eventMessage)
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
         .findFirst()
         .orElseThrow();
   }
 
+  //  TODO: consider refactoring below method to populate a data structure containing events returned by websocket request responses
   private <T extends GenericEvent> T sendNostrRequest(
       @NonNull String eventId,
-      @NonNull String pubKeySubscriberId,
+      @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    return getSocket(pubKeySubscriberId)
+    return getSocket(subscriberId)
         .send(
-            createReqJson(pubKeySubscriberId, eventId))
+            createReqJson(subscriberId.toString(), eventId))
         .stream()
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
@@ -154,9 +177,9 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
         .map(this::getContract).toList();
   }
 
-  private WebSocketClientIF getSocket(@NonNull String key) throws ExecutionException, InterruptedException {
-    WebSocketClientIF webSocketClientIF = webSocketClientMap.putIfAbsent(key, new StandardWebSocketClient(relayUri));
-    WebSocketClientIF webSocketClientIF1 = Optional.ofNullable(webSocketClientIF).orElse(webSocketClientMap.get(key));
-    return webSocketClientIF1;
+  private WebSocketClientIF getSocket(@NonNull Long key) throws ExecutionException, InterruptedException {
+    WebSocketClientIF webSocketClient = subscriberIdSocketClientMap.putIfAbsent(key, new StandardWebSocketClient(relayUri));
+    WebSocketClientIF webSocketClientIfNull = Optional.ofNullable(webSocketClient).orElse(subscriberIdSocketClientMap.get(key));
+    return webSocketClientIfNull;
   }
 }

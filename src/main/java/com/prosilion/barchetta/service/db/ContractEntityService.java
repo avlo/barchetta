@@ -22,7 +22,7 @@ public class ContractEntityService implements ContractEntityServiceIF {
   @Transactional
   @Override
   public Contract save(@NonNull Contract contract) {
-    return contractRepository.save(contract); // should be called after ContractEntityServiceNostrDecorator.save()
+    return contractRepository.save(contract);
   }
 
   @Override
