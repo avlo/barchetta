@@ -16,6 +16,10 @@
   <section>
     <h4>Contract state</h4>
     <form action="#" th:action="@{/contract/vote}" th:object="${contractDto}" method="post">
+      <input th:type="hidden" th:field="*{classifiedListingEventJson}" th:id="classifiedListingEventJson"
+             th:name="classifiedListingEventJson">
+      <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}" th:id="calendarTimeBasedEventJson"
+             th:name="calendarTimeBasedEventJson">
       <table style="width:90%">
         <thead>
         <tr>
@@ -61,7 +65,7 @@
       </div>
       <div>
         <input type="hidden" th:field="*{id}" id="id"/>
-        <input type="hidden" th:field="*{text}" id="text"/>
+        <input type="hidden" th:field="*{text}" id="content"/>
         <input type="hidden" th:field="*{payerStake}" id="payerStake"/>
         <input type="hidden" th:field="*{payeeStake}" id="payeeStake"/>
         <input type="hidden" th:field="*{price}" id="payoutAmount"/>

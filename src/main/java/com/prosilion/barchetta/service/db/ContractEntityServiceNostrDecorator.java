@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.service.db;
 
+import com.google.common.collect.Streams;
 import com.prosilion.barchetta.client.StandardWebSocketClient;
 import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
@@ -20,6 +21,7 @@ import nostr.event.message.OkMessage;
 import nostr.util.NostrException;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -73,11 +75,11 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 //  TODO: currently using contract.getId() as subscriptionId for event *creation*- which:
 //    2) consider using a general/global barchetta ID for event *creation* since
 //    1) may be superfluous, as only this class/decorator does anything with OkResponse
-    return getSocket(subscriptionId)
-        .send(eventMessage)
-        .stream()
+    List<String> received = getSocket(subscriptionId).send(eventMessage);
+
+    Optional<String> last = Streams.findLast(received.stream());
+    return last
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
-        .findFirst()
         .orElseThrow();
   }
 
@@ -133,17 +135,19 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    T firstEvent = getSocket(subscriberId)
+    List<String> send = getSocket(subscriberId)
         .send(
-            createReqJson(subscriberId.toString(), eventId)).stream()
-        .findFirst()
+            createReqJson(subscriberId.toString(), eventId));
+
+    T latestDatedEvent = send.stream().limit(send.size() - 1)
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
         .map(event -> new BaseEventEncoder<>(event).encode())
-        .map(encode -> new GenericEventDecoder<>(type).decode(encode)).stream()
-        .findFirst()
+        .map(encode -> new GenericEventDecoder<>(type).decode(encode))
+        .max(Comparator.comparingLong(T::getCreatedAt))
         .orElseThrow();
-    return firstEvent;
+
+    return latestDatedEvent;
   }
 
   private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
