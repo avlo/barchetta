@@ -47,22 +47,12 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
     CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
     Contract savedContract = contractEntityService.save(contract);
-//    worth keeping in mind- swallowing OKMessage here instead of returning to subscriber/client/UI
+
     OkMessage okMessageClassifiedListing = createNostrEvent(
-
-//    second parameter to EventMessageFactory(event, subscriptionId)
-//    is subscriptionId.  what to use for subscriptionId? options:
-//      2) contract.getId() *** ideal + sensible
-//      1) classifiedListingEvent.getId() + calendarTimeBasedEvent.getId()
         new EventMessageFactory(classifiedListingEvent, savedContract.getId().toString()).create(),
-
-//    second parameter to createNostrEvent(EventMessage, socketId)
-//    is currently contract.getNostrAppUserPubKey().  other options:
-//      1) contract.getId() *** ideal + sensible
         savedContract.getId()
     );
 
-//    worth keeping in mind- swallowing OKMessage here instead of returning to subscriber/client/UI
     OkMessage okMessageCalendarTimeBasedEvent = createNostrEvent(
         new EventMessageFactory(calendarTimeBasedEvent, savedContract.getId().toString()).create(),
         savedContract.getId());
@@ -71,6 +61,24 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
       throw new NostrException("failed OK from relay");
 
     return contractEntityService.save(contract);
+  }
+
+  private OkMessage createNostrEvent(
+      @NonNull EventMessage eventMessage,
+      @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
+//  TODO: are there (existing/superconductor/etc) use cases with:
+//    1) a client both generating events AND requesting events?
+//        i would think- yes
+//
+//  TODO: currently using contract.getId() as subscriptionId for event *creation*- which:
+//    2) consider using a general/global barchetta ID for event *creation* since
+//    1) may be superfluous, as only this class/decorator does anything with OkResponse
+    return getSocket(subscriptionId)
+        .send(eventMessage)
+        .stream()
+        .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
+        .findFirst()
+        .orElseThrow();
   }
 
   @SneakyThrows
@@ -120,23 +128,6 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
         .map(this::getContract).toList();
   }
 
-  private OkMessage createNostrEvent(
-      @NonNull EventMessage eventMessage,
-      @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
-//  TODO: are there (existing/superconductor/etc) use cases with:
-//    1) a client both generating events AND requesting events?
-//        i would think- yes
-//
-//  TODO: currently using contract.getId() as subscriptionId for event *creation*- which:
-//    2) consider using a general/global barchetta ID for event *creation* since
-//    1) may be superfluous, as only this class/decorator does anything with OkResponse
-    return getSocket(subscriptionId)
-        .send(eventMessage)
-        .stream()
-        .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
-        .findFirst()
-        .orElseThrow();
-  }
 
   //  TODO: consider refactoring below method to populate a data structure containing events returned by websocket request responses
   private <T extends GenericEvent> T sendNostrRequest(
