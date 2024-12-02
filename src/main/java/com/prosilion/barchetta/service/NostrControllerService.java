@@ -9,7 +9,6 @@ import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.util.NostrException;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +43,7 @@ public class NostrControllerService implements NostrControllerServiceIF {
 
   @Override
   public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract contract = getContract(contractId, user);
+    Contract contract = getContract(contractId);
     User foundUser = findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
     contract.setNostrCounterPartyPubKey(user.getPubkey());
@@ -52,35 +51,13 @@ public class NostrControllerService implements NostrControllerServiceIF {
   }
 
   @Override
-  public ContractDto getContractDto(@NonNull Long id, @NotNull NostrUser user) {
-    return getContract(id, user).convertToDto();
+  public ContractDto getContractDto(@NonNull Long id) {
+    return getContract(id).convertToDto();
   }
 
   @Override
-  public Contract getContract(@NonNull Long id, @NotNull NostrUser user) {
-    return contractEntityServiceNostrDecorator.getNostrContract(id);
-  }
-
-  @Override
-  public Contract getContract(@NonNull Long id) throws IOException {
-    System.out.println("000000000000000");
-    System.out.println("000000000000000");
-    System.out.println("this method should never get called in nostr context since it only requires id");
-    System.out.println("confirm as such then uncomment below to throw exception");
-    System.out.println("000000000000000");
-    System.out.println("000000000000000");
-    throw new IOException("NostrControllerService.getContract(@NonNull Long id) has been erroneously called.   NostrControllerService.getContract(@NonNull Long id, @NotNull User user) should be called instead");
-  }
-
-  @Override
-  public ContractDto getContractDto(@NonNull Long id) throws IOException {
-    System.out.println("111111111111111");
-    System.out.println("111111111111111");
-    System.out.println("this method should never get called in nostr context since it only requires id");
-    System.out.println("confirm as such then uncomment below to throw exception");
-    System.out.println("111111111111111");
-    System.out.println("111111111111111");
-    throw new IOException("NostrControllerService.getContractDto(@NonNull Long id) has been erroneously called.   NostrControllerService.getContractDto(@NonNull Long id, @NotNull User user) should be called instead");
+  public Contract getContract(@NonNull Long id) {
+    return contractEntityServiceNostrDecorator.getContract(id);
   }
 
   @Override

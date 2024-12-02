@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutionException;
 public interface ControllerServiceIF {
   Contract saveAsCreator(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException;
   Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException;
-  Contract getContract(@NonNull Long id) throws IOException;
-  ContractDto getContractDto(@NonNull Long id) throws IOException;
+  Contract getContract(@NonNull Long id) throws IOException, ExecutionException, InterruptedException;
+  ContractDto getContractDto(@NonNull Long id) throws IOException, ExecutionException, InterruptedException;
   User findByUsername(@NonNull String username);
   CreatorRoleEnum getRole(Contract contract, User user);
   Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException;

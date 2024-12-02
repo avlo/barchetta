@@ -59,11 +59,11 @@ public class ContractsController {
   }
 
   @GetMapping("/display_contract/{id}")
-  public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showAvailableContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) {
     log.info("Fetching selected contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        nostrControllerService.getContractDto(contractId, user));
+        nostrControllerService.getContractDto(contractId));
     model.addAttribute(
         COUNTER_PARTY_ID_STR,
         nostrControllerService.findByUsername(user.getUsername()).getId());
@@ -73,11 +73,11 @@ public class ContractsController {
   }
 
   @GetMapping("/my_contract/{id}")
-  public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException {
+  public String showMyContracts(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) {
     log.info("Fetching my contract: [{}]", contractId);
     model.addAttribute(
         CONTRACT_DTO_STR,
-        nostrControllerService.getContractDto(contractId, user));
+        nostrControllerService.getContractDto(contractId));
     return "thymeleaf/contract/view_contract";
   }
 

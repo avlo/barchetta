@@ -75,61 +75,49 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @SneakyThrows
   @Override
-  public Contract getNostrContract(@NonNull Long contractId) {
-    Contract contractByDbId = getContract(contractId);
-
+  public Contract getContract(@NonNull Contract contract) {
     ClassifiedListingEvent classifiedListingEvent = sendNostrRequest(
-        contractByDbId.getNostrClassifiedListingEventId(), contractId,
+        contract.getNostrClassifiedListingEventId(), contract.getId(),
         ClassifiedListingEvent.class);
 
     CalendarTimeBasedEvent calendarTimeBasedEvent = sendNostrRequest(
-        contractByDbId.getNostrCalendarTimeBasedEventId(), contractId,
+        contract.getNostrCalendarTimeBasedEventId(), contract.getId(),
         CalendarTimeBasedEvent.class);
 
-    contractByDbId.setClassifiedListingEvent(classifiedListingEvent);
-    contractByDbId.setCalendarTimeBasedEvent(calendarTimeBasedEvent);
+    contract.setClassifiedListingEvent(classifiedListingEvent);
+    contract.setCalendarTimeBasedEvent(calendarTimeBasedEvent);
 
-    return contractByDbId;
+    return contract;
   }
 
   @Override
   public Contract getContract(@NonNull Long id) {
-    return contractEntityService.getContract(id);
+    return getContract(contractEntityService.getContract(id));
   }
 
+  @SneakyThrows
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
-    List<Contract> availableOppositeRoleContractsByAppUser = contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser);
-    List<Contract> populatedOppositeRoleContracts = populateContracts(availableOppositeRoleContractsByAppUser);
-    return populatedOppositeRoleContracts;
+    return contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser).stream()
+        .map(this::getContract).toList();
   }
 
   @Override
   public List<Contract> getContractsByCoParty(@NonNull AppUser coParty) {
-    List<Contract> contractsByCoParty = contractEntityService.getContractsByCoParty(coParty);
-    List<Contract> populatedCounterPartyContracts = populateContracts(contractsByCoParty);
-    return populatedCounterPartyContracts;
+    return contractEntityService.getContractsByCoParty(coParty).stream()
+        .map(this::getContract).toList();
   }
 
   @Override
   public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
-    List<Contract> contractsByAppUser = contractEntityService.getContractsByAppUser(appUser);
-    List<Contract> populatedAppUserContracts = populateContracts(contractsByAppUser);
-    return populatedAppUserContracts;
-  }
-
-  @Override
-  public List<Contract> getAllContractsBySubscriberId(@NonNull String pubKeySubscriptionId) {
-    return getAllContracts().stream()
-        .map(Contract::getId)
-        .map(contractId -> getContract(contractId)).toList();
+    return contractEntityService.getContractsByAppUser(appUser).stream()
+        .map(this::getContract).toList();
   }
 
   @Override
   public List<Contract> getAllContracts() {
-    List<Contract> allContracts = contractEntityService.getAllContracts();
-    List<Contract> populatedContracts = populateContracts(allContracts);
-    return populatedContracts;
+    return contractEntityService.getAllContracts().stream()
+        .map(this::getContract).toList();
   }
 
   private OkMessage createNostrEvent(
@@ -155,31 +143,28 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    return getSocket(subscriberId)
+    T firstEvent = getSocket(subscriberId)
         .send(
-            createReqJson(subscriberId.toString(), eventId))
-        .stream()
+            createReqJson(subscriberId.toString(), eventId)).stream()
+        .findFirst()
         .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
         .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
         .map(event -> new BaseEventEncoder<>(event).encode())
-        .map(encode -> new GenericEventDecoder<T>(type).decode(encode))
+        .map(encode -> new GenericEventDecoder<>(type).decode(encode)).stream()
         .findFirst()
         .orElseThrow();
+    return firstEvent;
   }
 
   private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
     return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
   }
 
-  private List<Contract> populateContracts(List<Contract> contracts) {
-    return contracts.stream()
-        .map(Contract::getId)
-        .map(this::getContract).toList();
-  }
-
   private WebSocketClientIF getSocket(@NonNull Long key) throws ExecutionException, InterruptedException {
-    WebSocketClientIF webSocketClient = subscriberIdSocketClientMap.putIfAbsent(key, new StandardWebSocketClient(relayUri));
-    WebSocketClientIF webSocketClientIfNull = Optional.ofNullable(webSocketClient).orElse(subscriberIdSocketClientMap.get(key));
-    return webSocketClientIfNull;
+    return Optional.ofNullable(
+            subscriberIdSocketClientMap.putIfAbsent(
+                key,
+                new StandardWebSocketClient(relayUri)))
+        .orElse(subscriberIdSocketClientMap.get(key));
   }
 }
