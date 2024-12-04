@@ -12,7 +12,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.impl.GenericEvent;
 import nostr.event.impl.GenericTag;
+import nostr.event.json.codec.BaseEventEncoder;
 import nostr.event.tag.PriceTag;
 import nostr.event.tag.PubKeyTag;
 
@@ -50,7 +52,6 @@ public class Contract {
     this.nostrClassifiedListingEventId = classifiedListingEvent.getId();
     this.nostrCalendarTimeBasedEventId = calendarTimeBasedEvent.getId();
     this.nostrAppUserPubKey = classifiedListingEvent.getPubKey().toHexString();
-//    this.nostrCounterPartyPubKey = classifiedListingEvent.getPubKey().toHexString();
   }
 
   public String getText() {
@@ -83,6 +84,7 @@ public class Contract {
 
     BigDecimal price = getPriceTag().getNumber();
 
+//    TODO: complete stake
     String payerStakeString = "111";
 //        = classifiedListingEvent.getTags().stream()
 //        .filter(GenericTag.class::isInstance)
@@ -93,6 +95,7 @@ public class Contract {
 //        .toList().get(0).get(1).getValue().toString();
     BigDecimal payerStake = BigDecimal.valueOf(Long.parseLong(payerStakeString));
 
+//    TODO: complete stake
     String payeeStakeString = "222";
 //        = classifiedListingEvent.getTags().stream()
 //        .filter(GenericTag.class::isInstance)
@@ -125,8 +128,8 @@ public class Contract {
         getPayeeState(),
         nostrAppUserPubKey,
         nostrCounterPartyPubKey,
-        "",
-        "",
+        mapEventToJson(classifiedListingEvent),
+        mapEventToJson(calendarTimeBasedEvent),
         classifiedListingEvent.getContent());
   }
 
@@ -155,5 +158,9 @@ public class Contract {
             GenericTag.create(stateCode, 52, String.valueOf(ContractStateEnum.APPROVE)))
         .getAttributes().getFirst().getValue();
     return String.valueOf(value).toUpperCase();
+  }
+
+  private static <T extends GenericEvent> String mapEventToJson(T event) {
+    return new BaseEventEncoder<>(event).encode();
   }
 }

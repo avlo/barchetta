@@ -1,6 +1,5 @@
 package com.prosilion.barchetta.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
 import nostr.event.BaseMessage;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +22,16 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   private boolean completed = false;
 
   public StandardWebSocketClient(@NonNull String relayUri) throws ExecutionException, InterruptedException {
-    this.clientSession = new org.springframework.web.socket.client.standard.StandardWebSocketClient().execute(this, new WebSocketHttpHeaders(), URI.create(relayUri)).get();
+    this.clientSession = new org.springframework.web.socket.client.standard.StandardWebSocketClient()
+        .execute(
+            this,
+            new WebSocketHttpHeaders(),
+            URI.create(relayUri)).get();
+    System.out.println("33333333333");
+    System.out.println("33333333333");
+    System.out.println(clientSession.getId());
+    System.out.println("33333333333");
+    System.out.println("33333333333");
   }
 
   @Override
@@ -33,7 +41,7 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   }
 
   @Override
-  public <T extends BaseMessage> List<String> send(T eventMessage) throws JsonProcessingException, IOException {
+  public <T extends BaseMessage> List<String> send(T eventMessage) throws IOException {
     return send(eventMessage.encode());
   }
 

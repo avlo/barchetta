@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import nostr.event.BaseMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
@@ -14,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component
+// TODO: below component commented out so spring doesn't auto-create an instance w/ active socket
+//@Component
 public class ReactiveWebSocketClient implements WebSocketClientIF {
   private final ReactorNettyWebSocketClient client;
   private final URI uri;

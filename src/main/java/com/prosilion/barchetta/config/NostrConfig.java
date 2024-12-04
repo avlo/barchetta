@@ -1,13 +1,8 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.barchetta.service.db.ContractEntityServiceIF;
-import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecorator;
-import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecoratorIF;
 import com.prosilion.barchetta.service.user.UserService;
 import com.prosilion.barchetta.service.user.UserServiceNostrDecorator;
 import com.prosilion.barchetta.service.user.UserServiceNostrDecoratorIF;
-import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,11 +31,4 @@ public class NostrConfig {
 //        contractEntityService,
 //        reactiveWebSocketClient);
 //  }
-
-  @Bean
-  ContractEntityServiceNostrDecoratorIF contractServiceIF(
-      @NonNull ContractEntityServiceIF contractEntityService,
-      @Value("${nostr.relay.uri}") String relayUri) {
-    return new ContractEntityServiceNostrDecorator(contractEntityService, relayUri);
-  }
 }
