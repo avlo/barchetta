@@ -18,6 +18,7 @@ import nostr.event.message.OkMessage;
 import nostr.util.NostrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,10 +34,14 @@ public class NostrRelayService {
   private Map<Long, WebSocketClientIF> eventSocketClientMap = new ConcurrentHashMap<>();
   private Map<Long, WebSocketClientIF> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
+  private final SslBundles sslBundles;
 
   @Autowired
-  public NostrRelayService(@Value("${nostr.relay.uri}") String relayUri) {
+  public NostrRelayService(
+      @Value("${nostr.relay.uri}") String relayUri,
+      SslBundles sslBundles) {
     this.relayUri = relayUri;
+    this.sslBundles = sslBundles;
   }
 
   public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
@@ -172,7 +177,7 @@ public class NostrRelayService {
 
     clientIFMap.put(
         key,
-        new StandardWebSocketClient(relayUri));
+        new StandardWebSocketClient(relayUri, sslBundles));
     WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
     return webSocketClientIF;
   }

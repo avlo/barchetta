@@ -3,6 +3,7 @@ package com.prosilion.barchetta.client;
 import lombok.NonNull;
 import nostr.event.BaseMessage;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -21,12 +22,15 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   private List<String> events = new ArrayList<>();
   private boolean completed = false;
 
-  public StandardWebSocketClient(@NonNull String relayUri) throws ExecutionException, InterruptedException {
-    this.clientSession = new org.springframework.web.socket.client.standard.StandardWebSocketClient()
+  public StandardWebSocketClient(@NonNull String relayUri, @NonNull SslBundles sslBundles) throws ExecutionException, InterruptedException {
+    org.springframework.web.socket.client.standard.StandardWebSocketClient standardWebSocketClient = new org.springframework.web.socket.client.standard.StandardWebSocketClient();
+    standardWebSocketClient.setSslContext(sslBundles.getBundle("server").createSslContext());
+    this.clientSession = standardWebSocketClient
         .execute(
             this,
             new WebSocketHttpHeaders(),
-            URI.create(relayUri)).get();
+            URI.create(relayUri))
+        .get();
     System.out.println("33333333333");
     System.out.println("33333333333");
     System.out.println(clientSession.getId());

@@ -10,19 +10,26 @@ import nostr.event.tag.SubjectTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
 class StandardWebSocketClientTest {
   private static final String PRV_KEY_VALUE = "23c011c4c02de9aa98d48c3646c70bb0e7ae30bdae1dfed4d251cbceadaeeb7b";
   private static final String RELAY_URI = "wss://localhost:5555";
@@ -54,8 +61,12 @@ class StandardWebSocketClientTest {
   public static final String FREQUENCY = "1";
   public static final BigDecimal NUMBER = new BigDecimal(PRICE_NUMBER);
 
-  @Autowired
   StandardWebSocketClient standardWebSocketClient;
+
+  @Autowired
+  public StandardWebSocketClientTest(SslBundles sslBundles) throws ExecutionException, InterruptedException {
+    this.standardWebSocketClient = new StandardWebSocketClient(RELAY_URI, sslBundles);
+  }
 
   @BeforeEach
   void setup() throws IOException {

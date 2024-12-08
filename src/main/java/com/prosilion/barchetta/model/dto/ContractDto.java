@@ -39,7 +39,7 @@ public class ContractDto {
     );
   }
 
-  private static <T extends GenericEvent> T mapJsonToEvent(String eventJson, Class<T> clazz) {
+  public static <T extends GenericEvent> T mapJsonToEvent(String eventJson, Class<T> clazz) {
     return new GenericEventDecoder<>(clazz).decode(eventJson);
   }
 }
