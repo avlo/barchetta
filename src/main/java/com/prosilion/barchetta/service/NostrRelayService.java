@@ -49,7 +49,7 @@ public class NostrRelayService {
     CalendarTimeBasedEvent calendarTimeBasedEvent = contract.getCalendarTimeBasedEvent();
 
     OkMessage okMessageClassifiedListing =
-        createNostrEventAAAAAAAAAAAAAA(
+        createNostrEvent(
             new EventMessageFactory(
                 classifiedListingEvent,
                 contract.getId().toString()
@@ -58,7 +58,7 @@ public class NostrRelayService {
         );
 
     OkMessage okMessageCalendarTimeBasedEvent =
-        createNostrEventAAAAAAAAAAAAAA(
+        createNostrEvent(
             new EventMessageFactory(
                 calendarTimeBasedEvent,
                 contract.getId().toString()
@@ -72,10 +72,10 @@ public class NostrRelayService {
     return contract;
   }
 
-  private OkMessage createNostrEventAAAAAAAAAAAAAA(
+  private OkMessage createNostrEvent(
       @NonNull EventMessage eventMessage,
       @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
-    List<String> received = getEventSocket(subscriptionId).send(eventMessage);
+    List<String> received = getWebSocketClient(eventSocketClientMap, subscriptionId).send(eventMessage);
     Optional<String> last = Streams.findLast(received.stream());
     return last
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
@@ -85,14 +85,14 @@ public class NostrRelayService {
   @SneakyThrows
   public Contract getContractEvents(@NonNull Contract contract) {
     ClassifiedListingEvent classifiedListingEvent =
-        sendNostrRequestBBBBBBBBBBBBBBBBB(
+        sendNostrRequest(
             contract.getNostrClassifiedListingEventId(),
             contract.getId(),
             ClassifiedListingEvent.class
         );
 
     CalendarTimeBasedEvent calendarTimeBasedEvent =
-        sendNostrRequestBBBBBBBBBBBBBBBBB(
+        sendNostrRequest(
             contract.getNostrCalendarTimeBasedEventId(),
             contract.getId(),
             CalendarTimeBasedEvent.class
@@ -104,11 +104,11 @@ public class NostrRelayService {
     return contract;
   }
 
-  private <T extends GenericEvent> T sendNostrRequestBBBBBBBBBBBBBBBBB(
+  private <T extends GenericEvent> T sendNostrRequest(
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    List<String> send = getRequestSocket(subscriberId)
+    List<String> send = getWebSocketClient(requestSocketClientMap, subscriberId)
         .send(
             createReqJson(subscriberId.toString(), eventId));
 
@@ -134,42 +134,7 @@ public class NostrRelayService {
     return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
   }
 
-  private WebSocketClientIF getEventSocket(@NonNull Long key) throws ExecutionException, InterruptedException {
-    boolean exists = eventSocketClientMap.containsKey(key);
-    System.out.println("1111111111111111");
-    System.out.println("1111111111111111");
-    System.out.printf("event socket [%d] %b%n", key, exists);
-    System.out.println("1111111111111111");
-    System.out.println("1111111111111111");
-    WebSocketClientIF eventSocket = getClient(eventSocketClientMap, key);
-    return eventSocket;
-  }
-
-  private WebSocketClientIF getRequestSocket(@NonNull Long key) throws ExecutionException, InterruptedException {
-    boolean exists = requestSocketClientMap.containsKey(key);
-    System.out.println("2222222222222222");
-    System.out.println("2222222222222222");
-    System.out.printf("request socket [%d] %b%n", key, exists);
-    System.out.println("2222222222222222");
-    System.out.println("2222222222222222");
-    WebSocketClientIF requestSocket = getClient(requestSocketClientMap, key);
-    return requestSocket;
-  }
-
-//  private WebSocketClientIF getExistingClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) {
-//    WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
-//    return webSocketClientIF;
-//  }
-//
-//  private WebSocketClientIF createNewClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) throws ExecutionException, InterruptedException {
-//    WebSocketClientIF put = clientIFMap.put(
-//        key,
-//        instantiateClient());
-//    WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
-//    return webSocketClientIF;
-//  }
-
-  private WebSocketClientIF getClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) throws ExecutionException, InterruptedException {
+  private WebSocketClientIF getWebSocketClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) throws ExecutionException, InterruptedException {
     WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
     if (checkWebSocketClient != null) {
       return checkWebSocketClient;

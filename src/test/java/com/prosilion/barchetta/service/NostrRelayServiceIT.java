@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -22,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestPropertySource(locations = {"classpath:application-test.properties", "classpath:localhost.p12"})
 @ActiveProfiles("test")
 public class NostrRelayServiceIT {
   private static final String RELAY_URI = "wss://localhost:5555";
@@ -41,10 +39,6 @@ public class NostrRelayServiceIT {
 
     contract = new Contract(clEvent, ctbEvent);
     contract.setId(1L);
-//    below are/should be set in Contract ctor()
-//    contract.setNostrClassifiedListingEventId(clEvent.getId());
-//    contract.setNostrCalendarTimeBasedEventId(ctbEvent.getId());
-//    contract.setNostrAppUserPubKey(clEvent.getPubKey().toHexString());
   }
 
   @Test
