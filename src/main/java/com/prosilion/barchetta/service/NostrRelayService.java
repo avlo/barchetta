@@ -5,8 +5,8 @@ import com.prosilion.barchetta.client.StandardWebSocketClient;
 import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
+import nostr.event.BaseMessage;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.event.impl.GenericEvent;
@@ -22,12 +22,12 @@ import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 @Service
 public class NostrRelayService {
@@ -82,8 +82,7 @@ public class NostrRelayService {
         .orElseThrow();
   }
 
-  @SneakyThrows
-  public Contract getContractEvents(@NonNull Contract contract) {
+  public Contract get(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException {
     ClassifiedListingEvent classifiedListingEvent =
         sendNostrRequest(
             contract.getNostrClassifiedListingEventId(),
@@ -108,21 +107,50 @@ public class NostrRelayService {
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    List<String> send = getWebSocketClient(requestSocketClientMap, subscriberId)
+    WebSocketClientIF webSocketClient = getWebSocketClient(requestSocketClientMap, subscriberId);
+
+    List<String> send = webSocketClient
         .send(
             createReqJson(subscriberId.toString(), eventId));
 
-//    TODO: first time below is requested, it comes with EOSE.  subsequent times, it does not.  fix below accordingly
-    T latestDatedEvent = send.stream().limit(send.size() - 1)
+    Stream<BaseMessage> baseMessageStream = send.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
 
-        .map(baseMessage -> new BaseMessageDecoder<EventMessage>().decode(baseMessage))
-        .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
-        .map(event -> new BaseEventEncoder<>(event).encode())
-        .map(encode -> new GenericEventDecoder<>(type).decode(encode))
-        .max(Comparator.comparingLong(T::getCreatedAt))
-        .orElseThrow();
+    Stream<BaseMessage> baseMessageStream1 = baseMessageStream.filter(baseMessage -> !baseMessage.getCommand().equalsIgnoreCase("EOSE"));
 
+    Stream<BaseMessage> baseMessageStream2 = baseMessageStream1.filter(EventMessage.class::isInstance);
+
+    Stream<EventMessage> eventMessageStream = baseMessageStream2.map(EventMessage.class::cast);
+
+    Stream<GenericEvent> genericEventStream = eventMessageStream.map(eventMessage -> (GenericEvent) eventMessage.getEvent());
+
+    Stream<String> stringStream = genericEventStream.map(event -> new BaseEventEncoder<>(event).encode());
+
+    Stream<T> tStream = stringStream.map(encode -> new GenericEventDecoder<>(type).decode(encode));
+
+//    Optional<T> max = tStream.max((a, b) -> {
+//      System.out.println("a: " + a);
+//      System.out.println("b: " + b);
+//      return getCompare(a, b);
+//    });
+//    T latestDatedEvent = max.orElseThrow();
+
+    List<T> list = tStream.toList();
+    T last = list.getLast();
+    T latestDatedEvent = last;
+
+    System.out.println("2222222222222222222");
+    System.out.println("2222222222222222222");
+    System.out.println(latestDatedEvent);
+    System.out.println("2222222222222222222");
+    System.out.println("2222222222222222222");
     return latestDatedEvent;
+  }
+
+  private <T extends GenericEvent> int getCompare(T a, T b) {
+    Long aCreatedAt = a.getCreatedAt();
+    Long bCreatedAt = b.getCreatedAt();
+    int compare = Long.compare(aCreatedAt, bCreatedAt);
+    return compare;
   }
 
   private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
@@ -135,7 +163,7 @@ public class NostrRelayService {
   }
 
   private WebSocketClientIF getWebSocketClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) throws ExecutionException, InterruptedException {
-    WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
+    final WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
     if (checkWebSocketClient != null) {
       return checkWebSocketClient;
     }
@@ -143,7 +171,7 @@ public class NostrRelayService {
     clientIFMap.put(
         key,
         new StandardWebSocketClient(relayUri, sslBundles));
-    WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
+    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
     return webSocketClientIF;
   }
 }

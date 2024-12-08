@@ -12,15 +12,17 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.awaitility.Awaitility.await;
 
 public class StandardWebSocketClient extends TextWebSocketHandler implements WebSocketClientIF {
   private final WebSocketSession clientSession;
-  private List<String> events = new ArrayList<>();
-  private boolean completed = false;
+  private final List<String> events = Collections.synchronizedList(new ArrayList<>());
+  private final AtomicBoolean completed = new AtomicBoolean(false);
 
   public StandardWebSocketClient(@NonNull String relayUri, @NonNull SslBundles sslBundles) throws ExecutionException, InterruptedException {
     org.springframework.web.socket.client.standard.StandardWebSocketClient standardWebSocketClient = new org.springframework.web.socket.client.standard.StandardWebSocketClient();
@@ -31,17 +33,13 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
             new WebSocketHttpHeaders(),
             URI.create(relayUri))
         .get();
-    System.out.println("33333333333");
-    System.out.println("33333333333");
-    System.out.println(clientSession.getId());
-    System.out.println("33333333333");
-    System.out.println("33333333333");
   }
 
   @Override
   protected void handleTextMessage(@NotNull WebSocketSession session, TextMessage message) {
     events.add(message.getPayload());
-    completed = true;
+//    completed = true;
+    completed.setRelease(true);
   }
 
   @Override
@@ -52,10 +50,11 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   @Override
   public List<String> send(String json) throws IOException {
     clientSession.sendMessage(new TextMessage(json));
-    await().until(() -> completed);
+    await().until(() -> completed.compareAndSet(true, false));
     List<String> eventList = List.copyOf(events);
-    events = new ArrayList<>();
-    completed = false;
+//    events = Collections.synchronizedList(new ArrayList<>());
+    events.clear();
+//    completed = false;
     return eventList;
   }
 }

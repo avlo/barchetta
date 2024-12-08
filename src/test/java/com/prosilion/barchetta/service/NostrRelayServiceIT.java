@@ -6,6 +6,7 @@ import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.util.NostrException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,10 +43,58 @@ public class NostrRelayServiceIT {
   }
 
   @Test
-  void testSave() throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract saved = nostrRelayService.save(contract);
-    System.out.println(saved);
+  @Order(0)
+  void testSaveContract() throws NostrException, IOException, ExecutionException, InterruptedException {
+    contract = nostrRelayService.save(contract);
+    System.out.println("11111111111111111");
+    System.out.println("11111111111111111");
+    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
+    System.out.println("-----------------");
+    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
+    System.out.println("11111111111111111");
+    System.out.println("11111111111111111");
+
+    contract = nostrRelayService.get(contract);
+    System.out.println("33333333333333333");
+    System.out.println("33333333333333333");
+    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
+    System.out.println("-----------------");
+    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
+    System.out.println("33333333333333333");
+    System.out.println("33333333333333333");
+
+    contract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
+    contract = nostrRelayService.save(contract);
+    System.out.println("44444444444444444");
+    System.out.println("44444444444444444");
+    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
+    System.out.println("-----------------");
+    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
+    System.out.println("44444444444444444");
+    System.out.println("44444444444444444");
+
+    contract = nostrRelayService.get(contract);
+    System.out.println("55555555555555555");
+    System.out.println("55555555555555555");
+    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
+    System.out.println("-----------------");
+    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
+    System.out.println("55555555555555555");
+    System.out.println("55555555555555555");
   }
+
+//  @Test
+//  @Order(1)
+//  void testGetContract() throws IOException, ExecutionException, InterruptedException {
+//    contract = nostrRelayService.get(contract);
+//    System.out.println("55555555555555555");
+//    System.out.println("55555555555555555");
+//    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
+//    System.out.println("-----------------");
+//    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
+//    System.out.println("55555555555555555");
+//    System.out.println("55555555555555555");
+//  }
 
   private String getCalendarTimeBasedEventJson() {
     return "{\"id\":\"526fc0cd3183894e9f07044f3678a157886ce2cabdd0473245ae43e7efa57fe9\",\"kind\":31923,\"created_at\":1733609927,\"content\":\"CTBEvent content field: bbbbbbb\",\"tags\":[[\"d\",\"UUID-1733609927\"],[\"title\",\"CTBEvent title field: bbbbbbb\"],[\"start\",1733709927],[\"summary\",\"CTBEvent summary field: bbbbbbb\"],[\"location\",\"CTBEvent location field\"],[\"p\",\"9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224\",\"wss://localhost:5555\",\"PAYER\"]],\"pubkey\":\"9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224\",\"sig\":\"ef8c14b5901d2334d4cb3a70d344a19373e77e50445539377019ee96be5e605fed59827958511d2f41292e1d50bda836a5bd999681b46a79bb8497d0490e5bfa\"}";

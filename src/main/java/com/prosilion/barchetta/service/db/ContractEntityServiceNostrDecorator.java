@@ -39,7 +39,7 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   @SneakyThrows
   @Override
   public Contract getContract(@NonNull Contract contract) {
-    return nostrRelayService.getContractEvents(contract);
+    return nostrRelayService.get(contract);
   }
 
   @Override

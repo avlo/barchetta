@@ -160,7 +160,7 @@ public class Contract {
     return String.valueOf(value).toUpperCase();
   }
 
-  private static <T extends GenericEvent> String mapEventToJson(T event) {
+  public static <T extends GenericEvent> String mapEventToJson(T event) {
     return new BaseEventEncoder<>(event).encode();
   }
 }
