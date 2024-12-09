@@ -138,11 +138,11 @@ public class NostrRelayService {
     T last = list.getLast();
     T latestDatedEvent = last;
 
-    System.out.println("2222222222222222222");
-    System.out.println("2222222222222222222");
-    System.out.println(latestDatedEvent);
-    System.out.println("2222222222222222222");
-    System.out.println("2222222222222222222");
+//    System.out.println("2222222222222222222");
+//    System.out.println("2222222222222222222");
+//    System.out.println(latestDatedEvent);
+//    System.out.println("2222222222222222222");
+//    System.out.println("2222222222222222222");
     return latestDatedEvent;
   }
 

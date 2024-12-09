@@ -37,7 +37,21 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
 
   @Override
   protected void handleTextMessage(@NotNull WebSocketSession session, TextMessage message) {
-    events.add(message.getPayload());
+    String payload = message.getPayload();
+    System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    System.out.println(session.getId());
+    System.out.println("------------------------------");
+    System.out.println(payload);
+    System.out.println("------------------------------");
+    System.out.println("events BEFORE payload:");
+    events.forEach(System.out::println);
+    System.out.println("------------------------------");
+    events.add(payload);
+    System.out.println("events AFTER  payload:");
+    events.forEach(System.out::println);
+    System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n\n\n\n\n\n\n\n");
 //    completed = true;
     completed.setRelease(true);
   }
@@ -50,11 +64,22 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   @Override
   public List<String> send(String json) throws IOException {
     clientSession.sendMessage(new TextMessage(json));
-    await().until(() -> completed.compareAndSet(true, false));
-    List<String> eventList = List.copyOf(events);
-//    events = Collections.synchronizedList(new ArrayList<>());
+    await().untilTrue(completed);
+    System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+    System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+    System.out.println("sending JSON:");
+    System.out.println(json);
+    System.out.println("------------------------------");
+    List<String> eventList = Collections.synchronizedList(List.copyOf(events));
     events.clear();
+    eventList.forEach(System.out::println);
+//    events = Collections.synchronizedList(new ArrayList<>());
 //    completed = false;
+    System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+    System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n\n\n\n\n\n\n\n");
+    System.out.println("==============================");
+    System.out.println("==============================\n\n\n\n\n\n\n\n");
+    completed.setRelease(false);
     return eventList;
   }
 }
