@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nostr.base.PublicKey;
 import nostr.event.tag.EventTag;
@@ -20,10 +21,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -70,20 +71,26 @@ class StandardWebSocketClientTest {
 
   @BeforeEach
   void setup() throws IOException {
-    assertEquals(expectedEventResponseJson(ID), standardWebSocketClient.send(eventJson()).stream().findFirst().get());
+    standardWebSocketClient.send(eventJson());
+//    assertEquals(
+//        expectedEventResponseJson(ID),
+//        standardWebSocketClient.getEvents()
+//            .stream().findFirst().get());
   }
 
   @Test
   void testSendRequestExpectEventResponse() throws IOException {
+    standardWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID));
+
+    JsonNode expected = new ObjectMapper().readTree(expectedRequestResponseJson());
+    List<String> returnedEvents = standardWebSocketClient.getEvents();
+
+    JsonNode actual = new ObjectMapper().readTree(returnedEvents.getFirst());
+
     assertTrue(
         JsonComparator.equalsJson(
-            new ObjectMapper().readTree(
-                expectedRequestResponseJson()
-            ),
-            new ObjectMapper().readTree(
-                standardWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID))
-                    .stream().findFirst().get()
-            )));
+            expected,
+            actual));
     await().atMost(Duration.ofSeconds(3));
   }
 

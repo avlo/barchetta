@@ -75,7 +75,7 @@ public class NostrRelayService {
   private OkMessage createNostrEvent(
       @NonNull EventMessage eventMessage,
       @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
-    List<String> received = getWebSocketClient(eventSocketClientMap, subscriptionId).send(eventMessage);
+    List<String> received = sendEvent(eventSocketClientMap, subscriptionId, eventMessage);
     Optional<String> last = Streams.findLast(received.stream());
     return last
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
@@ -107,11 +107,7 @@ public class NostrRelayService {
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    WebSocketClientIF webSocketClient = getWebSocketClient(requestSocketClientMap, subscriberId);
-
-    List<String> send = webSocketClient
-        .send(
-            createReqJson(subscriberId.toString(), eventId));
+    List<String> send = sendRequest(requestSocketClientMap, subscriberId, eventId);
 
     Stream<BaseMessage> baseMessageStream = send.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
 
@@ -162,16 +158,31 @@ public class NostrRelayService {
     return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
   }
 
-  private WebSocketClientIF getWebSocketClient(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key) throws ExecutionException, InterruptedException {
+  private List<String> sendEvent(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key, EventMessage eventMessage) throws ExecutionException, InterruptedException, IOException {
     final WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
     if (checkWebSocketClient != null) {
-      return checkWebSocketClient;
+      checkWebSocketClient.getEvents();
     }
 
     clientIFMap.put(
         key,
         new StandardWebSocketClient(relayUri, sslBundles));
     final WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
-    return webSocketClientIF;
+    webSocketClientIF.send(eventMessage);
+    return webSocketClientIF.getEvents();
+  }
+
+  private List<String> sendRequest(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
+    final WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
+    if (checkWebSocketClient != null) {
+      checkWebSocketClient.getEvents();
+    }
+
+    clientIFMap.put(
+        key,
+        new StandardWebSocketClient(relayUri, sslBundles));
+    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
+    webSocketClientIF.send(createReqJson(key.toString(), eventId));
+    return webSocketClientIF.getEvents();
   }
 }

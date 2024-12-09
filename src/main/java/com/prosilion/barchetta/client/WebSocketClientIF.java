@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface WebSocketClientIF {
-  <T extends BaseMessage> List<String> send(T eventMessage) throws IOException;
-  List<String> send(String json) throws IOException;
+  <T extends BaseMessage> void send(T eventMessage) throws IOException;
+  List<String> getEvents();
+  void send(String json) throws IOException;
 }
