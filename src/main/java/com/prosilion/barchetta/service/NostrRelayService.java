@@ -31,8 +31,8 @@ import java.util.stream.Stream;
 
 @Service
 public class NostrRelayService {
-  private Map<Long, WebSocketClientIF> eventSocketClientMap = new ConcurrentHashMap<>();
-  private Map<Long, WebSocketClientIF> requestSocketClientMap = new ConcurrentHashMap<>();
+  private Map<Long, Map<String, WebSocketClientIF>> eventSocketClientMap = new ConcurrentHashMap<>();
+  private Map<Long, Map<String, WebSocketClientIF>> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
   private final SslBundles sslBundles;
 
@@ -107,9 +107,16 @@ public class NostrRelayService {
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    List<String> send = sendRequest(requestSocketClientMap, subscriberId, eventId);
+    List<String> returnedEvents = sendRequest(requestSocketClientMap, subscriberId, eventId);
 
-    Stream<BaseMessage> baseMessageStream = send.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
+    System.out.println("55555555555555555");
+    System.out.println("after REQUEST:");
+    System.out.printf("key:\n  [%d], eventId: [%s]\n", subscriberId, eventId);
+    System.out.println("-----------------");
+    System.out.println("returnedEvents:");
+    returnedEvents.forEach(event -> System.out.printf("  [%s]\n", event));
+    System.out.println("55555555555555555");
+    Stream<BaseMessage> baseMessageStream = returnedEvents.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
 
     Stream<BaseMessage> baseMessageStream1 = baseMessageStream.filter(baseMessage -> !baseMessage.getCommand().equalsIgnoreCase("EOSE"));
 
@@ -158,31 +165,69 @@ public class NostrRelayService {
     return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
   }
 
-  private List<String> sendEvent(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key, EventMessage eventMessage) throws ExecutionException, InterruptedException, IOException {
-    final WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
-    if (checkWebSocketClient != null) {
-      checkWebSocketClient.getEvents();
+  private List<String> sendEvent(Map<Long, Map<String, WebSocketClientIF>> clientIFMap, @NonNull Long key, EventMessage eventMessage) throws ExecutionException, InterruptedException, IOException {
+    final Map<String, WebSocketClientIF> keyMap = clientIFMap.get(key);
+    if (keyMap != null) {
+      WebSocketClientIF webSocketClientIF = keyMap.get(eventMessage.getEvent().getId());
+      if (webSocketClientIF != null) {
+        System.out.printf("111111111111 existing EVENT socket\nkey:\n  [%d]\nsocket:\n  [%s], event: [%s]\n\n", key, webSocketClientIF.getClientSession().getId(), eventMessage.getEvent().getId());
+        List<String> events = webSocketClientIF.getEvents();
+        System.out.println("-------------");
+        System.out.println("socket getEvents():");
+        events.forEach(event -> System.out.printf("  [%s]\n", event));
+        System.out.println("111111111111\n");
+        return events;
+      }
     }
+
+    Map<String, WebSocketClientIF> innerMap = new ConcurrentHashMap<>();
+    innerMap.put(eventMessage.getEvent().getId(), new StandardWebSocketClient(relayUri, sslBundles));
 
     clientIFMap.put(
         key,
-        new StandardWebSocketClient(relayUri, sslBundles));
-    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
+        innerMap);
+
+    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key).get(eventMessage.getEvent().getId());
+    System.out.printf("000000000000 new EVENT socket\nkey:\n  [%d]\neventId-Key:\n  [%s]\nsocket:\n  [%s], event: [%s]\n\n", key, eventMessage.getEvent().getId(), webSocketClientIF.getClientSession().getId(), eventMessage.getEvent().getId());
     webSocketClientIF.send(eventMessage);
+    List<String> events = webSocketClientIF.getEvents();
+    System.out.println("-------------");
+    System.out.println("socket getEvents():");
+    events.forEach(event -> System.out.printf("  [%s]\n", event));
+    System.out.println("000000000000\n");
     return webSocketClientIF.getEvents();
   }
 
-  private List<String> sendRequest(Map<Long, WebSocketClientIF> clientIFMap, @NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
-    final WebSocketClientIF checkWebSocketClient = clientIFMap.get(key);
-    if (checkWebSocketClient != null) {
-      checkWebSocketClient.getEvents();
+  private List<String> sendRequest(Map<Long, Map<String, WebSocketClientIF>> clientIFMap, @NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
+    final Map<String, WebSocketClientIF> keyMap = clientIFMap.get(key);
+    if (keyMap != null) {
+      WebSocketClientIF webSocketClientIF = keyMap.get(eventId);
+      if (webSocketClientIF != null) {
+        System.out.printf("3333333333333 existing REQ socket\nkey:\n  [%d]\nsocket:\n  [%s], event: [%s]\n\n", key, webSocketClientIF.getClientSession().getId(), eventId);
+        List<String> events = webSocketClientIF.getEvents();
+        System.out.println("-------------");
+        System.out.println("socket getEvents():");
+        events.forEach(event -> System.out.printf("  [%s]\n", event));
+        System.out.println("33333333333\n");
+        return events;
+      }
     }
+
+    Map<String, WebSocketClientIF> innerMap = new ConcurrentHashMap<>();
+    innerMap.put(eventId, new StandardWebSocketClient(relayUri, sslBundles));
 
     clientIFMap.put(
         key,
-        new StandardWebSocketClient(relayUri, sslBundles));
-    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key);
+        innerMap);
+
+    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key).get(eventId);
+    System.out.printf("222222222222 new REQ socket\nkey:\n  [%d]\neventId-Key:\n  [%s]\nsocket:\n  [%s], event: [%s]\n\n", key, eventId, webSocketClientIF.getClientSession().getId(), eventId);
     webSocketClientIF.send(createReqJson(key.toString(), eventId));
+    List<String> events = webSocketClientIF.getEvents();
+    System.out.println("-------------");
+    System.out.println("socket getEvents():");
+    events.forEach(event -> System.out.printf("  [%s]\n", event));
+    System.out.println("222222222222\n");
     return webSocketClientIF.getEvents();
   }
 }
