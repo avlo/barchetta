@@ -6,9 +6,11 @@ import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.util.NostrException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ssl.SslBundles;
@@ -23,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
+@TestMethodOrder(OrderAnnotation.class)
 public class NostrRelayServiceIT {
   private static final String RELAY_URI = "wss://localhost:5555";
 
@@ -50,6 +53,12 @@ public class NostrRelayServiceIT {
   }
 
   @Test
+  @Order(1)
+  void testPauseDb() {
+    System.out.println();
+  }
+
+  @Test
   @Order(0)
   void testSaveAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
     aliceContract = nostrRelayService.save(aliceContract);
@@ -70,8 +79,8 @@ public class NostrRelayServiceIT {
 //    System.out.println("33333333333333333");
 //    System.out.println("33333333333333333");
 
-//    aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
-//    aliceContract = nostrRelayService.save(aliceContract);
+    aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
+    aliceContract = nostrRelayService.save(aliceContract);
 
 //    System.out.println("44444444444444444");
 //    System.out.println("44444444444444444");
@@ -81,7 +90,7 @@ public class NostrRelayServiceIT {
 //    System.out.println("44444444444444444");
 //    System.out.println("44444444444444444");
 
-//    aliceContract = nostrRelayService.get(aliceContract);
+    aliceContract = nostrRelayService.get(aliceContract);
 
 //    System.out.println("55555555555555555");
 //    System.out.println("55555555555555555");
@@ -90,6 +99,7 @@ public class NostrRelayServiceIT {
 //    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
 //    System.out.println("55555555555555555");
 //    System.out.println("55555555555555555");
+
     bobContract = nostrRelayService.save(bobContract);
     bobContract = nostrRelayService.get(bobContract);
 

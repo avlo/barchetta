@@ -4,7 +4,6 @@ $(document).ready(function () {
     $("#createContract").submit(function (e) {
         e.preventDefault();
         const form = this;
-        dateNow = Math.floor(Date.now() / 1000);
         createEvent().then(function () {
             form.submit();
         })
@@ -12,6 +11,7 @@ $(document).ready(function () {
 });
 
 async function createEvent() {
+    dateNow = Math.floor(Date.now() / 1000);
     const calendarTimeBasedEventJson =
         await signEvent(
             await generateCTBEventJson());
