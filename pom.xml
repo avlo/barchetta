@@ -16,13 +16,13 @@
   </parent>
 
   <properties>
-    <java.version>22</java.version>
+    <java.version>21</java.version>
     <commons-io.version>2.13.0</commons-io.version>
     <guava.version>32.1.2-jre</guava.version>
     <h2.version>2.2.224</h2.version>
     <mysql-connector-j.version>9.1.0</mysql-connector-j.version>
     <lombok.version>1.18.32</lombok.version>
-    <nostr-java.version>0.6.1-SNAPSHOT</nostr-java.version>
+    <nostr-java.version>0.6.3-SNAPSHOT</nostr-java.version>
     <presto.nostr.version>0.0.3-SNAPSHOT</presto.nostr.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
@@ -42,7 +42,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nostr-java</groupId>
+      <groupId>xyz.tcheeric</groupId>
       <artifactId>nostr-java-api</artifactId>
       <version>${nostr-java.version}</version>
     </dependency>
@@ -157,26 +157,6 @@
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
-<!--      <plugin>-->
-<!--        <groupId>org.springframework.boot</groupId>-->
-<!--        <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--        &lt;!&ndash;  TODO: below buildpacks configuration appears to (currently) be necessary for JDK22, ref: &ndash;&gt;-->
-<!--        &lt;!&ndash;  https://github.com/paketo-buildpacks/bellsoft-liberica/issues/565  &ndash;&gt;-->
-<!--&lt;!&ndash;        <configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;          <image>&ndash;&gt;-->
-<!--&lt;!&ndash;            <env>&ndash;&gt;-->
-<!--&lt;!&ndash;              <BP_JVM_VERSION>22</BP_JVM_VERSION>&ndash;&gt;-->
-<!--&lt;!&ndash;            </env>&ndash;&gt;-->
-<!--&lt;!&ndash;            <buildpacks>&ndash;&gt;-->
-<!--&lt;!&ndash;              <buildpack>paketobuildpacks/azul-zulu</buildpack>&ndash;&gt;-->
-<!--&lt;!&ndash;              <buildpack>urn:cnb:builder:paketo-buildpacks/syft</buildpack>&ndash;&gt;-->
-<!--&lt;!&ndash;              <buildpack>urn:cnb:builder:paketo-buildpacks/executable-jar</buildpack>&ndash;&gt;-->
-<!--&lt;!&ndash;              <buildpack>urn:cnb:builder:paketo-buildpacks/spring-boot</buildpack>&ndash;&gt;-->
-<!--&lt;!&ndash;            </buildpacks>&ndash;&gt;-->
-<!--&lt;!&ndash;            <builder>paketobuildpacks/builder-jammy-base</builder>&ndash;&gt;-->
-<!--&lt;!&ndash;          </image>&ndash;&gt;-->
-<!--&lt;!&ndash;        </configuration>&ndash;&gt;-->
-<!--      </plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
