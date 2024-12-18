@@ -5,6 +5,7 @@ import com.prosilion.barchetta.client.StandardWebSocketClient;
 import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import nostr.api.factory.impl.NIP01Impl.EventMessageFactory;
 import nostr.event.BaseMessage;
 import nostr.event.impl.CalendarTimeBasedEvent;
@@ -27,11 +28,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class NostrRelayService {
-  private Map<Long, Map<String, WebSocketClientIF>> eventSocketClientMap = new ConcurrentHashMap<>();
+  private final WebSocketClientIF eventSocketClient;
   private Map<Long, Map<String, WebSocketClientIF>> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
   private final SslBundles sslBundles;
@@ -39,9 +42,10 @@ public class NostrRelayService {
   @Autowired
   public NostrRelayService(
       @Value("${nostr.relay.uri}") String relayUri,
-      SslBundles sslBundles) {
+      SslBundles sslBundles) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
     this.sslBundles = sslBundles;
+    this.eventSocketClient = new StandardWebSocketClient(relayUri, sslBundles);
   }
 
   public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
@@ -50,20 +54,12 @@ public class NostrRelayService {
 
     OkMessage okMessageClassifiedListing =
         createNostrEvent(
-            new EventMessageFactory(
-                classifiedListingEvent,
-                contract.getId().toString()
-            ).create(),
-            contract.getId()
+            new EventMessageFactory(classifiedListingEvent).create()
         );
 
     OkMessage okMessageCalendarTimeBasedEvent =
         createNostrEvent(
-            new EventMessageFactory(
-                calendarTimeBasedEvent,
-                contract.getId().toString()
-            ).create(),
-            contract.getId()
+            new EventMessageFactory(calendarTimeBasedEvent).create()
         );
 
     if (!okMessageClassifiedListing.getFlag() || !okMessageCalendarTimeBasedEvent.getFlag())
@@ -72,10 +68,8 @@ public class NostrRelayService {
     return contract;
   }
 
-  private OkMessage createNostrEvent(
-      @NonNull EventMessage eventMessage,
-      @NonNull Long subscriptionId) throws ExecutionException, InterruptedException, IOException {
-    List<String> received = sendEvent(eventSocketClientMap, subscriptionId, eventMessage);
+  private OkMessage createNostrEvent(@NonNull EventMessage eventMessage) throws IOException {
+    List<String> received = sendEvent(eventMessage);
     Optional<String> last = Streams.findLast(received.stream());
     return last
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
@@ -109,13 +103,6 @@ public class NostrRelayService {
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
     List<String> returnedEvents = sendRequest(requestSocketClientMap, subscriberId, eventId);
 
-    System.out.println("55555555555555555");
-    System.out.println("after REQUEST:");
-    System.out.printf("key:\n  [%d], eventId: [%s]\n", subscriberId, eventId);
-    System.out.println("-----------------");
-    System.out.println("returnedEvents:");
-    returnedEvents.forEach(event -> System.out.printf("  [%s]\n", event));
-    System.out.println("55555555555555555");
     Stream<BaseMessage> baseMessageStream = returnedEvents.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
 
     Stream<BaseMessage> baseMessageStream1 = baseMessageStream.filter(baseMessage -> !baseMessage.getCommand().equalsIgnoreCase("EOSE"));
@@ -156,46 +143,13 @@ public class NostrRelayService {
     return compare;
   }
 
-  private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
-//    TODO: re-introduce below after investigation
-//    String result = ids.stream()
-//        .map(s -> "\"" + s + "\"")
-//        .collect(Collectors.joining(", "));
-//    String joinedString = "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[" + result + "]}]";
-    return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
-  }
-
-  private List<String> sendEvent(Map<Long, Map<String, WebSocketClientIF>> clientIFMap, @NonNull Long key, EventMessage eventMessage) throws ExecutionException, InterruptedException, IOException {
-    final Map<String, WebSocketClientIF> keyMap = clientIFMap.get(key);
-    if (keyMap != null) {
-      WebSocketClientIF webSocketClientIF = keyMap.get(eventMessage.getEvent().getId());
-      if (webSocketClientIF != null) {
-        System.out.printf("111111111111 existing EVENT socket\nkey:\n  [%d]\nsocket:\n  [%s], event: [%s]\n\n", key, webSocketClientIF.getClientSession().getId(), eventMessage.getEvent().getId());
-        List<String> events = webSocketClientIF.getEvents();
-        System.out.println("-------------");
-        System.out.println("socket getEvents():");
-        events.forEach(event -> System.out.printf("  [%s]\n", event));
-        System.out.println("111111111111\n");
-        return events;
-      }
-    }
-
-    Map<String, WebSocketClientIF> innerMap = new ConcurrentHashMap<>();
-    innerMap.put(eventMessage.getEvent().getId(), new StandardWebSocketClient(relayUri, sslBundles));
-
-    clientIFMap.put(
-        key,
-        innerMap);
-
-    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key).get(eventMessage.getEvent().getId());
-    System.out.printf("000000000000 new EVENT socket\nkey:\n  [%d]\neventId-Key:\n  [%s]\nsocket:\n  [%s], event: [%s]\n\n", key, eventMessage.getEvent().getId(), webSocketClientIF.getClientSession().getId(), eventMessage.getEvent().getId());
-    webSocketClientIF.send(eventMessage);
-    List<String> events = webSocketClientIF.getEvents();
-    System.out.println("-------------");
-    System.out.println("socket getEvents():");
-    events.forEach(event -> System.out.printf("  [%s]\n", event));
-    System.out.println("000000000000\n");
-    return webSocketClientIF.getEvents();
+  private List<String> sendEvent(EventMessage eventMessage) throws IOException {
+    eventSocketClient.send(eventMessage);
+    log.debug("socket send EventMessage content\n  {}", eventMessage.getEvent());
+    List<String> events = eventSocketClient.getEvents();
+    log.debug("received relay response:");
+    log.debug("\n" + events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
+    return events;
   }
 
   private List<String> sendRequest(Map<Long, Map<String, WebSocketClientIF>> clientIFMap, @NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
@@ -203,12 +157,7 @@ public class NostrRelayService {
     if (keyMap != null) {
       WebSocketClientIF webSocketClientIF = keyMap.get(eventId);
       if (webSocketClientIF != null) {
-        System.out.printf("3333333333333 existing REQ socket\nkey:\n  [%d]\nsocket:\n  [%s], event: [%s]\n\n", key, webSocketClientIF.getClientSession().getId(), eventId);
         List<String> events = webSocketClientIF.getEvents();
-        System.out.println("-------------");
-        System.out.println("socket getEvents():");
-        events.forEach(event -> System.out.printf("  [%s]\n", event));
-        System.out.println("33333333333\n");
         return events;
       }
     }
@@ -221,13 +170,17 @@ public class NostrRelayService {
         innerMap);
 
     final WebSocketClientIF webSocketClientIF = clientIFMap.get(key).get(eventId);
-    System.out.printf("222222222222 new REQ socket\nkey:\n  [%d]\neventId-Key:\n  [%s]\nsocket:\n  [%s], event: [%s]\n\n", key, eventId, webSocketClientIF.getClientSession().getId(), eventId);
     webSocketClientIF.send(createReqJson(key.toString(), eventId));
     List<String> events = webSocketClientIF.getEvents();
-    System.out.println("-------------");
-    System.out.println("socket getEvents():");
-    events.forEach(event -> System.out.printf("  [%s]\n", event));
-    System.out.println("222222222222\n");
     return webSocketClientIF.getEvents();
+  }
+
+  private String createReqJson(@NonNull String subscriberId, @NonNull String id) {
+//    TODO: re-introduce below after investigation
+//    String result = ids.stream()
+//        .map(s -> "\"" + s + "\"")
+//        .collect(Collectors.joining(", "));
+//    String joinedString = "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[" + result + "]}]";
+    return "[\"REQ\",\"" + subscriberId + "\",{\"ids\":[\"" + id + "\"]}]";
   }
 }

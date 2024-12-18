@@ -2,6 +2,7 @@ package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
+import lombok.NonNull;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.util.NostrException;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -27,18 +27,17 @@ import java.util.concurrent.ExecutionException;
 @ActiveProfiles("test")
 @TestMethodOrder(OrderAnnotation.class)
 public class NostrRelayServiceIT {
-  private static final String RELAY_URI = "wss://localhost:5555";
-
-  @Autowired
-  SslBundles sslBundles;
-
-  private NostrRelayService nostrRelayService;
+  private final NostrRelayService nostrRelayService;
   private Contract aliceContract;
   private Contract bobContract;
 
+  @Autowired
+  public NostrRelayServiceIT(@NonNull NostrRelayService nostrRelayService) {
+    this.nostrRelayService = nostrRelayService;
+  }
+
   @BeforeAll
   void setup() {
-    nostrRelayService = new NostrRelayService(RELAY_URI, sslBundles);
     ClassifiedListingEvent clEventAlice = ContractDto.mapJsonToEvent(getAliceClassifiedListingEventJson(), ClassifiedListingEvent.class);
     CalendarTimeBasedEvent ctbEventAlice = ContractDto.mapJsonToEvent(getAliceCalendarTimeBasedEventJson(), CalendarTimeBasedEvent.class);
 
@@ -53,66 +52,43 @@ public class NostrRelayServiceIT {
   }
 
   @Test
-  @Order(1)
-  void testPauseDb() {
-    System.out.println();
-  }
-
-  @Test
   @Order(0)
   void testSaveAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
     aliceContract = nostrRelayService.save(aliceContract);
-//    System.out.println("11111111111111111");
-//    System.out.println("11111111111111111");
-//    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
-//    System.out.println("-----------------");
-//    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
-//    System.out.println("11111111111111111");
-//    System.out.println("11111111111111111");
-
     aliceContract = nostrRelayService.get(aliceContract);
-//    System.out.println("33333333333333333");
-//    System.out.println("33333333333333333");
-//    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
-//    System.out.println("-----------------");
-//    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
-//    System.out.println("33333333333333333");
-//    System.out.println("33333333333333333");
 
+//    TODO: below doesn't update either event.  that needs to be done by client
     aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
     aliceContract = nostrRelayService.save(aliceContract);
-
-//    System.out.println("44444444444444444");
-//    System.out.println("44444444444444444");
-//    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
-//    System.out.println("-----------------");
-//    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
-//    System.out.println("44444444444444444");
-//    System.out.println("44444444444444444");
-
     aliceContract = nostrRelayService.get(aliceContract);
-
-//    System.out.println("55555555555555555");
-//    System.out.println("55555555555555555");
-//    System.out.println(Contract.mapEventToJson(contract.getClassifiedListingEvent()));
-//    System.out.println("-----------------");
-//    System.out.println(Contract.mapEventToJson(contract.getCalendarTimeBasedEvent()));
-//    System.out.println("55555555555555555");
-//    System.out.println("55555555555555555");
-
-    bobContract = nostrRelayService.save(bobContract);
-    bobContract = nostrRelayService.get(bobContract);
-
-    aliceContract = nostrRelayService.get(aliceContract);
-    bobContract = nostrRelayService.get(bobContract);
-  }
-
-  private String getAliceCalendarTimeBasedEventJson() {
-    return "{\"id\":\"6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\",\"kind\":31923,\"created_at\":1733700427,\"content\":\"CTBEvent content field: aaaaaa\",\"tags\":[[\"d\",\"UUID-1733700427\"],[\"title\",\"CTBEvent title field: aaaaaa\"],[\"start\",1733800427],[\"summary\",\"CTBEvent summary field: aaaaaa\"],[\"location\",\"CTBEvent location field\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"]],\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"ed9f9844b3b1bfec598b9dbe9ee3743219f9e9b55158da126b8addaaf38ca863cad711eb0674f9224f41c08f2887e5606b1cad2e6777625e5079c91f5b02b117\"}";
+//
+//    bobContract = nostrRelayService.save(bobContract);
+//    bobContract = nostrRelayService.get(bobContract);
+//
+//    aliceContract = nostrRelayService.get(aliceContract);
+//    bobContract = nostrRelayService.get(bobContract);
   }
 
   private String getAliceClassifiedListingEventJson() {
-    return "{\"id\":\"30e357e5801e005080774142be0a6e6b07dc4db232db88a5d4d5c201132db32d\",\"kind\":30402,\"created_at\":1733700427,\"content\":\"CLEvent content field: aaaaaa\",\"tags\":[[\"subject\",\"CLEvent subject field: aaaaaa\"],[\"title\",\"CLEvent title field: aaaaaa\"],[\"published_at\",1733700427],[\"summary\",\"CLEvent summary field: aaaaaa\"],[\"location\",\"CLEvent location field\"],[\"price\",\"1111111\",\"BTC\",\"1\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"],[\"a\",\"31923:a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5:6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\"]],\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"43b2327d7321bf96e4ffa5e42b3339ca0d07613d2c1d46c8aa20e986124e1e28a929049ef6b22922eabfb415d235d14e6db0e7e39f653f6bfd9aa48fc9de1e47\"}";
+    return "{\"id\":\"30e357e5801e005080774142be0a6e6b07dc4db232db88a5d4d5c201132db32d\",\"kind\":30402,\"created_at\":1733700427,\"content\":\"CLEvent content field: aaaaaa\",\"tags\":[[\"subject\",\"CLEvent subject field: aaaaaa\"],[\"title\",\"CLEvent title field: aaaaaa\"],[\"published_at\",1733700427],[\"summary\",\"CLEvent summary field: aaaaaa\"],[\"location\",\"CLEvent location field\"],[\"price\",\"1111111\",\"BTC\",\"1\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"]," +
+
+        "[\"a\"," +
+        "\"31923:" +
+        "a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5:" +
+        "6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\"]]," +
+
+// TODO/note: clEvent can(/should?) also have "d" tag indicating it's addressable
+//  (aka, parameterized replacable) which might be necessary since the event
+//  gets updated per every alice/bob contract interaction with it
+        "\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"43b2327d7321bf96e4ffa5e42b3339ca0d07613d2c1d46c8aa20e986124e1e28a929049ef6b22922eabfb415d235d14e6db0e7e39f653f6bfd9aa48fc9de1e47\"}";
+  }
+
+  private String getAliceCalendarTimeBasedEventJson() {
+    return "{\"id\":\"6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\",\"kind\":31923,\"created_at\":1733700427,\"content\":\"CTBEvent content field: aaaaaa\",\"tags\":[" +
+
+        "[\"d\",\"UUID-1733700427\"]," +
+
+        "[\"title\",\"CTBEvent title field: aaaaaa\"],[\"start\",1733800427],[\"summary\",\"CTBEvent summary field: aaaaaa\"],[\"location\",\"CTBEvent location field\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"]],\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"ed9f9844b3b1bfec598b9dbe9ee3743219f9e9b55158da126b8addaaf38ca863cad711eb0674f9224f41c08f2887e5606b1cad2e6777625e5079c91f5b02b117\"}";
   }
 
   private String getBobCalendarTimeBasedEventJson() {
