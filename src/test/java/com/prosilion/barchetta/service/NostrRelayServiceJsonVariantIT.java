@@ -26,13 +26,13 @@ import java.util.concurrent.ExecutionException;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @TestMethodOrder(OrderAnnotation.class)
-public class NostrRelayServiceIT {
+public class NostrRelayServiceJsonVariantIT {
   private final NostrRelayService nostrRelayService;
   private Contract aliceContract;
   private Contract bobContract;
 
   @Autowired
-  public NostrRelayServiceIT(@NonNull NostrRelayService nostrRelayService) {
+  public NostrRelayServiceJsonVariantIT(@NonNull NostrRelayService nostrRelayService) {
     this.nostrRelayService = nostrRelayService;
   }
 
@@ -57,7 +57,6 @@ public class NostrRelayServiceIT {
     aliceContract = nostrRelayService.save(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
 
-//    TODO: below doesn't update either event.  that needs to be done by client
     aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
     aliceContract = nostrRelayService.save(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
@@ -72,21 +71,24 @@ public class NostrRelayServiceIT {
   private String getAliceClassifiedListingEventJson() {
     return "{\"id\":\"30e357e5801e005080774142be0a6e6b07dc4db232db88a5d4d5c201132db32d\",\"kind\":30402,\"created_at\":1733700427,\"content\":\"CLEvent content field: aaaaaa\",\"tags\":[[\"subject\",\"CLEvent subject field: aaaaaa\"],[\"title\",\"CLEvent title field: aaaaaa\"],[\"published_at\",1733700427],[\"summary\",\"CLEvent summary field: aaaaaa\"],[\"location\",\"CLEvent location field\"],[\"price\",\"1111111\",\"BTC\",\"1\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"]," +
 
+// TODO/note: clEvent can(/should?) also have "d" tag?
+//  currently no clear need for it re: clEvent, but would serve w/ potentially querying, so include it for now
+//  UUID use superconductor ContractId
+        "[\"d\",\"superconductor-contract_id-1\"]," +
+
         "[\"a\"," +
         "\"31923:" +
         "a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5:" +
-        "6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\"]]," +
+        "superconductor-contract_id-1\"]]," +
 
-// TODO/note: clEvent can(/should?) also have "d" tag indicating it's addressable
-//  (aka, parameterized replacable) which might be necessary since the event
-//  gets updated per every alice/bob contract interaction with it
+
         "\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"43b2327d7321bf96e4ffa5e42b3339ca0d07613d2c1d46c8aa20e986124e1e28a929049ef6b22922eabfb415d235d14e6db0e7e39f653f6bfd9aa48fc9de1e47\"}";
   }
 
   private String getAliceCalendarTimeBasedEventJson() {
     return "{\"id\":\"6eb8df291787919cf847327245e321a1795dc9b60936bb7304c9a87ac8c37698\",\"kind\":31923,\"created_at\":1733700427,\"content\":\"CTBEvent content field: aaaaaa\",\"tags\":[" +
 
-        "[\"d\",\"UUID-1733700427\"]," +
+        "[\"d\",\"superconductor-contract_id-1\"]," +
 
         "[\"title\",\"CTBEvent title field: aaaaaa\"],[\"start\",1733800427],[\"summary\",\"CTBEvent summary field: aaaaaa\"],[\"location\",\"CTBEvent location field\"],[\"p\",\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"wss://localhost:5555\",\"PAYER\"]],\"pubkey\":\"a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5\",\"sig\":\"ed9f9844b3b1bfec598b9dbe9ee3743219f9e9b55158da126b8addaaf38ca863cad711eb0674f9224f41c08f2887e5606b1cad2e6777625e5079c91f5b02b117\"}";
   }
