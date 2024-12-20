@@ -23,6 +23,7 @@ import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 @Service
 public class NostrRelayService {
   private final WebSocketClientIF eventSocketClient;
-  private Map<Long, Map<String, WebSocketClientIF>> requestSocketClientMap = new ConcurrentHashMap<>();
+  private Map<Long, Map<String, WebSocketClientIF>> requestSocketClientMap = new HashMap<>(new ConcurrentHashMap<>());
   private final String relayUri;
   private final SslBundles sslBundles;
 
@@ -101,7 +102,7 @@ public class NostrRelayService {
       @NonNull String eventId,
       @NonNull Long subscriberId,
       @NonNull Class<T> type) throws IOException, ExecutionException, InterruptedException {
-    List<String> returnedEvents = sendRequest(requestSocketClientMap, subscriberId, eventId);
+    List<String> returnedEvents = sendRequest(subscriberId, eventId);
 
     Stream<BaseMessage> baseMessageStream = returnedEvents.stream().map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage));
 
@@ -152,8 +153,8 @@ public class NostrRelayService {
     return events;
   }
 
-  private List<String> sendRequest(Map<Long, Map<String, WebSocketClientIF>> clientIFMap, @NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
-    final Map<String, WebSocketClientIF> keyMap = clientIFMap.get(key);
+  private List<String> sendRequest(@NonNull Long key, String eventId) throws ExecutionException, InterruptedException, IOException {
+    final Map<String, WebSocketClientIF> keyMap = requestSocketClientMap.get(key);
     if (keyMap != null) {
       WebSocketClientIF webSocketClientIF = keyMap.get(eventId);
       if (webSocketClientIF != null) {
@@ -165,11 +166,11 @@ public class NostrRelayService {
     Map<String, WebSocketClientIF> innerMap = new ConcurrentHashMap<>();
     innerMap.put(eventId, new StandardWebSocketClient(relayUri, sslBundles));
 
-    clientIFMap.put(
+    requestSocketClientMap.put(
         key,
         innerMap);
 
-    final WebSocketClientIF webSocketClientIF = clientIFMap.get(key).get(eventId);
+    final WebSocketClientIF webSocketClientIF = requestSocketClientMap.get(key).get(eventId);
     webSocketClientIF.send(createReqJson(key.toString(), eventId));
     List<String> events = webSocketClientIF.getEvents();
     return webSocketClientIF.getEvents();

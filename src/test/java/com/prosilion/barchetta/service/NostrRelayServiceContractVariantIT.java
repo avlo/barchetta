@@ -2,7 +2,6 @@ package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.entity.Contract;
 import lombok.NonNull;
-import nostr.api.EventNostr;
 import nostr.api.NIP52;
 import nostr.api.NIP99;
 import nostr.event.BaseTag;
@@ -51,7 +50,8 @@ public class NostrRelayServiceContractVariantIT {
   public static final String LOCATION = "pangea";
   public static final PriceTag PRICE_TAG = new PriceTag(BigDecimal.valueOf(11111), CURRENCY, MONTH);
 
-  public static final String CTBEVENT_TITLE = "Calendar Time-Based Event title";
+  public static final String CTBEVENT_CONTENT = "CalendarTimeBasedEvent content";
+  public static final String CTBEVENT_TITLE = "CalendarTimeBasedEvent title";
 
   String contractId1 = "superconductor-contract_id-1";
   long aliceCreatedAt = new Date().getTime();
@@ -107,18 +107,16 @@ public class NostrRelayServiceContractVariantIT {
         .build();
     classifiedListing.setLocation(LOCATION);
     classifiedListing.setPublishedAt(aliceCreatedAt);
-    NIP99<ClassifiedListingEvent> nip99 = new NIP99<>(aliceIdentity);
-    NIP99<ClassifiedListingEvent> instance = nip99.createClassifiedListingEvent(
-        baseTags,
-        CLEVENT_CONTENT,
-        classifiedListing);
 
-    EventNostr sign = instance.sign();
-    return (ClassifiedListingEvent) sign.getEvent();
+    return (ClassifiedListingEvent) new NIP99<>(aliceIdentity)
+        .createClassifiedListingEvent(
+            baseTags,
+            CLEVENT_CONTENT,
+            classifiedListing)
+        .sign().getEvent();
   }
 
   private CalendarTimeBasedEvent createAliceCalendarTimeBasedEvent() {
-
     CalendarContent calendarContent = CalendarContent.builder(
         new IdentifierTag(contractId1),
         CTBEVENT_TITLE,
@@ -129,9 +127,12 @@ public class NostrRelayServiceContractVariantIT {
         "ws://localhost:5555",
         "ISSUER"));
 
-    NIP52<CalendarTimeBasedEvent> nip52 = new NIP52<>(aliceIdentity);
-    EventNostr event = nip52.createCalendarTimeBasedEvent(tags, "content", calendarContent).sign();
-    return (CalendarTimeBasedEvent) event.getEvent();
+    return (CalendarTimeBasedEvent) new NIP52<>(aliceIdentity)
+        .createCalendarTimeBasedEvent(
+            tags,
+            CTBEVENT_CONTENT,
+            calendarContent)
+        .sign().getEvent();
   }
 
   private CalendarTimeBasedEvent createBobCalendarTimeBasedEvent() {
