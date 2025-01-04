@@ -26,6 +26,7 @@
     <presto.nostr.version>0.0.3-SNAPSHOT</presto.nostr.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
+    <junit-jupiter.version>5.10.2</junit-jupiter.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
   </properties>
@@ -140,6 +141,12 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>

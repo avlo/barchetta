@@ -66,7 +66,7 @@ class StandardWebSocketClientTest {
 
   @Autowired
   public StandardWebSocketClientTest(SslBundles sslBundles) throws ExecutionException, InterruptedException {
-    this.standardWebSocketClient = new StandardWebSocketClient(RELAY_URI, sslBundles);
+    this.standardWebSocketClient = new StandardWebSocketClient(RELAY_URI);
   }
 
   @BeforeEach
