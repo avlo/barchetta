@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.event.BaseMessage;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -29,17 +30,26 @@ public class StandardWebSocketClient extends TextWebSocketHandler {
   @Getter
   private final List<String> events = Collections.synchronizedList(new ArrayList<>());
 
-  public StandardWebSocketClient(@NonNull String relayUri
-  ) throws ExecutionException, InterruptedException {
+  public StandardWebSocketClient(@NonNull String relayUri) throws ExecutionException, InterruptedException {
     org.springframework.web.socket.client.standard.StandardWebSocketClient standardWebSocketClient = new org.springframework.web.socket.client.standard.StandardWebSocketClient();
-//    standardWebSocketClient.setSslContext(sslBundles.getBundle("server").createSslContext());
-    this.clientSession = standardWebSocketClient
+    this.clientSession = getClientSession(relayUri, standardWebSocketClient);
+    log.debug("Non-Secure (WS) WebSocket client connected {}", clientSession.getId());
+  }
+
+  public StandardWebSocketClient(@NonNull String relayUri, @NonNull SslBundles sslBundles) throws ExecutionException, InterruptedException {
+    org.springframework.web.socket.client.standard.StandardWebSocketClient standardWebSocketClient = new org.springframework.web.socket.client.standard.StandardWebSocketClient();
+    standardWebSocketClient.setSslContext(sslBundles.getBundle("server").createSslContext());
+    this.clientSession = getClientSession(relayUri, standardWebSocketClient);
+    log.debug("Secure (WSS) WebSocket client connected {}", clientSession.getId());
+  }
+
+  private WebSocketSession getClientSession(@NotNull String relayUri, org.springframework.web.socket.client.standard.StandardWebSocketClient standardWebSocketClient) throws InterruptedException, ExecutionException {
+    return standardWebSocketClient
         .execute(
             this,
             new WebSocketHttpHeaders(),
             URI.create(relayUri))
         .get();
-    log.debug("WebSocket client connected {}", clientSession.getId());
   }
 
   @Override

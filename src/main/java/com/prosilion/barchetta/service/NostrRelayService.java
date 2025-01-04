@@ -16,6 +16,7 @@ import nostr.util.NostrException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,20 +36,27 @@ public class NostrRelayService {
   private Map<String, StandardWebSocketClient> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
   private final String subscriberIdPrefix;
-//  private final SslBundles sslBundles;
+
+//  @Autowired
+//  public NostrRelayService(
+//      @Value("${superconductor.relay.uri}") String relayUri,
+//      @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix
+//  ) throws ExecutionException, InterruptedException {
+//    this.relayUri = relayUri;
+//    this.subscriberIdPrefix = subscriberIdPrefix;
+//    this.eventSocketClient = new StandardWebSocketClient(relayUri
+//    );
+//  }
 
   @Autowired
   public NostrRelayService(
       @Value("${superconductor.relay.uri}") String relayUri,
-      @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix
-//      , SslBundles sslBundles
+      @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix,
+      @NonNull SslBundles sslBundles
   ) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
     this.subscriberIdPrefix = subscriberIdPrefix;
-//    this.sslBundles = sslBundles;
-    this.eventSocketClient = new StandardWebSocketClient(relayUri
-//        , sslBundles
-    );
+    this.eventSocketClient = new StandardWebSocketClient(relayUri, sslBundles);
   }
 
   public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
