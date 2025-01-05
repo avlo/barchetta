@@ -2,6 +2,7 @@ package com.prosilion.barchetta.service;
 
 import com.google.common.collect.Streams;
 import com.prosilion.barchetta.client.StandardWebSocketClient;
+import com.prosilion.barchetta.client.WebSocketClientIF;
 import com.prosilion.barchetta.model.entity.Contract;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import nostr.util.NostrException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +34,11 @@ import static java.util.Comparator.comparing;
 @Slf4j
 @Service
 public class NostrRelayService {
-  private final StandardWebSocketClient eventSocketClient;
-  private Map<String, StandardWebSocketClient> requestSocketClientMap = new ConcurrentHashMap<>();
+  private final WebSocketClientIF eventSocketClient;
+
+  private Map<String, WebSocketClientIF> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
+  private final SslBundles sslBundles;
   private final String subscriberIdPrefix;
 
 //  @Autowired
@@ -52,10 +56,18 @@ public class NostrRelayService {
   public NostrRelayService(
       @Value("${superconductor.relay.uri}") String relayUri,
       @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix,
-      @NonNull SslBundles sslBundles
+      SslBundles sslBundles
   ) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
+    log.info("relayUri: \n{}", relayUri);
     this.subscriberIdPrefix = subscriberIdPrefix;
+    log.info("subscriberIdPrefix: \n{}", subscriberIdPrefix);
+    this.sslBundles = sslBundles;
+    log.info("sslBundles: \n{}", sslBundles);
+    final SslBundle server = sslBundles.getBundle("server");
+    log.info("sslBundles name: \n{}", server);
+    log.info("sslBundles key: \n{}", server.getKey());
+    log.info("sslBundles protocol: \n{}", server.getProtocol());
     this.eventSocketClient = new StandardWebSocketClient(relayUri, sslBundles);
   }
 
@@ -144,7 +156,7 @@ public class NostrRelayService {
 
   private List<String> request(@NonNull Long clientUuid) throws ExecutionException, InterruptedException, IOException {
     final String subscriberPrefixEventIdSuffix = subscriberIdPrefix + clientUuid;
-    final StandardWebSocketClient existingSubscriberUuidWebClient = requestSocketClientMap.get(subscriberPrefixEventIdSuffix);
+    final WebSocketClientIF existingSubscriberUuidWebClient = requestSocketClientMap.get(subscriberPrefixEventIdSuffix);
     if (existingSubscriberUuidWebClient != null) {
       log.debug("3333333333333 existing REQ socket\nkey:\n  [{}]\nsocket:\n  [{}]\n\n", subscriberPrefixEventIdSuffix, existingSubscriberUuidWebClient.getClientSession().getId());
       List<String> events = existingSubscriberUuidWebClient.getEvents();
@@ -155,11 +167,9 @@ public class NostrRelayService {
       return events;
     }
 
-    requestSocketClientMap.put(subscriberPrefixEventIdSuffix, new StandardWebSocketClient(relayUri
-//        , sslBundles
-    ));
+    requestSocketClientMap.put(subscriberPrefixEventIdSuffix, new StandardWebSocketClient(relayUri, sslBundles));
 
-    final StandardWebSocketClient newSubscriberUuidWebClient = requestSocketClientMap.get(subscriberPrefixEventIdSuffix);
+    final WebSocketClientIF newSubscriberUuidWebClient = requestSocketClientMap.get(subscriberPrefixEventIdSuffix);
     final String newSubscriberUuidWebClientsessionId = newSubscriberUuidWebClient.getClientSession().getId();
     log.debug("222222222222 new REQ socket\nkey:\n  [{}]\nsocket:\n  [{}]\n\n", subscriberPrefixEventIdSuffix, newSubscriberUuidWebClientsessionId);
     newSubscriberUuidWebClient.send(createReqJson(clientUuid));

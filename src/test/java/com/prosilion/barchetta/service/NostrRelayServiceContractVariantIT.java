@@ -2,6 +2,7 @@ package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.entity.Contract;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import nostr.api.NIP52;
 import nostr.api.NIP99;
 import nostr.event.BaseTag;
@@ -15,16 +16,14 @@ import nostr.event.tag.PubKeyTag;
 import nostr.id.Identity;
 import nostr.util.NostrException;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,11 +32,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
+@Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@DirtiesContext
 @ActiveProfiles("test")
-@TestMethodOrder(OrderAnnotation.class)
 public class NostrRelayServiceContractVariantIT {
   Identity aliceIdentity = Identity.generateRandomIdentity();
   Identity bobIdentity = Identity.generateRandomIdentity();
