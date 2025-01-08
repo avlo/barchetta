@@ -1,4 +1,4 @@
-package com.prosilion.barchetta.service;
+package com.prosilion.barchetta.service.nostr;
 
 import com.google.common.collect.Streams;
 import com.prosilion.barchetta.client.StandardWebSocketClient;

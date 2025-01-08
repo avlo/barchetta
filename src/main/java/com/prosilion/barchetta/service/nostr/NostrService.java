@@ -1,9 +1,10 @@
-package com.prosilion.barchetta.service;
+package com.prosilion.barchetta.service.nostr;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
+import com.prosilion.barchetta.service.controller.ControllerServiceIF;
 import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecoratorIF;
 import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;

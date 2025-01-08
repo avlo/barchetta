@@ -1,6 +1,7 @@
 package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.barchetta.service.nostr.NostrRelayService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.api.NIP52;

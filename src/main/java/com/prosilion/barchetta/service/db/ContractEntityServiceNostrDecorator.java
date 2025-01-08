@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.service.db;
 
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.service.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.NostrRelayService;
 import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;

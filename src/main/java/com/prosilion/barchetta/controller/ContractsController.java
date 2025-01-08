@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
-import com.prosilion.barchetta.service.NostrServiceIF;
+import com.prosilion.barchetta.service.nostr.NostrServiceIF;
 import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

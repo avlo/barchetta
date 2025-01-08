@@ -1,4 +1,4 @@
-package com.prosilion.barchetta.service;
+package com.prosilion.barchetta.service.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
