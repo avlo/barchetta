@@ -2,6 +2,7 @@ package com.prosilion.barchetta.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import nostr.base.PublicKey;
 import nostr.event.tag.EventTag;
 import nostr.event.tag.GeohashTag;
@@ -25,8 +26,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,30 +65,43 @@ class StandardWebSocketClientTest {
   public static final String FREQUENCY = "1";
   public static final BigDecimal NUMBER = new BigDecimal(PRICE_NUMBER);
 
-  StandardWebSocketClient standardWebSocketClient;
+  ObjectMapper objectMapper = new ObjectMapper();
+  StandardWebSocketClient eventWebSocketClient;
+  StandardWebSocketClient requestWebSocketClient;
 
   @Autowired
   public StandardWebSocketClientTest(SslBundles sslBundles) throws ExecutionException, InterruptedException {
-    this.standardWebSocketClient = new StandardWebSocketClient(RELAY_URI, sslBundles);
+    this.eventWebSocketClient = new StandardWebSocketClient(RELAY_URI, sslBundles);
+    this.requestWebSocketClient = new StandardWebSocketClient(RELAY_URI, sslBundles);
   }
 
   @BeforeEach
   void setup() throws IOException {
-    standardWebSocketClient.send(eventJson());
-//    assertEquals(
-//        expectedEventResponseJson(ID),
-//        standardWebSocketClient.getEvents()
-//            .stream().findFirst().get());
+    eventWebSocketClient.send(eventJson());
+
+    String expected = expectedEventResponseJson(ID);
+    String actual = eventWebSocketClient.getEvents()
+        .stream().findFirst().get();
+
+    log.debug("\nEVENT expected:\n  {}\n", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected));
+    log.debug("-----");
+    log.debug("EVENT actual:\n  {}\n\n", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual));
+
+    assertEquals(expected, actual);
   }
 
   @Test
   void testSendRequestExpectEventResponse() throws IOException {
-    standardWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID));
+    requestWebSocketClient.send(createReqJson(SUBSCRIBER_ID, ID));
 
-    JsonNode expected = new ObjectMapper().readTree(expectedRequestResponseJson());
-    List<String> returnedEvents = standardWebSocketClient.getEvents();
+    JsonNode expected = objectMapper.readTree(expectedRequestResponseJson());
+    List<String> returnedEvents = requestWebSocketClient.getEvents();
 
-    JsonNode actual = new ObjectMapper().readTree(returnedEvents.getFirst());
+    JsonNode actual = objectMapper.readTree(returnedEvents.getFirst());
+
+    log.debug("\nREQ expected:\n  {}\n", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected));
+    log.debug("-----");
+    log.debug("REQ actual:\n  {}\n\n", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual));
 
     assertTrue(
         JsonComparator.equalsJson(
@@ -106,10 +122,10 @@ class StandardWebSocketClientTest {
     return
         "   [\"EVENT\",\"" + SUBSCRIBER_ID + "\",\n" +
             "          {\"id\": \"" + ID + "\",\n" +
-            "          \"kind\": " + KIND + ",\n" +
-            "          \"content\": \"" + CLASSIFIED_CONTENT + "\",\n" +
             "          \"pubkey\": \"" + PUB_KEY + "\",\n" +
+            "          \"content\": \"" + CLASSIFIED_CONTENT + "\",\n" +
             "          \"created_at\": " + CREATED_AT + ",\n" +
+            "          \"kind\": " + KIND + ",\n" +
             "          \"tags\": [\n" +
 //            "            [ \"e\", \"" + E_TAG.getIdEvent() + "\", \"" + E_TAG.getMarker() + "\" ],\n" +
             "            [ \"e\", \"" + E_TAG.getIdEvent() + "\" ],\n" +
