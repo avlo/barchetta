@@ -79,9 +79,9 @@ public class NostrRelayService {
 
   private <T extends GenericEvent> void saveEvent(@NonNull T clazz, @NonNull String failureString) throws NostrException, IOException {
     Optional.of(
-            getOkMessage(
-                sendEvent(
-                    new EventMessageFactory(clazz).create())).getFlag());
+        getOkMessage(
+            sendEvent(
+                new EventMessageFactory(clazz).create())).getFlag());
   }
 
   private static OkMessage getOkMessage(@NonNull List<String> received) throws NostrException {
@@ -104,20 +104,26 @@ public class NostrRelayService {
   }
 
   public <T extends GenericEvent> Contract get(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException {
-    contract.setClassifiedListingEvent(
-        sendRequest(
-            contract.getId(),
-            ClassifiedListingEvent.class));
+    Optional.of(sendRequest(
+        contract.getId(),
+        ClassifiedListingEvent.class)
+    ).orElseGet(
+        Optional::empty
+    ).ifPresent(
+        contract::setClassifiedListingEvent);
 
-    contract.setCalendarTimeBasedEvent(
-        sendRequest(
-            contract.getId(),
-            CalendarTimeBasedEvent.class));
+    Optional.of(sendRequest(
+        contract.getId(),
+        CalendarTimeBasedEvent.class)
+    ).orElseGet(
+        Optional::empty
+    ).ifPresent(
+        contract::setCalendarTimeBasedEvent);
 
     return contract;
   }
 
-  public <T extends GenericEvent> T sendRequest(
+  public <T extends GenericEvent> Optional<T> sendRequest(
       @NonNull Long clientUuid,
       @NonNull Class<T> clazz) throws IOException, ExecutionException, InterruptedException {
     List<String> returnedEvents = request(clientUuid);
@@ -144,8 +150,7 @@ public class NostrRelayService {
             comparing(eventMessage ->
                 ((GenericEvent) eventMessage.getEvent()).getCreatedAt()))
         .reduce((first, second) -> second) // gets last/aka, most recently dated event
-        .map(clazz::cast)
-        .orElseThrow();
+        .map(clazz::cast);
   }
 
   private String createReqJson(@NonNull Long uuid) {
