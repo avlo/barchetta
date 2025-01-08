@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 
@@ -54,18 +55,18 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   @Override
   protected void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) {
     String payload = message.getPayload();
-//    log.debug("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
-//    log.debug("socket:\n  [{}]\n", session.getId());
-//    log.debug("------------------------------");
-//    log.debug("  " + payload);
-//    log.debug("------------------------------");
-//    log.debug("events BEFORE payload:");
-//    log.debug(events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
-//    log.debug("------------------------------");
+    log.debug("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    log.debug("socket:\n  [{}]\n", session.getId());
+    log.debug("------------------------------");
+    log.debug("  " + payload);
+    log.debug("------------------------------");
+    log.debug("events BEFORE payload:");
+    log.debug(events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
+    log.debug("------------------------------");
     events.add(payload);
-//    log.debug("events AFTER  payload:");
-//    log.debug(events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
-//    log.debug("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n\n");
+    log.debug("events AFTER  payload:");
+    log.debug(events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
+    log.debug("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n\n");
     completed.setRelease(true);
   }
 

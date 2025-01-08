@@ -81,14 +81,13 @@ public class NostrRelayService {
     Optional.of(
             getOkMessage(
                 sendEvent(
-                    new EventMessageFactory(clazz).create())).getFlag())
-        .orElseThrow(() -> new NostrException(failureString));
+                    new EventMessageFactory(clazz).create())).getFlag());
   }
 
-  private static OkMessage getOkMessage(@NonNull List<String> received) {
+  private static OkMessage getOkMessage(@NonNull List<String> received) throws NostrException {
     return Streams.findLast(received.stream())
         .map(baseMessage -> new BaseMessageDecoder<OkMessage>().decode(baseMessage))
-        .orElseThrow();
+        .orElseThrow(NostrException::new);
   }
 
   private List<String> sendEvent(@NonNull EventMessage eventMessage) throws IOException {
@@ -99,8 +98,8 @@ public class NostrRelayService {
 
   public List<String> getEvents() {
     List<String> events = eventSocketClient.getEvents();
-    log.info("received relay response:");
-    log.info("\n" + events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
+    log.debug("received relay response:");
+    log.debug("\n" + events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
     return events;
   }
 
