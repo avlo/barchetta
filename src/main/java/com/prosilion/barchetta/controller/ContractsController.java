@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
-import com.prosilion.barchetta.service.NostrControllerServiceIF;
+import com.prosilion.barchetta.service.NostrServiceIF;
 import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +29,10 @@ public class ContractsController {
   public static final String OPEN_CONTRACTS_STR = "open_contracts";
   public static final String USER_CONTRACTS_STR = "user_contracts";
 
-  private final NostrControllerServiceIF nostrControllerService;
+  private final NostrServiceIF nostrControllerService;
 
   @Autowired
-  public ContractsController(@NonNull NostrControllerServiceIF nostrControllerService) {
+  public ContractsController(@NonNull NostrServiceIF nostrControllerService) {
     this.nostrControllerService = nostrControllerService;
   }
 

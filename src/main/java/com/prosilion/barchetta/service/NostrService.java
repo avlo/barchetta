@@ -19,12 +19,12 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class NostrControllerService implements NostrControllerServiceIF {
+public class NostrService implements NostrServiceIF {
   private final ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator;
   private final ControllerServiceIF controllerService;
 
   @Autowired
-  public NostrControllerService(
+  public NostrService(
       @NonNull ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator,
       @NonNull ControllerServiceIF controllerService) {
     this.contractEntityServiceNostrDecorator = contractEntityServiceNostrDecorator;

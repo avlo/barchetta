@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public interface NostrControllerServiceIF extends ControllerServiceIF {
+public interface NostrServiceIF extends ControllerServiceIF {
   List<Contract> getAllNostrUserContracts(@NonNull NostrUser user);
   List<Contract> getOpenContracts(@NonNull NostrUser nostrUser);
   Contract getContract(@NonNull Long id) throws IOException, ExecutionException, InterruptedException;
