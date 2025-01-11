@@ -33,7 +33,7 @@ async function generateCTBEventJson() {
         created_at: dateNow,
         content: ("CTBEvent content field: " + content.val()),
         tags: [
-            ['d', "UUID-"+dateNow],
+            ['d', $("#ctbEventUuid").val()],
             ['title', "CTBEvent title field: " + content.val()],
             ['start', dateNow+100000],
             ['summary', "CTBEvent summary field: " + content.val()],

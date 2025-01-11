@@ -70,7 +70,7 @@ public class NostrRelayServiceContractVariantIT {
     ClassifiedListingEvent clEventAlice = createAliceClassifiedListingEvent();
     CalendarTimeBasedEvent ctbEventAlice = createAliceCalendarTimeBasedEvent();
 
-    aliceContract = new Contract(clEventAlice, ctbEventAlice);
+    aliceContract = new Contract(clEventAlice, ctbEventAlice, "uuid-cle-01", "uuid-ctb-02");
     aliceContract.setId(1L);
 
 //    ClassifiedListingEvent clEventBob = ContractDto.mapJsonToEvent(createBobClassifiedListingEvent(), ClassifiedListingEvent.class);

@@ -1,6 +1,8 @@
 package com.prosilion.barchetta.model.dto;
 
 import com.prosilion.barchetta.model.entity.Contract;
+import com.prosilion.barchetta.model.entity.ContractStateEnum;
+import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,13 +20,15 @@ public class ContractDto {
   private Long id;
   private Long appUserId;
   private Long counterPartyId;
-  private String role;
+  private String clEventUuid;
+  private String ctbEventUuid;
+  private CreatorRoleEnum creatorRole;
   private BigDecimal price;
   private BigDecimal payerStake;
   private BigDecimal payeeStake;
   private boolean completed;
-  private String payerState;
-  private String payeeState;
+  private ContractStateEnum payerState;
+  private ContractStateEnum payeeState;
   private String nostrAppUserPubKey;
   private String nostrCounterPartyPubKey;
   private String classifiedListingEventJson;
@@ -35,7 +39,9 @@ public class ContractDto {
     return new Contract(
 //        TODO: below two lines need refactor into a NostrContractDto variant
         mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class),
-        mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class)
+        mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class),
+        clEventUuid,
+        ctbEventUuid
     );
   }
 

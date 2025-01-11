@@ -1,6 +1,7 @@
 package com.prosilion.barchetta.model.entity;
 
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 public enum CreatorRoleEnum {
@@ -9,8 +10,11 @@ public enum CreatorRoleEnum {
 
   private final String creatorRoleType;
 
+  CreatorRoleEnum(@NonNull String roleType) {
+    this.creatorRoleType = roleType;
+  }
 
-  CreatorRoleEnum(String creatorRoleType) {
-    this.creatorRoleType = creatorRoleType;
+  public static CreatorRoleEnum getOppositeRole(@NonNull CreatorRoleEnum roleType) {
+    return roleType.equals(PAYEE) ? PAYER : PAYEE;
   }
 }

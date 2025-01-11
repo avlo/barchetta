@@ -32,14 +32,14 @@
         <tbody>
         <tr>
           <td th:text="*{id}"/>
-          <td th:text="*{role}"/>
+          <td th:text="*{creatorRole}"/>
           <td th:text="*{text}"/>
           <td th:text="*{nostrAppUserPubKey}"/>
         </tr>
         </tbody>
       </table>
       <h4>Vote Form</h4>
-      <div th:switch="*{role}">
+      <div th:switch="${viewer_role}">
         <div th:case="${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).PAYER}">
           <h5 id="payee_state">Payee State: <code class="language-plaintext highlighter-rouge"><span
               th:text="*{payeeState} ?: 'awaiting'"/></code></h5>
@@ -49,7 +49,7 @@
                 th:value="${payer_state}" th:text="${payer_state.getContractStateType()}">
             </option>
           </select>
-          <input type="hidden" th:field="*{payeeState}" id="payeeState"/>
+          <input th:type="hidden" th:field="*{payeeState}" id="payeeState"/>
         </div>
         <div th:case="${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).PAYEE}">
           <h5 id="payer_state">Payer State: <code class="language-plaintext highlighter-rouge"><span
@@ -60,23 +60,25 @@
                 th:value="${payee_state}" th:text="${payee_state.getContractStateType()}">
             </option>
           </select>
-          <input type="hidden" th:field="*{payerState}" id="payerState"/>
+          <input th:type="hidden" th:field="*{payerState}" id="payerState"/>
         </div>
       </div>
       <div>
-        <input type="hidden" th:field="*{id}" id="id"/>
-        <input type="hidden" th:field="*{text}" id="content"/>
-        <input type="hidden" th:field="*{payerStake}" id="payerStake"/>
-        <input type="hidden" th:field="*{payeeStake}" id="payeeStake"/>
-        <input type="hidden" th:field="*{price}" id="payoutAmount"/>
-        <input type="hidden" th:field="*{completed}" id="completed"/>
-        <!--      <input type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
-        <input type="hidden" th:field="*{role}" id="creatorRole"/>
-        <input type="hidden" th:field="*{appUserId}" id="appUserId"/>
-        <input type="hidden" th:value="*{counterPartyId}" name="counterPartyId"/>
+        <input th:type="hidden" th:field="*{id}" id="id"/>
+        <input th:type="hidden" th:field="*{text}" id="content"/>
+        <input th:type="hidden" th:field="*{payerStake}" id="payerStake"/>
+        <input th:type="hidden" th:field="*{payeeStake}" id="payeeStake"/>
+        <input th:type="hidden" th:field="*{price}" id="payoutAmount"/>
+        <input th:type="hidden" th:field="*{completed}" id="completed"/>
+        <!--      <input th:type="hidden" th:field="${contract.agreedCompletionTime}" id="agreedCompletionTime"/>-->
+        <input th:type="hidden" th:field="*{creatorRole}" id="creatorRole"/>
+        <input th:type="hidden" th:field="*{appUserId}" id="appUserId"/>
+        <input th:type="hidden" th:value="*{counterPartyId}" name="counterPartyId"/>
+        <input th:type="hidden" th:field="*{ctbEventUuid}" id="ctbEventUuid"/>
+        <input th:type="hidden" th:field="*{clEventUuid}" id="clEventUuid"/>
       </div>
 <!--      TODO: needs either new (aka, updated) event (use nip-99.js) or parameterized replaceable event-->
-      <input type="submit" value="Accept Contract (View page)">
+      <input th:type="submit" value="Accept Contract (View page)">
     </form>
   </section>
 </main>

@@ -63,7 +63,7 @@
           [[${user_contract?.getPayerState()}]]
         </td>
         <td>
-          [[${user_contract?.getPayerState()}]]
+          [[${user_contract?.getPayeeState()}]]
         </td>
       </tr>
       </tbody>
@@ -129,6 +129,8 @@
     <h4>Create Contract</h4>
     <form th:id="createContract" action="#" th:action="@{/contract/create}" th:object="${contractDto}" method="post">
 
+      <input th:type="hidden" th:field="*{ctbEventUuid}" th:id="ctbEventUuid">
+      <input th:type="hidden" th:field="*{clEventUuid}" th:id="clEventUuid">
       <input th:type="hidden" th:field="*{classifiedListingEventJson}" th:id="classifiedListingEventJson"
              th:name="classifiedListingEventJson">
       <input th:type="hidden" th:field="*{calendarTimeBasedEventJson}" th:id="calendarTimeBasedEventJson"
@@ -143,7 +145,7 @@
       <br>
 
       <label>Role:</label>
-      <select name="creatorRole" th:field="*{role}">
+      <select name="creatorRole" th:field="*{creatorRole}">
         <option id="role" th:each="role : ${T(com.prosilion.barchetta.model.entity.CreatorRoleEnum).values()}"
                 th:value="${role}" th:text="${role.creatorRoleType}"></option>
       </select>

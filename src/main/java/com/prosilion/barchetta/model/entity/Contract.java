@@ -31,6 +31,8 @@ public class Contract {
   private Long id;
   private Long appUserId;
   private Long counterPartyId;
+  private String clEventUuid;
+  private String ctbEventUuid;
 
   private String nostrClassifiedListingEventId;
   private String nostrCalendarTimeBasedEventId;
@@ -45,9 +47,13 @@ public class Contract {
 
   public Contract(
       @NonNull ClassifiedListingEvent classifiedListingEvent,
-      @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent) {
+      @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent,
+      @NonNull String clEventUuid,
+      @NonNull String ctbEventUuid) {
     this.classifiedListingEvent = classifiedListingEvent;
     this.calendarTimeBasedEvent = calendarTimeBasedEvent;
+    this.clEventUuid = clEventUuid;
+    this.ctbEventUuid = ctbEventUuid;
 
     this.nostrClassifiedListingEventId = classifiedListingEvent.getId();
     this.nostrCalendarTimeBasedEventId = calendarTimeBasedEvent.getId();
@@ -66,22 +72,7 @@ public class Contract {
     return classifiedListingEvent.getClassifiedListing().getPriceTag();
   }
 
-  public CreatorRoleEnum getCreatorRole() {
-    String role = calendarTimeBasedEvent.getTags().stream()
-        .filter(PubKeyTag.class::isInstance)
-        .map(PubKeyTag.class::cast)
-        .filter(pubKeyTag -> pubKeyTag.getPublicKey().toHexString().equals(nostrAppUserPubKey))
-        .map(PubKeyTag::getPetName).findFirst().orElseThrow();
-    return CreatorRoleEnum.valueOf(role.toUpperCase());
-  }
-
   public ContractDto convertToDto() {
-    String role = calendarTimeBasedEvent.getTags().stream()
-        .filter(PubKeyTag.class::isInstance)
-        .map(PubKeyTag.class::cast)
-        .filter(pubKeyTag -> pubKeyTag.getPublicKey().toHexString().equals(nostrAppUserPubKey))
-        .map(PubKeyTag::getPetName).findFirst().orElseThrow();
-
     BigDecimal price = getPriceTag().getNumber();
 
 //    TODO: complete stake
@@ -119,7 +110,9 @@ public class Contract {
         id,
         appUserId,
         counterPartyId,
-        role,
+        clEventUuid,
+        ctbEventUuid,
+        getCreatorRole(),
         price,
         payerStake,
         payeeStake,
@@ -133,23 +126,24 @@ public class Contract {
         classifiedListingEvent.getContent());
   }
 
-  public String getPayerState() {
-    return getState("payer_state");
+  public CreatorRoleEnum getCreatorRole() {
+    String role = calendarTimeBasedEvent.getTags().stream()
+        .filter(PubKeyTag.class::isInstance)
+        .map(PubKeyTag.class::cast)
+        .filter(pubKeyTag -> pubKeyTag.getPublicKey().toHexString().equals(nostrAppUserPubKey))
+        .map(PubKeyTag::getPetName).findFirst().orElseThrow();
+    return CreatorRoleEnum.valueOf(role.toUpperCase());
   }
 
-  public ContractStateEnum getPayerStateEnum() {
-    return ContractStateEnum.valueOf(getPayerState());
+  public ContractStateEnum getPayerState() {
+    return ContractStateEnum.valueOf(getState("payer_state"));
   }
 
-  public String getPayeeState() {
-    return getState("payee_state");
+  public ContractStateEnum getPayeeState() {
+    return ContractStateEnum.valueOf(getState("payee_state"));
   }
 
-  public ContractStateEnum getPayeeStateEnum() {
-    return ContractStateEnum.valueOf(getPayeeState());
-  }
-
-  public String getState(String stateCode) {
+  private String getState(String stateCode) {
     Object value = classifiedListingEvent.getTags().stream()
         .filter(baseTag ->
             baseTag.getCode().equalsIgnoreCase(stateCode))

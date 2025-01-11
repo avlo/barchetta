@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
@@ -104,6 +105,10 @@ public class ControllerService implements ControllerServiceIF {
 
   @Override
   public ContractDto constructContractDto() {
-    return new ContractDto();
+    ContractDto contractDto = new ContractDto();
+    String uuidPrefix = UUID.randomUUID().toString().concat(UUID.randomUUID().toString()).substring(0, 60);
+    contractDto.setClEventUuid(uuidPrefix.concat("-cle"));
+    contractDto.setCtbEventUuid(uuidPrefix.concat("-ctb"));
+    return contractDto;
   }
 }
