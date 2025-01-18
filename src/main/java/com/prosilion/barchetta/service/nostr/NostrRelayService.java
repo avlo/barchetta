@@ -72,13 +72,25 @@ public class NostrRelayService {
     this.eventSocketClient = new StandardWebSocketClient(relayUri, sslBundles);
   }
 
-  public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
+  public Contract create(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
     saveEvent(contract.getClassifiedListingEvent(), "ClassifiedListingEvent failed OK from relay");
     saveEvent(contract.getCalendarTimeBasedEvent(), "CalendarTimeBasedEvent failed OK from relay");
     return contract;
   }
 
+  public Contract update(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
+    updateEvent(contract.getCalendarRsvpEvent(), "CalendarRsvpEvent failed OK from relay");
+    return contract;
+  }
+
   private <T extends GenericEvent> void saveEvent(@NonNull T clazz, @NonNull String failureString) throws NostrException, IOException {
+    Optional.of(
+        getOkMessage(
+            sendEvent(
+                new EventMessageFactory(clazz).create())).getFlag());
+  }
+
+  private <T extends GenericEvent> void updateEvent(@NonNull T clazz, @NonNull String failureString) throws NostrException, IOException {
     Optional.of(
         getOkMessage(
             sendEvent(

@@ -1,8 +1,9 @@
 package com.prosilion.barchetta.controller;
 
 import com.prosilion.barchetta.model.dto.ContractDto;
+import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
-import com.prosilion.barchetta.service.nostr.NostrServiceIF;
+import com.prosilion.barchetta.service.nostr.NostrControllerServiceIF;
 import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,15 @@ public class ContractsController {
   public static final String CONTRACT_DTO_STR = "contractDto";
   public static final String CONTRACTS_STR = "contracts";
   public static final String COUNTER_PARTY_ID_STR = "counter_party_id";
+  public static final String CTB_EVENT_ID = "ctbEventId";
   public static final String OPEN_CONTRACTS_STR = "open_contracts";
   public static final String USER_CONTRACTS_STR = "user_contracts";
   public static final String VIEWER_ROLE_STR = "viewer_role";
 
-  private final NostrServiceIF nostrControllerService;
+  private final NostrControllerServiceIF nostrControllerService;
 
   @Autowired
-  public ContractsController(@NonNull NostrServiceIF nostrControllerService) {
+  public ContractsController(@NonNull NostrControllerServiceIF nostrControllerService) {
     this.nostrControllerService = nostrControllerService;
   }
 
@@ -53,6 +55,15 @@ public class ContractsController {
   }
 
   //  TODO: below security not being applied, needs investigation
+  @Secured({"ROLE_USER", "USER"})
+  @PostMapping("/update")
+  public String applyForContractRxR(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
+    Contract contract = nostrControllerService.saveAsCounterParty(contractDto, user);
+    model.addAttribute(CTB_EVENT_ID, contract.getNostrCalendarTimeBasedEventId());
+    setCanonicalModelAttributes(user, model);
+    return "thymeleaf/contract/display_all";
+  }
+
   @Secured({"ROLE_USER", "USER"})
   @GetMapping("/display_all")
   public String showUserContracts(@AuthenticationPrincipal NostrUser user, Model model) {
@@ -93,6 +104,7 @@ public class ContractsController {
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
+
 
   @PostMapping("/vote")
   public String voteOnContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {

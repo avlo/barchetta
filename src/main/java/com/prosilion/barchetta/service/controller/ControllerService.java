@@ -39,10 +39,16 @@ public class ControllerService implements ControllerServiceIF {
     User foundUser = userService.findByUsername(user.getUsername());
     Contract contract = contractDto.convertToEntity();
     contract.setAppUserId(foundUser.getId());
-//    TODO: below line should be refactored into NostrControllerService
-    contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
-    return save(contract);
+    return create(contract);
+  }
+
+  @Override
+  public Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
+    User foundUser = userService.findByUsername(user.getUsername());
+    Contract contract = contractDto.convertToEntity();
+    contract.setCounterPartyId(foundUser.getId());
+    return create(contract);
   }
 
   @Override
@@ -50,9 +56,7 @@ public class ControllerService implements ControllerServiceIF {
     Contract contract = getContract(contractId);
     User foundUser = userService.findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
-//    TODO: below line should be refactored into NostrControllerService
-    contract.setNostrCounterPartyPubKey(user.getPubkey());
-    return save(contract);
+    return create(contract);
   }
 
   @Override
@@ -77,12 +81,17 @@ public class ControllerService implements ControllerServiceIF {
 
   @Override
   public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-   return save(contractDto.convertToEntity());
+    return create(contractDto.convertToEntity());
   }
 
   @Override
-  public Contract save(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return contractEntityService.save(contract);
+  public Contract create(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return contractEntityService.create(contract);
+  }
+
+  @Override
+  public Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return create(contract);
   }
 
   @Override
@@ -106,9 +115,8 @@ public class ControllerService implements ControllerServiceIF {
   @Override
   public ContractDto constructContractDto() {
     ContractDto contractDto = new ContractDto();
-    String uuidPrefix = UUID.randomUUID().toString().concat(UUID.randomUUID().toString()).substring(0, 60);
-    contractDto.setClEventUuid(uuidPrefix.concat("-cle"));
-    contractDto.setCtbEventUuid(uuidPrefix.concat("-ctb"));
+    String uuid = UUID.randomUUID().toString().concat(UUID.randomUUID().toString()).substring(0, 64);
+    contractDto.setEventUuid(uuid);
     return contractDto;
   }
 }

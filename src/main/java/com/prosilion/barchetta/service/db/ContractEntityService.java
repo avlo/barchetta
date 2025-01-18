@@ -21,7 +21,7 @@ public class ContractEntityService implements ContractEntityServiceIF {
 
   @Transactional
   @Override
-  public Contract save(@NonNull Contract contract) {
+  public Contract create(@NonNull Contract contract) {
     return contractRepository.save(contract);
   }
 

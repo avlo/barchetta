@@ -20,12 +20,12 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class NostrService implements NostrServiceIF {
+public class NostrControllerService implements NostrControllerServiceIF {
   private final ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator;
   private final ControllerServiceIF controllerService;
 
   @Autowired
-  public NostrService(
+  public NostrControllerService(
       @NonNull ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator,
       @NonNull ControllerServiceIF controllerService) {
     this.contractEntityServiceNostrDecorator = contractEntityServiceNostrDecorator;
@@ -39,7 +39,16 @@ public class NostrService implements NostrServiceIF {
     contract.setAppUserId(foundUser.getId());
     contract.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
-    return save(contract);
+    return create(contract);
+  }
+
+  @Override
+  public Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
+    User foundUser = findByUsername(user.getUsername());
+    Contract contract = contractDto.convertToEntity();
+    contract.setCounterPartyId(foundUser.getId());
+    contract.setNostrCounterPartyPubKey(user.getPubkey());
+    return create(contract);
   }
 
   @Override
@@ -48,7 +57,7 @@ public class NostrService implements NostrServiceIF {
     User foundUser = findByUsername(user.getUsername());
     contract.setCounterPartyId(foundUser.getId());
     contract.setNostrCounterPartyPubKey(user.getPubkey());
-    return save(contract);
+    return create(contract);
   }
 
   @Override
@@ -73,12 +82,17 @@ public class NostrService implements NostrServiceIF {
 
   @Override
   public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return save(contractDto.convertToEntity());
+    return create(contractDto.convertToEntity());
   }
 
   @Override
-  public Contract save(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return contractEntityServiceNostrDecorator.save(contract);
+  public Contract create(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return contractEntityServiceNostrDecorator.create(contract);
+  }
+
+  @Override
+  public Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return contractEntityServiceNostrDecorator.create(contract);
   }
 
   @Override

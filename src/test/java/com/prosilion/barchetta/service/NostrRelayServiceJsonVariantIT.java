@@ -14,13 +14,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -58,12 +56,12 @@ public class NostrRelayServiceJsonVariantIT {
 
   @Test
   @Order(0)
-  void testSaveAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
-    aliceContract = nostrRelayService.save(aliceContract);
+  void testCreateAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
+    aliceContract = nostrRelayService.create(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
 
     aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
-    aliceContract = nostrRelayService.save(aliceContract);
+    aliceContract = nostrRelayService.create(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
 //
 //    bobContract = nostrRelayService.save(bobContract);
