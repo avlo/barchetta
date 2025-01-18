@@ -20,8 +20,7 @@ public class ContractDto {
   private Long id;
   private Long appUserId;
   private Long counterPartyId;
-  private String clEventUuid;
-  private String ctbEventUuid;
+  private String eventUuid;
   private CreatorRoleEnum creatorRole;
   private BigDecimal price;
   private BigDecimal payerStake;
@@ -40,8 +39,7 @@ public class ContractDto {
 //        TODO: below two lines need refactor into a NostrContractDto variant
         mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class),
         mapJsonToEvent(calendarTimeBasedEventJson, CalendarTimeBasedEvent.class),
-        clEventUuid,
-        ctbEventUuid
+        eventUuid
     );
   }
 

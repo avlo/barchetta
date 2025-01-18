@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import nostr.event.impl.CalendarRsvpEvent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.event.impl.GenericEvent;
@@ -31,8 +32,7 @@ public class Contract {
   private Long id;
   private Long appUserId;
   private Long counterPartyId;
-  private String clEventUuid;
-  private String ctbEventUuid;
+  private String eventUuid;
 
   private String nostrClassifiedListingEventId;
   private String nostrCalendarTimeBasedEventId;
@@ -44,16 +44,16 @@ public class Contract {
   private ClassifiedListingEvent classifiedListingEvent;
   @Transient
   private CalendarTimeBasedEvent calendarTimeBasedEvent;
+  @Transient
+  private CalendarRsvpEvent calendarRsvpEvent;
 
   public Contract(
       @NonNull ClassifiedListingEvent classifiedListingEvent,
       @NonNull CalendarTimeBasedEvent calendarTimeBasedEvent,
-      @NonNull String clEventUuid,
-      @NonNull String ctbEventUuid) {
+      @NonNull String eventUuid) {
     this.classifiedListingEvent = classifiedListingEvent;
     this.calendarTimeBasedEvent = calendarTimeBasedEvent;
-    this.clEventUuid = clEventUuid;
-    this.ctbEventUuid = ctbEventUuid;
+    this.eventUuid = eventUuid;
 
     this.nostrClassifiedListingEventId = classifiedListingEvent.getId();
     this.nostrCalendarTimeBasedEventId = calendarTimeBasedEvent.getId();
@@ -110,8 +110,7 @@ public class Contract {
         id,
         appUserId,
         counterPartyId,
-        clEventUuid,
-        ctbEventUuid,
+        eventUuid,
         getCreatorRole(),
         price,
         payerStake,

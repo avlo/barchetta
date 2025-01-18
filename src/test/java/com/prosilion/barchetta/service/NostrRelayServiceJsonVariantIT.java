@@ -46,13 +46,13 @@ public class NostrRelayServiceJsonVariantIT {
     ClassifiedListingEvent clEventAlice = ContractDto.mapJsonToEvent(getAliceClassifiedListingEventJson(), ClassifiedListingEvent.class);
     CalendarTimeBasedEvent ctbEventAlice = ContractDto.mapJsonToEvent(getAliceCalendarTimeBasedEventJson(), CalendarTimeBasedEvent.class);
 
-    aliceContract = new Contract(clEventAlice, ctbEventAlice, "uuid-cle-01", "uuid-ctb-02");
+    aliceContract = new Contract(clEventAlice, ctbEventAlice, "uuid-01");
     aliceContract.setId(1L);
 
     ClassifiedListingEvent clEventBob = ContractDto.mapJsonToEvent(getBobClassifiedListingEventJson(), ClassifiedListingEvent.class);
     CalendarTimeBasedEvent ctbEventBob = ContractDto.mapJsonToEvent(getBobCalendarTimeBasedEventJson(), CalendarTimeBasedEvent.class);
 
-    bobContract = new Contract(clEventBob, ctbEventBob, "uuid-cle-02", "uuid-ctb-02");
+    bobContract = new Contract(clEventBob, ctbEventBob, "uuid-02");
     bobContract.setId(2L);
   }
 

@@ -39,7 +39,6 @@ async function generateCTBEventJson() {
             ['summary', "CTBEvent summary field: " + content.val()],
             ['location', "CTBEvent location field"],
             ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()]
-            // ['p', "9cf26cf9e1635723fd4dca4db6c25aac99bda57d1961d02c83d47cc26ea0b224", "wss://localhost:5555", $("#role").val()]
         ],
         pubkey: '',
         sig: ''
@@ -61,7 +60,6 @@ async function generateCLEventJson(ctbEventId) {
             ['location', "CLEvent location field"],
             ['price', $("#payoutAmount").val(), "BTC", "1"],
             ['p', await window.nostr.getPublicKey(), "wss://localhost:5555", $("#role").val()],
-            // ['p', "111df01ca1aa9d6f1c35953833bbe6d99a0c85b73af222e6bd305b51f2749f6f", "ws://localhost:5555", $("#role").val()]
             ['a', "31923:" + await window.nostr.getPublicKey() + ":" + ctbEventId]
         ],
         pubkey: '',

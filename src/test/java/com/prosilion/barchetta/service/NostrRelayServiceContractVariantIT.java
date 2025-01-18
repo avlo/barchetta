@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import nostr.api.NIP52;
 import nostr.api.NIP99;
 import nostr.event.BaseTag;
+import nostr.event.NIP52Event;
+import nostr.event.NIP99Event;
 import nostr.event.impl.CalendarContent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListing;
@@ -53,7 +55,7 @@ public class NostrRelayServiceContractVariantIT {
   public static final String CTBEVENT_CONTENT = "CalendarTimeBasedEvent content";
   public static final String CTBEVENT_TITLE = "CalendarTimeBasedEvent title";
 
-  String contractId1 = "superconductor-contract_id-1";
+  private final String uuid = "uuid-001";
   long aliceCreatedAt = new Date().getTime();
 
   private final NostrRelayService nostrRelayService;
@@ -70,7 +72,7 @@ public class NostrRelayServiceContractVariantIT {
     ClassifiedListingEvent clEventAlice = createAliceClassifiedListingEvent();
     CalendarTimeBasedEvent ctbEventAlice = createAliceCalendarTimeBasedEvent();
 
-    aliceContract = new Contract(clEventAlice, ctbEventAlice, "uuid-cle-01", "uuid-ctb-02");
+    aliceContract = new Contract(clEventAlice, ctbEventAlice, uuid);
     aliceContract.setId(1L);
 
 //    ClassifiedListingEvent clEventBob = ContractDto.mapJsonToEvent(createBobClassifiedListingEvent(), ClassifiedListingEvent.class);
@@ -86,8 +88,8 @@ public class NostrRelayServiceContractVariantIT {
     aliceContract = nostrRelayService.save(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
 
-    aliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
-    aliceContract = nostrRelayService.save(aliceContract);
+//    aliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
+//    aliceContract = nostrRelayService.save(aliceContract);
     aliceContract = nostrRelayService.get(aliceContract);
 //
 //    bobContract = nostrRelayService.save(bobContract);
@@ -108,17 +110,20 @@ public class NostrRelayServiceContractVariantIT {
     classifiedListing.setLocation(LOCATION);
     classifiedListing.setPublishedAt(aliceCreatedAt);
 
-    return (ClassifiedListingEvent) new NIP99<>(aliceIdentity)
+    NIP99<NIP99Event> classifiedListingEvent = new NIP99<>(aliceIdentity)
         .createClassifiedListingEvent(
             baseTags,
             CLEVENT_CONTENT,
-            classifiedListing)
+            classifiedListing);
+    classifiedListingEvent.addTag(new IdentifierTag(uuid));
+
+    return (ClassifiedListingEvent) classifiedListingEvent
         .sign().getEvent();
   }
 
   private CalendarTimeBasedEvent createAliceCalendarTimeBasedEvent() {
     CalendarContent calendarContent = CalendarContent.builder(
-        new IdentifierTag(contractId1),
+        new IdentifierTag(uuid),
         CTBEVENT_TITLE,
         aliceCreatedAt).build();
 
@@ -127,11 +132,13 @@ public class NostrRelayServiceContractVariantIT {
         "ws://localhost:5555",
         "ISSUER"));
 
-    return (CalendarTimeBasedEvent) new NIP52<>(aliceIdentity)
+    NIP52<NIP52Event> calendarTimeBasedEvent = new NIP52<>(aliceIdentity)
         .createCalendarTimeBasedEvent(
             tags,
             CTBEVENT_CONTENT,
-            calendarContent)
+            calendarContent);
+
+    return (CalendarTimeBasedEvent) calendarTimeBasedEvent
         .sign().getEvent();
   }
 
