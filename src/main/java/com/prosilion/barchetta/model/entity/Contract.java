@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 import nostr.event.impl.CalendarRsvpEvent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
@@ -26,6 +27,7 @@ import java.util.Collection;
 @Setter
 @NoArgsConstructor
 @Entity
+//@ToString useful during junit debugging to get entire JSON
 public class Contract {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

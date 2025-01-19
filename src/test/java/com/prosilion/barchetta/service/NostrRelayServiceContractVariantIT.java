@@ -43,8 +43,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * note: log.debug() full event/JSON avail by activating:
+ *  1) lombok @ToString in @see Contract
+ *  2) logging.level.com.prosilion.barchetta=debug in application-test.properties
+ */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
