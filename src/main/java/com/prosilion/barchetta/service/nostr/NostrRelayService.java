@@ -168,7 +168,7 @@ public class NostrRelayService {
         .filter(EventMessage.class::isInstance)
         .map(EventMessage.class::cast)
         .map(eventMessage -> (GenericEvent) eventMessage.getEvent())
-        .sorted(Comparator.comparing(GenericEvent::getCreatedAt))
+        .sorted(Comparator.comparing(GenericEvent::getCreatedAt).reversed())
         .map(event -> new BaseEventEncoder<>(event).encode())
         .toList();
 
