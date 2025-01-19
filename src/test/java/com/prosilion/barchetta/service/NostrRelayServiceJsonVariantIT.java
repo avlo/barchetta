@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.service.nostr.NostrRelayService;
@@ -40,7 +41,7 @@ public class NostrRelayServiceJsonVariantIT {
   }
 
   @BeforeAll
-  void setup() {
+  void setup() throws JsonProcessingException {
     ClassifiedListingEvent clEventAlice = ContractDto.mapJsonToEvent(getAliceClassifiedListingEventJson(), ClassifiedListingEvent.class);
     CalendarTimeBasedEvent ctbEventAlice = ContractDto.mapJsonToEvent(getAliceCalendarTimeBasedEventJson(), CalendarTimeBasedEvent.class);
 

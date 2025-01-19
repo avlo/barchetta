@@ -1,5 +1,6 @@
 package com.prosilion.barchetta.model.dto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.ContractStateEnum;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
@@ -34,7 +35,7 @@ public class ContractDto {
   private String calendarTimeBasedEventJson;
   private String text;
 
-  public Contract convertToEntity() {
+  public Contract convertToEntity() throws JsonProcessingException {
     return new Contract(
 //        TODO: below two lines need refactor into a NostrContractDto variant
         mapJsonToEvent(classifiedListingEventJson, ClassifiedListingEvent.class),
@@ -43,7 +44,7 @@ public class ContractDto {
     );
   }
 
-  public static <T extends GenericEvent> T mapJsonToEvent(String eventJson, Class<T> clazz) {
+  public static <T extends GenericEvent> T mapJsonToEvent(String eventJson, Class<T> clazz) throws JsonProcessingException {
     return new GenericEventDecoder<>(clazz).decode(eventJson);
   }
 }

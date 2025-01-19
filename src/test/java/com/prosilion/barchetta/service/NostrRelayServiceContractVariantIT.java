@@ -6,22 +6,29 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.api.NIP52;
 import nostr.api.NIP99;
+import nostr.base.Relay;
 import nostr.event.BaseTag;
+import nostr.event.Kind;
 import nostr.event.NIP52Event;
 import nostr.event.NIP99Event;
 import nostr.event.impl.CalendarContent;
+import nostr.event.impl.CalendarRsvpContent;
+import nostr.event.impl.CalendarRsvpEvent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListing;
 import nostr.event.impl.ClassifiedListingEvent;
+import nostr.event.tag.AddressTag;
 import nostr.event.tag.IdentifierTag;
 import nostr.event.tag.PriceTag;
 import nostr.event.tag.PubKeyTag;
 import nostr.id.Identity;
 import nostr.util.NostrException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -35,11 +42,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext
 @ActiveProfiles("test")
+@TestMethodOrder(OrderAnnotation.class)
 public class NostrRelayServiceContractVariantIT {
   Identity aliceIdentity = Identity.generateRandomIdentity();
   Identity bobIdentity = Identity.generateRandomIdentity();
@@ -51,12 +62,14 @@ public class NostrRelayServiceContractVariantIT {
   public static final String MONTH = "MONTH";
   public static final String LOCATION = "pangea";
   public static final PriceTag PRICE_TAG = new PriceTag(BigDecimal.valueOf(11111), CURRENCY, MONTH);
+  public static final String relayUri = "ws://localhost:5555";
 
   public static final String CTBEVENT_CONTENT = "CalendarTimeBasedEvent content";
   public static final String CTBEVENT_TITLE = "CalendarTimeBasedEvent title";
+  public static final String RSVPEVENT_CONTENT = "CalendarRsvpEvent content";
 
   private final String uuid = "uuid-001";
-  long aliceCreatedAt = new Date().getTime();
+  private final long aliceCreatedAt = new Date().getTime();
 
   private final NostrRelayService nostrRelayService;
   private Contract aliceContract;
@@ -84,13 +97,62 @@ public class NostrRelayServiceContractVariantIT {
 
   @Test
   @Order(0)
-  void testSaveAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
-    aliceContract = nostrRelayService.save(aliceContract);
-    aliceContract = nostrRelayService.get(aliceContract);
+  void testCreateAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
+    Contract createdAliceContract = nostrRelayService.create(aliceContract);
+    log.debug("createdAliceContract contents:\n  {}\n", createdAliceContract.toString());
+
+    assertEquals(
+        aliceContract.getNostrClassifiedListingEventId(),
+        createdAliceContract.getClassifiedListingEvent().getId());
+
+    assertEquals(
+        aliceContract.getClassifiedListingEvent().getPubKey().toHexString(),
+        aliceIdentity.getPublicKey().toHexString());
+
+    assertEquals(
+        aliceContract.getNostrCalendarTimeBasedEventId(),
+        createdAliceContract.getCalendarTimeBasedEvent().getId());
+
+    assertEquals(
+        aliceContract.getCalendarTimeBasedEvent().getPubKey().toHexString(),
+        aliceIdentity.getPublicKey().toHexString());
+
+    Contract returnedAliceContract = nostrRelayService.get(createdAliceContract);
+    log.debug("returnedAliceContract contents:\n  {}\n", returnedAliceContract.toString());
+//    assertTrue(
+//        assertThrows(IllegalArgumentException.class, () -> new BaseMessageDecoder<>().decode(kindTarget.apply(-1)))
+//            .getMessage().contains("Kind must be between 0 and 65535 but was [-1]"));
+
+//    assertEquals("location ipsum", genericTags.stream()
+//        .filter(tag -> tag.getCode().equalsIgnoreCase("location")).map(GenericTag::getAttributes).toList().getFirst().getFirst().getValue());
 
 //    aliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
 //    aliceContract = nostrRelayService.save(aliceContract);
-    aliceContract = nostrRelayService.get(aliceContract);
+//
+//    bobContract = nostrRelayService.save(bobContract);
+//    bobContract = nostrRelayService.get(bobContract);
+//
+//    aliceContract = nostrRelayService.get(aliceContract);
+//    bobContract = nostrRelayService.get(bobContract);
+  }
+
+
+  @Test
+  @Order(1)
+  void testCreateBobAsCounterPartyOnAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
+    Contract getAliceContract = nostrRelayService.get(aliceContract);
+    log.debug("getAliceContract contents:\n  {}\n", getAliceContract.toString());
+
+    CalendarRsvpEvent rsvpContentBob = createBobRsvpEvent();
+    log.debug("rsvpContentBob contents:\n  {}\n", rsvpContentBob);
+
+    getAliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
+    getAliceContract.setCalendarRsvpEvent(rsvpContentBob);
+    Contract updatedAliceContractWBobCounterParty = nostrRelayService.update(getAliceContract);
+    log.debug("updatedAliceContractWBobCounterParty contents:\n  {}\n", updatedAliceContractWBobCounterParty.toString());
+
+    Contract getAliceContractWBobCounterParty = nostrRelayService.get(updatedAliceContractWBobCounterParty);
+    log.debug("getAliceContractWBobCounterParty contents:\n  {}\n", getAliceContractWBobCounterParty.toString());
 //
 //    bobContract = nostrRelayService.save(bobContract);
 //    bobContract = nostrRelayService.get(bobContract);
@@ -129,7 +191,7 @@ public class NostrRelayServiceContractVariantIT {
 
     List<BaseTag> tags = new ArrayList<>();
     tags.add(new PubKeyTag(aliceIdentity.getPublicKey(),
-        "ws://localhost:5555",
+        relayUri,
         "ISSUER"));
 
     NIP52<NIP52Event> calendarTimeBasedEvent = new NIP52<>(aliceIdentity)
@@ -142,10 +204,30 @@ public class NostrRelayServiceContractVariantIT {
         .sign().getEvent();
   }
 
-  private CalendarTimeBasedEvent createBobCalendarTimeBasedEvent() {
-    //    tags.add(new PubKeyTag(new PublicKey("494001ac0c8af2a10f60f23538e5b35d3cdacb8e1cc956fe7a16dfa5cbfc4347"),
-//        "",
-//        "COUNTERPARTY"));
-    return null;
+  private CalendarRsvpEvent createBobRsvpEvent() {
+    IdentifierTag identifierTag = new IdentifierTag(uuid);
+    AddressTag addressTag = new AddressTag(
+        Kind.CALENDAR_TIME_BASED_EVENT.getValue(),
+        aliceIdentity.getPublicKey(),
+        identifierTag,
+        new Relay(relayUri));
+
+    CalendarRsvpContent rsvpContent = CalendarRsvpContent.builder(
+        identifierTag,
+        addressTag,
+        "APPROVE").build();
+
+    List<BaseTag> tags = new ArrayList<>();
+    tags.add(new PubKeyTag(bobIdentity.getPublicKey(),
+        relayUri,
+        "COUNTERPARTY"));
+
+    NIP52<NIP52Event> calendarRsvpEvent = new NIP52<>(bobIdentity)
+        .createCalendarRsvpEvent(
+            tags,
+            RSVPEVENT_CONTENT,
+            rsvpContent);
+
+    return (CalendarRsvpEvent) calendarRsvpEvent.sign().getEvent();
   }
 }
