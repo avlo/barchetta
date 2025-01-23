@@ -5,7 +5,7 @@ import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.barchetta.model.entity.CreatorRoleEnum;
 import com.prosilion.barchetta.model.entity.User;
 import com.prosilion.barchetta.service.controller.ControllerServiceIF;
-import com.prosilion.barchetta.service.db.ContractEntityServiceNostrDecoratorIF;
+import com.prosilion.barchetta.service.db.ContractEntityServiceNostrIF;
 import com.prosilion.presto.nostr.entity.NostrUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +21,12 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class NostrControllerService implements NostrControllerServiceIF {
-  private final ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator;
+  private final ContractEntityServiceNostrIF contractEntityServiceNostrDecorator;
   private final ControllerServiceIF controllerService;
 
   @Autowired
   public NostrControllerService(
-      @NonNull ContractEntityServiceNostrDecoratorIF contractEntityServiceNostrDecorator,
+      @NonNull ContractEntityServiceNostrIF contractEntityServiceNostrDecorator,
       @NonNull ControllerServiceIF controllerService) {
     this.contractEntityServiceNostrDecorator = contractEntityServiceNostrDecorator;
     this.controllerService = controllerService;

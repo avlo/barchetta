@@ -17,12 +17,12 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
-public class ContractEntityServiceNostrDecorator implements ContractEntityServiceNostrDecoratorIF {
+public class ContractEntityServiceNostr implements ContractEntityServiceNostrIF {
   private final ContractEntityServiceIF contractEntityService;
   private final NostrRelayService nostrRelayService;
 
   @Autowired
-  public ContractEntityServiceNostrDecorator(
+  public ContractEntityServiceNostr(
       @NonNull ContractEntityServiceIF contractEntityService,
       @NonNull NostrRelayService nostrRelayService) {
     this.contractEntityService = contractEntityService;
