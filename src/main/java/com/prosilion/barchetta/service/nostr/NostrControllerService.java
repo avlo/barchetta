@@ -33,19 +33,15 @@ public class NostrControllerService implements NostrControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
-    contractDto.setAppUserId(
-        findByUsername(user.getUsername())
-            .getId());
+  public Contract createContract(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     contractDto.setNostrAppUserPubKey(user.getPubkey());
     log.info("Set appUser userId [{}] to contract [{}]", contractDto.getAppUserId(), contractDto.getId());
     return save(contractDto);
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
+  public Contract createContractCounterparty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
     User foundUser = findByUsername(user.getUsername());
-    contractDto.setCounterPartyId(foundUser.getId());
     contractDto.setNostrCounterPartyPubKey(user.getPubkey());
     return save(contractDto);
   }

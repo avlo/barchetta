@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface ControllerServiceIF {
-  Contract saveAsCreator(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException;
-  Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException;
+  Contract createContract(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException;
+  Contract createContractCounterparty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException;
 
   Contract update(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException;
   ContractDto getContractDto(@NonNull Long id);

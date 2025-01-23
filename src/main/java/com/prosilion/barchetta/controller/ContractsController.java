@@ -49,7 +49,7 @@ public class ContractsController {
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/create")
   public String createContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
-    nostrControllerService.saveAsCreator(contractDto, user);
+    nostrControllerService.createContract(contractDto, user);
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";
   }
@@ -58,7 +58,7 @@ public class ContractsController {
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/update")
   public String applyForContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
-    Contract contract = nostrControllerService.saveAsCounterParty(contractDto, user);
+    Contract contract = nostrControllerService.createContractCounterparty(contractDto, user);
     model.addAttribute(CTB_EVENT_ID, contract.getNostrCalendarTimeBasedEventId());
     setCanonicalModelAttributes(user, model);
     return "thymeleaf/contract/display_all";

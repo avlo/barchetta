@@ -34,7 +34,7 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public Contract createContract(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     // TODO: check below contract doesn't already have existing different appuser ID or other/clean sol'n
     contractDto.setAppUserId(
         userService.findByUsername(
@@ -45,12 +45,11 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public Contract createContractCounterparty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     contractDto.setCounterPartyId(
         userService.findByUsername(
                 user.getUsername())
             .getId());
-    contractDto.setNostrCounterPartyPubKey(user.getPubkey());
     return save(contractDto);
   }
 
