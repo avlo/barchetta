@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -77,7 +78,7 @@ public class StandardWebSocketClient extends TextWebSocketHandler implements Web
   public void send(String json) throws IOException {
     clientSession.sendMessage(new TextMessage(json));
     await()
-//        .timeout(66, TimeUnit.MINUTES)
+        .timeout(66, TimeUnit.MINUTES)
         .untilTrue(completed);
     completed.setRelease(false);
   }

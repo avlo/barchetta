@@ -14,17 +14,16 @@ import java.util.concurrent.ExecutionException;
 
 public interface ControllerServiceIF {
   Contract saveAsCreator(@NonNull ContractDto contract, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException;
-  Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException;
   Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException;
-  Contract getContract(@NonNull Long id) throws IOException, ExecutionException, InterruptedException;
-  ContractDto getContractDto(@NonNull Long id) throws IOException, ExecutionException, InterruptedException;
-  User findByUsername(@NonNull String username);
-  CreatorRoleEnum getRole(Contract contract, User user);
-  Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException;
-  Contract create(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException;
-  Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException;
+
+  Contract update(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException;
+  ContractDto getContractDto(@NonNull Long id);
+
   List<Contract> getAllContracts() throws IOException;
   List<Contract> getAllUserContracts(@NonNull User user);
   List<Contract> getOpenContracts(@NonNull User user);
   ContractDto constructContractDto();
+
+  User findByUsername(@NonNull String username);
+  CreatorRoleEnum getRole(Contract contract, User user);
 }

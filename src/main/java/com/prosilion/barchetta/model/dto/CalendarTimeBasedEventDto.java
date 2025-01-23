@@ -36,7 +36,7 @@ public class CalendarTimeBasedEventDto {
         .findFirst().orElseThrow();
 
     CalendarContent calendarContent = CalendarContent.builder(identifierTag, content, created_at.getTime()).build();
-    calendarContent.setId(id);
+//    calendarContent.setId(id);
 
     CalendarTimeBasedEvent calendarTimeBasedEvent = new CalendarTimeBasedEvent(
         new PublicKey(pubkey),

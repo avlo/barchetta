@@ -57,7 +57,7 @@ public class ContractsController {
   //  TODO: below security not being applied, needs investigation
   @Secured({"ROLE_USER", "USER"})
   @PostMapping("/update")
-  public String applyForContractRxR(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
+  public String applyForContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     Contract contract = nostrControllerService.saveAsCounterParty(contractDto, user);
     model.addAttribute(CTB_EVENT_ID, contract.getNostrCalendarTimeBasedEventId());
     setCanonicalModelAttributes(user, model);
@@ -98,21 +98,13 @@ public class ContractsController {
     return "thymeleaf/contract/view_contract";
   }
 
-  @PostMapping("/apply/{id}")
-  public String applyForContract(@AuthenticationPrincipal NostrUser user, @PathVariable("id") Long contractId, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
-    nostrControllerService.saveAsCounterParty(contractId, user);
-    setCanonicalModelAttributes(user, model);
-    return "thymeleaf/contract/display_all";
-  }
-
-
   @PostMapping("/vote")
   public String voteOnContract(@AuthenticationPrincipal NostrUser user, ContractDto contractDto, Model model) throws IOException, NostrException, ExecutionException, InterruptedException {
     log.info("User [{}] voting on contractDto [{}]", user.getUsername(), contractDto);
     log.info("Contract id: [{}] ", contractDto.getId());
     log.info("Contract text: [{}] ", contractDto.getText());
     log.info("Contract appUserId: [{}] ", contractDto.getAppUserId());
-    nostrControllerService.saveDto(contractDto);
+    nostrControllerService.update(contractDto);
     model.addAttribute(CONTRACTS_STR, nostrControllerService.getAllContracts());
     return "redirect:display_all";
   }

@@ -31,14 +31,14 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
 
   @Transactional
   @Override
-  public Contract create(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
+  public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
     log.info("saving contract {}", contract);
-    return nostrRelayService.create(contractEntityService.create(contract));
+    return nostrRelayService.create(getSaved(contract));
   }
 
   @Override
   public Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return nostrRelayService.update(contractEntityService.create(contract));
+    return nostrRelayService.update(getSaved(contract));
   }
 
   @SneakyThrows
@@ -74,5 +74,9 @@ public class ContractEntityServiceNostrDecorator implements ContractEntityServic
   public List<Contract> getAllContracts() {
     return contractEntityService.getAllContracts().stream()
         .map(this::getContract).toList();
+  }
+
+  private Contract getSaved(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
+    return contractEntityService.save(contract);
   }
 }

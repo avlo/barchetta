@@ -42,17 +42,6 @@ public class NostrRelayService {
   private final SslBundles sslBundles;
 //  private final String subscriberIdPrefix;
 
-//  @Autowired
-//  public NostrRelayService(
-//      @Value("${superconductor.relay.uri}") String relayUri,
-//      @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix
-//  ) throws ExecutionException, InterruptedException {
-//    this.relayUri = relayUri;
-//    this.subscriberIdPrefix = subscriberIdPrefix;
-//    this.eventSocketClient = new StandardWebSocketClient(relayUri
-//    );
-//  }
-
   @Autowired
   public NostrRelayService(
       @Value("${superconductor.relay.uri}") String relayUri,

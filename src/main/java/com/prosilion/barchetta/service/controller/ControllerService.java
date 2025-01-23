@@ -36,37 +36,27 @@ public class ControllerService implements ControllerServiceIF {
   @Override
   public Contract saveAsCreator(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     // TODO: check below contract doesn't already have existing different appuser ID or other/clean sol'n
-    User foundUser = userService.findByUsername(user.getUsername());
-    Contract contract = contractDto.convertToEntity();
-    contract.setAppUserId(foundUser.getId());
-    log.info("Set appUser userId [{}] to contract [{}]", contract.getAppUserId(), contract.getId());
-    return create(contract);
+    contractDto.setAppUserId(
+        userService.findByUsername(
+                user.getUsername())
+            .getId());
+    log.info("Set appUser userId [{}] to contract [{}]", contractDto.getAppUserId(), contractDto.getId());
+    return save(contractDto);
   }
 
   @Override
   public Contract saveAsCounterParty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
-    User foundUser = userService.findByUsername(user.getUsername());
-    Contract contract = contractDto.convertToEntity();
-    contract.setCounterPartyId(foundUser.getId());
-    return create(contract);
-  }
-
-  @Override
-  public Contract saveAsCounterParty(@NonNull Long contractId, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract contract = getContract(contractId);
-    User foundUser = userService.findByUsername(user.getUsername());
-    contract.setCounterPartyId(foundUser.getId());
-    return create(contract);
+    contractDto.setCounterPartyId(
+        userService.findByUsername(
+                user.getUsername())
+            .getId());
+    contractDto.setNostrCounterPartyPubKey(user.getPubkey());
+    return save(contractDto);
   }
 
   @Override
   public ContractDto getContractDto(@NonNull Long contractId) {
-    return getContract(contractId).convertToDto();
-  }
-
-  @Override
-  public Contract getContract(@NonNull Long contractId) {
-    return contractEntityService.getContract(contractId);
+    return contractEntityService.getContract(contractId).convertToDto();
   }
 
   @Override
@@ -80,18 +70,8 @@ public class ControllerService implements ControllerServiceIF {
   }
 
   @Override
-  public Contract saveDto(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return create(contractDto.convertToEntity());
-  }
-
-  @Override
-  public Contract create(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return contractEntityService.create(contract);
-  }
-
-  @Override
-  public Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return create(contract);
+  public Contract update(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return save(contractDto);
   }
 
   @Override
@@ -118,5 +98,9 @@ public class ControllerService implements ControllerServiceIF {
     String uuid = UUID.randomUUID().toString().concat(UUID.randomUUID().toString()).substring(0, 64);
     contractDto.setEventUuid(uuid);
     return contractDto;
+  }
+
+  private Contract save(@NonNull ContractDto contractDto) throws IOException, ExecutionException, InterruptedException, NostrException {
+    return contractEntityService.save(contractDto.convertToEntity());
   }
 }

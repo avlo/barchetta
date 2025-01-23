@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 public interface ContractEntityServiceIF {
   @Transactional
-  Contract create(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException;
+  Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException;
   Contract getContract(@NonNull Long id);
   List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser);
   List<Contract> getContractsByAppUser(@NonNull AppUser appUser);

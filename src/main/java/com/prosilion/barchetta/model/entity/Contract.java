@@ -27,7 +27,7 @@ import java.util.Collection;
 @Setter
 @NoArgsConstructor
 @Entity
-//@ToString useful during junit debugging to get entire JSON
+//@ToString // useful during junit debugging to get entire JSON
 public class Contract {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
