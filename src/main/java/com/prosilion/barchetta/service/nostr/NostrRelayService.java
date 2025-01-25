@@ -39,12 +39,10 @@ public class NostrRelayService {
   private final String relayUri;
   // TODO: below needs cleanup
   private SslBundles sslBundles = null;
-  //  private final String subscriberIdPrefix;
+
   public NostrRelayService(@Value("${superconductor.relay.uri}") String relayUri) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
     log.info("relayUri: \n{}", relayUri);
-//    this.subscriberIdPrefix = subscriberIdPrefix;
-//    log.info("subscriberIdPrefix: \n{}", subscriberIdPrefix);
     this.eventSocketClient = new StandardWebSocketClient(relayUri);
   }
 
