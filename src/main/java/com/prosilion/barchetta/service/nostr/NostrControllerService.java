@@ -35,15 +35,20 @@ public class NostrControllerService implements NostrControllerServiceIF {
   @Override
   public Contract createContract(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws IOException, NostrException, ExecutionException, InterruptedException {
     contractDto.setNostrAppUserPubKey(user.getPubkey());
-    log.info("Set appUser userId [{}] to contract [{}]", contractDto.getAppUserId(), contractDto.getId());
+    log.info("contract id [{}], set AppUserPubKey to [{}]", contractDto.getId(), contractDto.getNostrAppUserPubKey());
     return save(contractDto);
   }
 
   @Override
   public Contract createContractCounterparty(@NonNull ContractDto contractDto, @NonNull NostrUser user) throws NostrException, IOException, ExecutionException, InterruptedException {
-    User foundUser = findByUsername(user.getUsername());
     contractDto.setNostrCounterPartyPubKey(user.getPubkey());
+    log.info("contract id [{}] set NostrCounterPartyPubKey to [{}]", contractDto.getId(), contractDto.getNostrCounterPartyPubKey());
     return save(contractDto);
+  }
+
+  @Override
+  public Contract update(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
+    return contractEntityServiceNostrDecorator.update(contractDto.convertToEntity());
   }
 
   @Override
@@ -59,11 +64,6 @@ public class NostrControllerService implements NostrControllerServiceIF {
   @Override
   public CreatorRoleEnum getRole(@NonNull Contract contract, @NonNull User user) {
     return controllerService.getRole(contract, user);
-  }
-
-  @Override
-  public Contract update(@NonNull ContractDto contractDto) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return save(contractDto);
   }
 
   @Override

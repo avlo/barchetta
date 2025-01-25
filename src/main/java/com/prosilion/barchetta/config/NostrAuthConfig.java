@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Primary;
     prefix = "barchetta",
     name = "nostr.active",
     havingValue = "true")
-public class NostrConfig {
+public class NostrAuthConfig {
 
   @Bean
   @Primary

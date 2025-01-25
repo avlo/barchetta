@@ -43,37 +43,37 @@ public class ContractEntityServiceNostr implements ContractEntityServiceNostrIF 
 
   @SneakyThrows
   @Override
-  public Contract getContract(@NonNull Contract contract) {
+  public Contract get(@NonNull Contract contract) {
     return nostrRelayService.get(contract);
   }
 
   @Override
   public Contract getContract(@NonNull Long id) {
-    return getContract(contractEntityService.getContract(id));
+    return get(contractEntityService.getContract(id));
   }
 
   @Override
   public List<Contract> getAvailableOppositeRoleContractsByAppUser(@NonNull AppUser appUser) {
     return contractEntityService.getAvailableOppositeRoleContractsByAppUser(appUser).stream()
-        .map(this::getContract).toList();
+        .map(this::get).toList();
   }
 
   @Override
   public List<Contract> getContractsByCoParty(@NonNull AppUser coParty) {
     return contractEntityService.getContractsByCoParty(coParty).stream()
-        .map(this::getContract).toList();
+        .map(this::get).toList();
   }
 
   @Override
   public List<Contract> getContractsByAppUser(@NonNull AppUser appUser) {
     return contractEntityService.getContractsByAppUser(appUser).stream()
-        .map(this::getContract).toList();
+        .map(this::get).toList();
   }
 
   @Override
   public List<Contract> getAllContracts() {
     return contractEntityService.getAllContracts().stream()
-        .map(this::getContract).toList();
+        .map(this::get).toList();
   }
 
   private Contract getSaved(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {

@@ -8,6 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public interface ContractEntityServiceNostrIF extends ContractEntityServiceIF {
-  Contract getContract(@NonNull Contract contract);
+  Contract get(@NonNull Contract contract);
   Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException;
 }

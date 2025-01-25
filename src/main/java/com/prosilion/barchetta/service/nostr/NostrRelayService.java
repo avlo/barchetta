@@ -17,35 +17,39 @@ import nostr.event.json.codec.GenericEventDecoder;
 import nostr.event.message.EventMessage;
 import nostr.event.message.OkMessage;
 import nostr.util.NostrException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
 public class NostrRelayService {
   private final WebSocketClientIF eventSocketClient;
 
   private Map<String, WebSocketClientIF> requestSocketClientMap = new ConcurrentHashMap<>();
   private final String relayUri;
-  private final SslBundles sslBundles;
-//  private final String subscriberIdPrefix;
+  // TODO: below needs cleanup
+  private SslBundles sslBundles = null;
+  //  private final String subscriberIdPrefix;
+  public NostrRelayService(@Value("${superconductor.relay.uri}") String relayUri) throws ExecutionException, InterruptedException {
+    this.relayUri = relayUri;
+    log.info("relayUri: \n{}", relayUri);
+//    this.subscriberIdPrefix = subscriberIdPrefix;
+//    log.info("subscriberIdPrefix: \n{}", subscriberIdPrefix);
+    this.eventSocketClient = new StandardWebSocketClient(relayUri);
+  }
 
-  @Autowired
   public NostrRelayService(
       @Value("${superconductor.relay.uri}") String relayUri,
-      @Value("${barchetta.uuid.prefix}") String subscriberIdPrefix,
       SslBundles sslBundles
   ) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
@@ -203,7 +207,7 @@ public class NostrRelayService {
       return events;
     }
 
-    requestSocketClientMap.put(subscriberPrefixEventIdSuffix, new StandardWebSocketClient(relayUri, sslBundles));
+    requestSocketClientMap.put(subscriberPrefixEventIdSuffix, getStandardWebSocketClient());
 
     final WebSocketClientIF newSubscriberUuidWebClient = requestSocketClientMap.get(subscriberPrefixEventIdSuffix);
     final String newSubscriberUuidWebClientsessionId = newSubscriberUuidWebClient.getClientSession().getId();
@@ -215,5 +219,10 @@ public class NostrRelayService {
     events.forEach(event -> log.debug("  {}\n", event));
     log.debug("222222222222\n");
     return events;
+  }
+
+  private StandardWebSocketClient getStandardWebSocketClient() throws ExecutionException, InterruptedException {
+    return Objects.nonNull(sslBundles) ? new StandardWebSocketClient(relayUri, sslBundles) :
+        new StandardWebSocketClient(relayUri);
   }
 }

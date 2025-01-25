@@ -40,7 +40,7 @@ public class ControllerService implements ControllerServiceIF {
         userService.findByUsername(
                 user.getUsername())
             .getId());
-    log.info("Set appUser userId [{}] to contract [{}]", contractDto.getAppUserId(), contractDto.getId());
+    log.info("contract id [{}], set AppUser to [{}] having AppUserId [{}]", contractDto.getId(), user.getUsername(), contractDto.getAppUserId());
     return save(contractDto);
   }
 
@@ -50,6 +50,7 @@ public class ControllerService implements ControllerServiceIF {
         userService.findByUsername(
                 user.getUsername())
             .getId());
+    log.info("contract id [{}], set CounterParty to [{}] having CounterPartyId [{}]", contractDto.getId(), user.getUsername(), contractDto.getCounterPartyId());
     return save(contractDto);
   }
 

@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
@@ -46,8 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * note: log.debug() full event/JSON avail by activating:
- *  1) lombok @ToString in @see Contract
- *  2) logging.level.com.prosilion.barchetta=debug in application-test.properties
+ * 1) lombok @ToString in @see Contract
+ * 2) logging.level.com.prosilion.barchetta=debug in application-test.properties
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -66,7 +67,6 @@ public class NostrRelayServiceContractVariantIT {
   public static final String MONTH = "MONTH";
   public static final String LOCATION = "pangea";
   public static final PriceTag PRICE_TAG = new PriceTag(BigDecimal.valueOf(11111), CURRENCY, MONTH);
-  public static final String relayUri = "ws://localhost:5555";
 
   public static final String CTBEVENT_CONTENT = "CalendarTimeBasedEvent content";
   public static final String CTBEVENT_TITLE = "CalendarTimeBasedEvent title";
@@ -76,12 +76,18 @@ public class NostrRelayServiceContractVariantIT {
   private final long aliceCreatedAt = new Date().getTime();
 
   private final NostrRelayService nostrRelayService;
+  private final String relayUri;
   private Contract aliceContract;
   private Contract bobContract;
 
   @Autowired
-  public NostrRelayServiceContractVariantIT(@NonNull NostrRelayService nostrRelayService) {
+  NostrRelayServiceContractVariantIT(
+      @NonNull NostrRelayService nostrRelayService,
+      @Value("${superconductor.relay.uri}") String relayUri) {
+    log.debug("nostrRelayService: {}", nostrRelayService);
+    log.debug("relayUri {} ", relayUri);
     this.nostrRelayService = nostrRelayService;
+    this.relayUri = relayUri;
   }
 
   @BeforeAll
