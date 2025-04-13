@@ -18,7 +18,7 @@
   <properties>
     <java.version>21</java.version>
     <spring-boot.version>${project.parent.version}</spring-boot.version>
-    <nostr-java.version>0.6.3-SNAPSHOT</nostr-java.version>
+    <nostr-java.version>0.6.5-SNAPSHOT</nostr-java.version>
     <presto-nostr.version>0.0.3-SNAPSHOT</presto-nostr.version>
 
     <commons-io.version>2.13.0</commons-io.version>
@@ -50,19 +50,28 @@
       <artifactId>nostr-java-api</artifactId>
       <version>${nostr-java.version}</version>
     </dependency>
+
+<!--
     <dependency>
       <groupId>com.prosilion.presto.starter</groupId>
       <artifactId>core</artifactId>
       <version>${presto-nostr.version}</version>
     </dependency>
+-->
+
     <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>web</artifactId>
+      <groupId>com.prosilion.presto</groupId>
+      <artifactId>starter-core</artifactId>
       <version>${presto-nostr.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>nostr</artifactId>
+      <groupId>com.prosilion.presto</groupId>
+      <artifactId>starter-web</artifactId>
+      <version>${presto-nostr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.prosilion.presto</groupId>
+      <artifactId>starter-nostr</artifactId>
       <version>${presto-nostr.version}</version>
     </dependency>
     <dependency>
@@ -250,8 +259,8 @@
       </build>
       <dependencies>
         <dependency>
-          <groupId>com.prosilion.presto.starter</groupId>
-          <artifactId>h2db</artifactId>
+          <groupId>com.prosilion.presto</groupId>
+          <artifactId>starter-h2db</artifactId>
           <version>${presto-nostr.version}</version>
           <scope>runtime</scope>
         </dependency>
@@ -283,8 +292,8 @@
       </build>
       <dependencies>
         <dependency>
-          <groupId>com.prosilion.presto.starter</groupId>
-          <artifactId>mysql</artifactId>
+          <groupId>com.prosilion.presto</groupId>
+          <artifactId>starter-mysql</artifactId>
           <version>${presto-nostr.version}</version>
           <scope>runtime</scope>
         </dependency>
@@ -316,8 +325,8 @@
       </build>
       <dependencies>
         <dependency>
-          <groupId>com.prosilion.presto.starter</groupId>
-          <artifactId>mysql</artifactId>
+          <groupId>com.prosilion.presto</groupId>
+          <artifactId>starter-mysql</artifactId>
           <version>${presto-nostr.version}</version>
           <scope>runtime</scope>
         </dependency>
