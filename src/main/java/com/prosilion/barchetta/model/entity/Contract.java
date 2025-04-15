@@ -15,8 +15,8 @@ import nostr.event.impl.CalendarRsvpEvent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.event.impl.GenericEvent;
-import nostr.event.impl.GenericTag;
 import nostr.event.json.codec.BaseEventEncoder;
+import nostr.event.tag.GenericTag;
 import nostr.event.tag.PriceTag;
 import nostr.event.tag.PubKeyTag;
 

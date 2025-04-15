@@ -3,7 +3,7 @@ package com.prosilion.barchetta.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prosilion.barchetta.model.dto.ContractDto;
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.service.nostr.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.BarchettaNostrRelayService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.event.impl.CalendarTimeBasedEvent;
@@ -30,14 +30,14 @@ import java.util.concurrent.ExecutionException;
 @DirtiesContext
 @ActiveProfiles("test")
 @TestMethodOrder(OrderAnnotation.class)
-public class NostrRelayServiceJsonVariantIT {
-  private final NostrRelayService nostrRelayService;
+public class BarchettaNostrRelayServiceJsonVariantIT {
+  private final BarchettaNostrRelayService barchettaNostrRelayService;
   private Contract aliceContract;
   private Contract bobContract;
 
   @Autowired
-  public NostrRelayServiceJsonVariantIT(@NonNull NostrRelayService nostrRelayService) {
-    this.nostrRelayService = nostrRelayService;
+  public BarchettaNostrRelayServiceJsonVariantIT(@NonNull BarchettaNostrRelayService barchettaNostrRelayService) {
+    this.barchettaNostrRelayService = barchettaNostrRelayService;
   }
 
   @BeforeAll
@@ -58,18 +58,18 @@ public class NostrRelayServiceJsonVariantIT {
   @Test
   @Order(0)
   void testCreateAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
-    aliceContract = nostrRelayService.create(aliceContract);
-    aliceContract = nostrRelayService.get(aliceContract);
+    aliceContract = barchettaNostrRelayService.create(aliceContract);
+    aliceContract = barchettaNostrRelayService.get(aliceContract);
 
     aliceContract.setNostrCounterPartyPubKey("a7b92fd0fb2b1964e2b48712383d611086bf47920dcb792e3b383cdc545b07e5");
-    aliceContract = nostrRelayService.create(aliceContract);
-    aliceContract = nostrRelayService.get(aliceContract);
+    aliceContract = barchettaNostrRelayService.create(aliceContract);
+    aliceContract = barchettaNostrRelayService.get(aliceContract);
 //
-//    bobContract = nostrRelayService.save(bobContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    bobContract = barchettaNostrRelayService.save(bobContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
 //
-//    aliceContract = nostrRelayService.get(aliceContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    aliceContract = barchettaNostrRelayService.get(aliceContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
   }
 
   private String getAliceClassifiedListingEventJson() {

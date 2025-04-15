@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.service;
 
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.service.nostr.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.BarchettaNostrRelayService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import nostr.api.NIP52;
@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DirtiesContext
 @ActiveProfiles("test")
 @TestMethodOrder(OrderAnnotation.class)
-public class NostrRelayServiceContractVariantIT {
+public class BarchettaNostrRelayServiceContractVariantIT {
   Identity aliceIdentity = Identity.generateRandomIdentity();
   Identity bobIdentity = Identity.generateRandomIdentity();
 
@@ -75,18 +75,18 @@ public class NostrRelayServiceContractVariantIT {
   private final String uuid = "uuid-001";
   private final long aliceCreatedAt = new Date().getTime();
 
-  private final NostrRelayService nostrRelayService;
+  private final BarchettaNostrRelayService barchettaNostrRelayService;
   private final String relayUri;
   private Contract aliceContract;
   private Contract bobContract;
 
   @Autowired
-  NostrRelayServiceContractVariantIT(
-      @NonNull NostrRelayService nostrRelayService,
+  BarchettaNostrRelayServiceContractVariantIT(
+      @NonNull BarchettaNostrRelayService barchettaNostrRelayService,
       @Value("${superconductor.relay.uri}") String relayUri) {
-    log.debug("nostrRelayService: {}", nostrRelayService);
+    log.debug("barchettaNostrRelayService: {}", barchettaNostrRelayService);
     log.debug("relayUri {} ", relayUri);
-    this.nostrRelayService = nostrRelayService;
+    this.barchettaNostrRelayService = barchettaNostrRelayService;
     this.relayUri = relayUri;
   }
 
@@ -108,7 +108,7 @@ public class NostrRelayServiceContractVariantIT {
   @Test
   @Order(0)
   void testCreateAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract createdAliceContract = nostrRelayService.create(aliceContract);
+    Contract createdAliceContract = barchettaNostrRelayService.create(aliceContract);
     log.debug("createdAliceContract contents:\n  {}\n", createdAliceContract.toString());
 
     assertEquals(
@@ -127,7 +127,7 @@ public class NostrRelayServiceContractVariantIT {
         aliceContract.getCalendarTimeBasedEvent().getPubKey().toHexString(),
         aliceIdentity.getPublicKey().toHexString());
 
-    Contract returnedAliceContract = nostrRelayService.get(createdAliceContract);
+    Contract returnedAliceContract = barchettaNostrRelayService.get(createdAliceContract);
     log.debug("returnedAliceContract contents:\n  {}\n", returnedAliceContract.toString());
 //    assertTrue(
 //        assertThrows(IllegalArgumentException.class, () -> new BaseMessageDecoder<>().decode(kindTarget.apply(-1)))
@@ -137,20 +137,20 @@ public class NostrRelayServiceContractVariantIT {
 //        .filter(tag -> tag.getCode().equalsIgnoreCase("location")).map(GenericTag::getAttributes).toList().getFirst().getFirst().getValue());
 
 //    aliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
-//    aliceContract = nostrRelayService.save(aliceContract);
+//    aliceContract = barchettaNostrRelayService.save(aliceContract);
 //
-//    bobContract = nostrRelayService.save(bobContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    bobContract = barchettaNostrRelayService.save(bobContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
 //
-//    aliceContract = nostrRelayService.get(aliceContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    aliceContract = barchettaNostrRelayService.get(aliceContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
   }
 
 
   @Test
   @Order(1)
   void testCreateBobAsCounterPartyOnAliceContract() throws NostrException, IOException, ExecutionException, InterruptedException {
-    Contract getAliceContract = nostrRelayService.get(aliceContract);
+    Contract getAliceContract = barchettaNostrRelayService.get(aliceContract);
     log.debug("getAliceContract contents:\n  {}\n", getAliceContract.toString());
 
     CalendarRsvpEvent rsvpContentBob = createBobRsvpEvent();
@@ -158,17 +158,17 @@ public class NostrRelayServiceContractVariantIT {
 
     getAliceContract.setNostrCounterPartyPubKey(bobIdentity.getPublicKey().toHexString());
     getAliceContract.setCalendarRsvpEvent(rsvpContentBob);
-    Contract updatedAliceContractWBobCounterParty = nostrRelayService.update(getAliceContract);
+    Contract updatedAliceContractWBobCounterParty = barchettaNostrRelayService.update(getAliceContract);
     log.debug("updatedAliceContractWBobCounterParty contents:\n  {}\n", updatedAliceContractWBobCounterParty.toString());
 
-    Contract getAliceContractWBobCounterParty = nostrRelayService.get(updatedAliceContractWBobCounterParty);
+    Contract getAliceContractWBobCounterParty = barchettaNostrRelayService.get(updatedAliceContractWBobCounterParty);
     log.debug("getAliceContractWBobCounterParty contents:\n  {}\n", getAliceContractWBobCounterParty.toString());
 //
-//    bobContract = nostrRelayService.save(bobContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    bobContract = barchettaNostrRelayService.save(bobContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
 //
-//    aliceContract = nostrRelayService.get(aliceContract);
-//    bobContract = nostrRelayService.get(bobContract);
+//    aliceContract = barchettaNostrRelayService.get(aliceContract);
+//    bobContract = barchettaNostrRelayService.get(bobContract);
   }
 
   private ClassifiedListingEvent createAliceClassifiedListingEvent() {

@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.barchetta.service.nostr.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.BarchettaNostrRelayService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,10 +22,10 @@ public class NostrWssConfig {
   //  @Lazy
   @Bean
   @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  public NostrRelayService nostrRelayService(
+  public BarchettaNostrRelayService nostrRelayService(
       @NonNull @Value("${superconductor.relay.uri}") String relayUri,
       @NonNull SslBundles sslBundles
   ) throws ExecutionException, InterruptedException {
-    return new NostrRelayService(relayUri, sslBundles);
+    return new BarchettaNostrRelayService(relayUri, sslBundles);
   }
 }

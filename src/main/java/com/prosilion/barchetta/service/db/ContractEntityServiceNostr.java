@@ -1,7 +1,7 @@
 package com.prosilion.barchetta.service.db;
 
 import com.prosilion.barchetta.model.entity.Contract;
-import com.prosilion.barchetta.service.nostr.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.BarchettaNostrRelayService;
 import com.prosilion.presto.security.entity.AppUser;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -19,32 +19,32 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class ContractEntityServiceNostr implements ContractEntityServiceNostrIF {
   private final ContractEntityServiceIF contractEntityService;
-  private final NostrRelayService nostrRelayService;
+  private final BarchettaNostrRelayService barchettaNostrRelayService;
 
   @Autowired
   public ContractEntityServiceNostr(
       @NonNull ContractEntityServiceIF contractEntityService,
-      @NonNull NostrRelayService nostrRelayService) {
+      @NonNull BarchettaNostrRelayService barchettaNostrRelayService) {
     this.contractEntityService = contractEntityService;
-    this.nostrRelayService = nostrRelayService;
+    this.barchettaNostrRelayService = barchettaNostrRelayService;
   }
 
   @Transactional
   @Override
   public Contract save(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException, NostrException {
     log.info("saving contract {}", contract);
-    return nostrRelayService.create(getSaved(contract));
+    return barchettaNostrRelayService.create(getSaved(contract));
   }
 
   @Override
   public Contract update(@NonNull Contract contract) throws NostrException, IOException, ExecutionException, InterruptedException {
-    return nostrRelayService.update(getSaved(contract));
+    return barchettaNostrRelayService.update(getSaved(contract));
   }
 
   @SneakyThrows
   @Override
   public Contract get(@NonNull Contract contract) {
-    return nostrRelayService.get(contract);
+    return barchettaNostrRelayService.get(contract);
   }
 
   @Override

@@ -32,6 +32,7 @@
     <mysql-connector-j.version>9.1.0</mysql-connector-j.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <thymeleaf-extras-springsecurity6.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity6.version>
+    <subdivisions.version>0.0.1</subdivisions.version>
   </properties>
 
   <dependencyManagement>
@@ -50,15 +51,11 @@
       <artifactId>nostr-java-api</artifactId>
       <version>${nostr-java.version}</version>
     </dependency>
-
-<!--
     <dependency>
-      <groupId>com.prosilion.presto.starter</groupId>
-      <artifactId>core</artifactId>
-      <version>${presto-nostr.version}</version>
+      <groupId>com.prosilion</groupId>
+      <artifactId>subdivisions</artifactId>
+      <version>${subdivisions.version}</version>
     </dependency>
--->
-
     <dependency>
       <groupId>com.prosilion.presto</groupId>
       <artifactId>starter-core</artifactId>
@@ -145,6 +142,11 @@
       <scope>runtime</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>

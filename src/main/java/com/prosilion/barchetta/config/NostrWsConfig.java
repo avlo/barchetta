@@ -1,6 +1,6 @@
 package com.prosilion.barchetta.config;
 
-import com.prosilion.barchetta.service.nostr.NostrRelayService;
+import com.prosilion.barchetta.service.nostr.BarchettaNostrRelayService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,7 +20,7 @@ public class NostrWsConfig {
   //  @Lazy
   @Bean
   @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  public NostrRelayService nostrRelayService(@Value("${superconductor.relay.uri}") String relayUri) throws ExecutionException, InterruptedException {
-    return new NostrRelayService(relayUri);
+  public BarchettaNostrRelayService nostrRelayService(@Value("${superconductor.relay.uri}") String relayUri) throws ExecutionException, InterruptedException {
+    return new BarchettaNostrRelayService(relayUri);
   }
 }
