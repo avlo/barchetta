@@ -4,16 +4,18 @@ import com.prosilion.barchetta.model.entity.Contract;
 import com.prosilion.subdivisions.service.NostrRelayService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import nostr.event.filter.Filters;
+import nostr.event.filter.IdentifierTagFilter;
 import nostr.event.impl.CalendarRsvpEvent;
 import nostr.event.impl.CalendarTimeBasedEvent;
 import nostr.event.impl.ClassifiedListingEvent;
 import nostr.event.impl.GenericEvent;
 import nostr.event.json.codec.BaseEventEncoder;
-import nostr.event.json.codec.BaseMessageDecoder;
 import nostr.event.json.codec.GenericEventDecoder;
 import nostr.event.message.EventMessage;
+import nostr.event.message.ReqMessage;
+import nostr.event.tag.IdentifierTag;
 import nostr.util.NostrException;
-import org.apache.commons.lang3.stream.Streams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
@@ -41,8 +43,8 @@ public class BarchettaNostrRelayService {
   }
 
   public BarchettaNostrRelayService(
-      @Value("${superconductor.relay.uri}") String relayUri,
-      SslBundles sslBundles
+          @Value("${superconductor.relay.uri}") String relayUri,
+          SslBundles sslBundles
   ) throws ExecutionException, InterruptedException {
     this.relayUri = relayUri;
     log.info("relayUri: \n{}", relayUri);
@@ -68,82 +70,72 @@ public class BarchettaNostrRelayService {
     return contract;
   }
 
-  private <T extends GenericEvent> void saveEvent(@NonNull T clazz, @NonNull String failureString) throws NostrException, IOException {
-    nostrRelayService.createEvent(clazz);
+  private <T extends GenericEvent> void saveEvent(@NonNull T event, @NonNull String failureString) throws NostrException, IOException {
+    nostrRelayService.sendEvent(new EventMessage(event));
   }
 
-  private <T extends GenericEvent> void updateEvent(@NonNull T clazz, @NonNull String failureString) throws NostrException, IOException {
-    nostrRelayService.createEvent(clazz);
-  }
-
-  private List<String> getEvents() {
-    List<String> events = nostrRelayService.getEvents();
-    log.debug("received relay response:");
-    log.debug("\n" + events.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
-    return events;
+  private <T extends GenericEvent> void updateEvent(@NonNull T event, @NonNull String failureString) throws NostrException, IOException {
+    nostrRelayService.sendEvent(new EventMessage(event));
   }
 
   public <T extends GenericEvent> Contract get(@NonNull Contract contract) throws IOException, ExecutionException, InterruptedException {
     final String eventUuid = contract.getEventUuid();
     final String appUserPubKey = contract.getNostrAppUserPubKey();
 
-    List<T> returnedEvents = sendRequest(
-        eventUuid,
-        createUnifiedJsonReq(eventUuid),
-        List.of(
-            (Class<T>) ClassifiedListingEvent.class,
-            (Class<T>) CalendarTimeBasedEvent.class,
-            (Class<T>) CalendarRsvpEvent.class)
+    ReqMessage reqMessage = new ReqMessage(
+            appUserPubKey,
+            new Filters(
+                    new IdentifierTagFilter<>(new IdentifierTag(eventUuid))));
+
+    List<T> returnedEvents = sendRequest(reqMessage,
+            List.of(
+                    (Class<T>) ClassifiedListingEvent.class,
+                    (Class<T>) CalendarTimeBasedEvent.class,
+                    (Class<T>) CalendarRsvpEvent.class)
     );
 
     returnedEvents.stream()
-        .filter(ClassifiedListingEvent.class::isInstance)
-        .map(ClassifiedListingEvent.class::cast)
-        .findFirst()
-        .ifPresent(contract::setClassifiedListingEvent);
+            .filter(ClassifiedListingEvent.class::isInstance)
+            .map(ClassifiedListingEvent.class::cast)
+            .findFirst()
+            .ifPresent(contract::setClassifiedListingEvent);
 
     returnedEvents.stream()
-        .filter(CalendarTimeBasedEvent.class::isInstance)
-        .map(CalendarTimeBasedEvent.class::cast)
-        .findFirst()
-        .ifPresent(contract::setCalendarTimeBasedEvent);
+            .filter(CalendarTimeBasedEvent.class::isInstance)
+            .map(CalendarTimeBasedEvent.class::cast)
+            .findFirst()
+            .ifPresent(contract::setCalendarTimeBasedEvent);
 
     returnedEvents.stream()
-        .filter(CalendarRsvpEvent.class::isInstance)
-        .map(CalendarRsvpEvent.class::cast)
-        .findFirst()
-        .ifPresent(contract::setCalendarRsvpEvent);
+            .filter(CalendarRsvpEvent.class::isInstance)
+            .map(CalendarRsvpEvent.class::cast)
+            .findFirst()
+            .ifPresent(contract::setCalendarRsvpEvent);
 
     return contract;
   }
 
-  private <T extends GenericEvent> List<T> sendRequest(
-      @NonNull String clientUuid,
-      @NonNull String reqJson,
-      @NonNull List<Class<T>> clazzez) throws IOException, ExecutionException, InterruptedException {
-    List<String> returnedEvents = request(clientUuid, reqJson);
+  private <T extends GenericEvent> List<T> sendRequest(ReqMessage reqMessage, List<Class<T>> clazzez) throws IOException {
+    List<GenericEvent> returnedEvents = request(reqMessage);
 
     log.debug("55555555555555555");
     log.debug("after REQUEST:");
-    log.debug("key:\n  [{}]\n", clientUuid);
+    log.debug("key:\n  [{}]\n", reqMessage.getSubscriptionId());
     log.debug("-----------------");
     log.debug("returnedEvents:");
     log.debug(returnedEvents.stream().map(event -> String.format("  %s\n", event)).collect(Collectors.joining()));
     log.debug("55555555555555555");
 
-    List<String> eventsJson = Streams.failableStream(returnedEvents.stream()).map(baseMessage -> new BaseMessageDecoder<>().decode(baseMessage))
-        .filter(EventMessage.class::isInstance)
-        .map(EventMessage.class::cast)
-        .map(eventMessage -> (GenericEvent) eventMessage.getEvent()).stream()
-        .sorted(Comparator.comparing(GenericEvent::getCreatedAt).reversed())
-        .map(event -> new BaseEventEncoder<>(event).encode())
-        .toList();
+    List<String> eventsJson = returnedEvents.stream()
+            .sorted(Comparator.comparing(GenericEvent::getCreatedAt).reversed())
+            .map(event -> new BaseEventEncoder<>(event).encode())
+            .toList();
 
     List<Optional<T>> u = eventsJson.stream()
-        .flatMap(json -> clazzez.stream()
-            .map(clazz ->
-                getDecode(json, clazz)))
-        .toList();
+            .flatMap(json -> clazzez.stream()
+                    .map(clazz ->
+                            getDecode(json, clazz)))
+            .toList();
 
     List<T> list = u.stream().filter(Optional::isPresent).map(Optional::get).toList();
     return list;
@@ -158,16 +150,7 @@ public class BarchettaNostrRelayService {
     }
   }
 
-  private String createUnifiedJsonReq(String uuid) {
-    return "[\"REQ\",\"" + uuid +
-        "\",{" +
-        //        "\"kinds\":[\"" + Kind.CALENDAR_TIME_BASED_EVENT + "\"]," +
-        //        "\"authors\":[\"" + pubkey + "\"]," +
-        "\"#d\":[\"" + uuid + "\"]" +
-        "}]";
-  }
-
-  private List<String> request(String clientUuid, String reqJson) throws ExecutionException, InterruptedException, IOException {
-    return nostrRelayService.sendRequestReturnEvents(reqJson, clientUuid);
+  private List<GenericEvent> request(ReqMessage reqMessage) throws IOException {
+    return nostrRelayService.sendRequestReturnEvents(reqMessage);
   }
 }
